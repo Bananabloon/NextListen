@@ -1,0 +1,2 @@
+# Stypendijak
+Wyszukiwarka stypendiów
