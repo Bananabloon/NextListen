@@ -1,4 +1,4 @@
-# Stypendijak
-Wyszukiwarka stypendiów
+# NextListen
+Muza leci UUUUUU
 
-<a href="https://blush-wasabi-68c.notion.site/Stypendijak-1e45d256e98f80e19b6ac37dd1127a96" target="_blank">Notion</a>
+<a href="https://www.notion.so/NextListen-1ea5d256e98f80459af9c8f0930128ee" target="_blank">Notion</a>
