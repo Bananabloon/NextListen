@@ -14,11 +14,10 @@ services:
 
   web:
     build:
-      context: ./backend
+      context: .
     command: python backendApps/manage.py runserver 0.0.0.0:8000
-    working_dir: /backendApps
     volumes:
-      - ./backend:/backendApps
+      - /backendApps
     ports:
       - "8000:8000"
     depends_on:
