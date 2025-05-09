@@ -13,6 +13,7 @@ class SpotifyAPI:
 
     def _get(self, endpoint):
         url = f"{self.base_url}{endpoint}"
+<<<<<<< HEAD
         r = requests.get(url, headers=self.headers)
         print(f"Zapytanie: {url}")
         print("Odpowiedź status:", r.status_code)
@@ -28,6 +29,43 @@ class SpotifyAPI:
 
     def get_top_tracks(self):
         return self._get("/me/top/tracks")
+=======
+        print(f"[DEBUG] Wysyłam GET: {url}")
+        print(f"[DEBUG] Authorization header: {self.headers.get('Authorization')}")
+
+        try:
+            response = requests.get(url, headers=self.headers)
+            print(f"[DEBUG] Status odpowiedzi: {response.status_code}")
+            print(f"[DEBUG] Raw response: {response.text}")  # <-- RĘCZNY print treści odpowiedzi
+
+            if response.status_code == 401 and self.refresh_token:
+                print("[DEBUG] Token wygasł. Odświeżam...")
+                self.refresh_access_token()
+                response = requests.get(url, headers=self.headers)
+                print(f"[DEBUG] Retry status: {response.status_code}")
+                print(f"[DEBUG] Retry response: {response.text}")
+
+            try:
+                json_data = response.json()
+            except ValueError:
+                print("[ERROR] Niepoprawny JSON w odpowiedzi.")
+                return {"error": "Invalid JSON response"}
+
+            if response.status_code >= 400:
+                print(f"[ERROR] Błąd HTTP {response.status_code}: {json_data}")
+
+            return json_data
+
+        except requests.RequestException as e:
+            print(f"[ERROR] Wyjątek przy zapytaniu: {e}")
+            return {"error": str(e)}
+
+    def get_user_profile(self):
+        return self._get("/me")
+
+    def get_top_tracks(self, limit=10):
+        return self._get(f"/me/top/tracks?limit={limit}")
+>>>>>>> be2eae2 (Added vectors using qdrant (no audiofeatures [problem]))
 
     def get_current_playing(self):
         return self._get("/me/player/currently-playing")
@@ -49,3 +87,16 @@ class SpotifyAPI:
         if self.user:
             self.user.spotifyAccessToken = self.access_token
             self.user.save()
+<<<<<<< HEAD
+=======
+
+    def get_artist(self, artist_id):
+        endpoint = f"/artists/{artist_id}" 
+        return self._get(endpoint)
+
+
+    def get_audio_features(self, track_id):
+        print(f"[DEBUG] Pobieram audio features dla track_id: {track_id}")
+        print(f"[DEBUG] Obecne nagłówki: {self.headers}") 
+        return self._get(f"/audio-features/{track_id}")
+>>>>>>> be2eae2 (Added vectors using qdrant (no audiofeatures [problem]))

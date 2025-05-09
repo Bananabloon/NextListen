@@ -49,7 +49,11 @@ class SpotifyOAuthRedirectView(APIView):
             "client_id": settings.SPOTIFY_CLIENT_ID,
             "response_type": "code",
             "redirect_uri": settings.SPOTIFY_REDIRECT_URI,
+<<<<<<< HEAD
             "scope": "user-read-email user-read-private user-top-read user-read-playback-state user-read-currently-playing"
+=======
+            "scope": "user-read-email user-read-private user-top-read user-read-playback-state user-read-currently-playing user-read-recently-played"
+>>>>>>> be2eae2 (Added vectors using qdrant (no audiofeatures [problem]))
         }
         url = f"https://accounts.spotify.com/authorize?{urlencode(params)}"
         return redirect(url)
