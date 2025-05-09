@@ -1,5 +1,6 @@
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 from django.db import models
+from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 
 class Genre(models.Model):
     genreName = models.CharField(max_length=100, primary_key=True)
@@ -54,7 +55,7 @@ class UserManager(BaseUserManager):
 
         return self.create_user(spotifyUserId, password, **extra_fields)
 
-from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
+
 
 class User(AbstractBaseUser, PermissionsMixin):  
     id = models.AutoField(primary_key=True)

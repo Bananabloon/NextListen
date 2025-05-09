@@ -15,9 +15,9 @@ services:
   web:
     build:
       context: .
-    command: python backendApps/manage.py runserver 0.0.0.0:8000
+    command: ["./wait-for-it.sh", "db:3306", "--", "python", "backendApps/manage.py", "runserver", "0.0.0.0:8000"]  
     volumes:
-      - /etc/NextListen:/etc/NextListen/backendApps
+      - .:/backendApps
     ports:
       - "8000:8000"
     depends_on:
@@ -26,7 +26,7 @@ services:
       - DB_HOST=db
       - DB_NAME=spotify_db
       - DB_USER=user
-      - DB_PASSWORD=password
+      - DB_PASSWORD=novell123
 
   phpmyadmin:
     image: phpmyadmin/phpmyadmin
