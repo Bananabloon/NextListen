@@ -1,6 +1,7 @@
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
+from django.core.validators import MinValueValidator, MaxValueValidator
 
 class Genre(models.Model):
     genreName = models.CharField(max_length=100, primary_key=True)
@@ -61,9 +62,14 @@ class User(AbstractBaseUser, PermissionsMixin):
     id = models.AutoField(primary_key=True)
     spotifyUserId = models.CharField(max_length=100, unique=True)
     displayName = models.CharField(max_length=100)
+    spotifyAccessToken = models.CharField(max_length=1024, null=True, blank=True)
+    spotifyRefreshToken = models.CharField(max_length=1024, null=True, blank=True)
     createdAt = models.DateTimeField(auto_now_add=True)
     lastUpdated = models.DateTimeField(auto_now=True)
-    curveballEnjoyment = models.BooleanField(default=False)
+    curveballEnjoyment = models.IntegerField(
+        default=5,
+        validators=[MinValueValidator(0), MaxValueValidator(10)]
+    )
     is_staff = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
     password = models.CharField(max_length=128, null=True, blank=True)
@@ -75,6 +81,7 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     def __str__(self):
         return self.displayName
+
 
 class PreferenceVector(models.Model):
     id = models.AutoField(primary_key=True)

@@ -1,10 +1,30 @@
 from rest_framework import generics, permissions
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from django.contrib.auth import get_user_model
 
 from .models import User, PreferenceVector
 from .serializers import RegisterSerializer, UserSerializer, PreferenceVectorSerializer
 
+User = get_user_model()
+
+class SpotifyLoginView(APIView):
+    def post(self, request):
+        access_token = request.data.get("access_token")
+        if not access_token:
+            return Response({"error": "No access token"}, status=400)
+
+        # Znajdź użytkownika po tokenie (lepiej byłoby po ID)
+        try:
+            user = User.objects.get(spotifyAccessToken=access_token)
+        except User.DoesNotExist:
+            return Response({"error": "User not found"}, status=404)
+
+        refresh = RefreshToken.for_user(user)
+        return Response({
+            "refresh": str(refresh),
+            "access": str(refresh.access_token),
+        })
 
 class RegisterView(generics.CreateAPIView):
     queryset = User.objects.all()

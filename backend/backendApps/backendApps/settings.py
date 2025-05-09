@@ -42,7 +42,8 @@ INSTALLED_APPS = [
     'rest_framework',
     "rest_framework_simplejwt",
     'users',
-    'authentication'
+    'authentication',
+    'spotifyData'
 ]
 
 REST_FRAMEWORK = {
