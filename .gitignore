@@ -175,6 +175,7 @@ cython_debug/
 
 .postman/
 .postman_workspaces/
+Postman
 
 db.sqlite3
 __pycache__/

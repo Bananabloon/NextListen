@@ -1,0 +1,43 @@
+version: "3.9"
+services:
+  db:
+    image: mysql:8
+    environment:
+      MYSQL_DATABASE: spotify_db
+      MYSQL_USER: user
+      MYSQL_PASSWORD: novell123
+      MYSQL_ROOT_PASSWORD: novell123
+    ports:
+      - "3306:3306"
+    volumes:
+      - dbdata:/var/lib/mysql
+
+  web:
+    build:
+      context: .
+    command: python backendApps/manage.py runserver 0.0.0.0:8000
+    volumes:
+      - /etc/NextListen:/etc/NextListen/backendApps
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+    environment:
+      - DB_HOST=db
+      - DB_NAME=spotify_db
+      - DB_USER=user
+      - DB_PASSWORD=password
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    restart: always
+    ports:
+      - "8080:80"
+    environment:
+      PMA_HOST: db
+      MYSQL_ROOT_PASSWORD: novell123
+    depends_on:
+      - db
+
+volumes:
+  dbdata:

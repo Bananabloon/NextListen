@@ -1,0 +1,5 @@
+django
+djangorestframework
+djangorestframework-simplejwt
+mysqlclient>=2.1.1
+python-dotenv
