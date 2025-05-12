@@ -1,9 +1,4 @@
 from rest_framework.views import APIView
-<<<<<<< HEAD
-from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated
-from .services.spotifyClient import SpotifyAPI
-=======
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from users.models import PreferenceVector
@@ -18,7 +13,6 @@ from qdrant_client.http.exceptions import UnexpectedResponse
 import requests
 
 FEATURE_KEYS = ["danceability", "energy", "valence", "tempo"]
->>>>>>> be2eae2 (Added vectors using qdrant (no audiofeatures [problem]))
 
 class CurrentUserProfileView(APIView):
     permission_classes = [IsAuthenticated]
@@ -46,8 +40,6 @@ class CurrentlyPlayingView(APIView):
         refresh = request.user.spotifyRefreshToken
         data = SpotifyAPI(token, refresh_token=refresh, user=request.user).get_current_playing()
         return Response(data)
-<<<<<<< HEAD
-=======
 
 class GeneratePreferencesFromTopTracksView(APIView):
     permission_classes = [IsAuthenticated]
@@ -142,4 +134,3 @@ class AudioFeaturesView(APIView):
             return Response({"error": "Nie udało się pobrać danych"}, status=response.status_code)
 
         return Response(response.json())
->>>>>>> be2eae2 (Added vectors using qdrant (no audiofeatures [problem]))

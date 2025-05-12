@@ -13,23 +13,6 @@ class SpotifyAPI:
 
     def _get(self, endpoint):
         url = f"{self.base_url}{endpoint}"
-<<<<<<< HEAD
-        r = requests.get(url, headers=self.headers)
-        print(f"Zapytanie: {url}")
-        print("Odpowiedź status:", r.status_code)
-        print("Odpowiedź JSON:", r.json())  # Debugowanie
-        if r.status_code == 401 and self.refresh_token:
-            print("Access token expired, attempting refresh...")
-            self.refresh_access_token()
-            r = requests.get(url, headers=self.headers)  
-        return r.json()
-    
-    def get_user_profile(self):
-        return self._get("/me")
-
-    def get_top_tracks(self):
-        return self._get("/me/top/tracks")
-=======
         print(f"[DEBUG] Wysyłam GET: {url}")
         print(f"[DEBUG] Authorization header: {self.headers.get('Authorization')}")
 
@@ -65,7 +48,6 @@ class SpotifyAPI:
 
     def get_top_tracks(self, limit=10):
         return self._get(f"/me/top/tracks?limit={limit}")
->>>>>>> be2eae2 (Added vectors using qdrant (no audiofeatures [problem]))
 
     def get_current_playing(self):
         return self._get("/me/player/currently-playing")
@@ -87,8 +69,6 @@ class SpotifyAPI:
         if self.user:
             self.user.spotifyAccessToken = self.access_token
             self.user.save()
-<<<<<<< HEAD
-=======
 
     def get_artist(self, artist_id):
         endpoint = f"/artists/{artist_id}" 
@@ -99,4 +79,3 @@ class SpotifyAPI:
         print(f"[DEBUG] Pobieram audio features dla track_id: {track_id}")
         print(f"[DEBUG] Obecne nagłówki: {self.headers}") 
         return self._get(f"/audio-features/{track_id}")
->>>>>>> be2eae2 (Added vectors using qdrant (no audiofeatures [problem]))
