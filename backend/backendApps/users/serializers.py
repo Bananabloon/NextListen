@@ -1,33 +1,36 @@
 from rest_framework import serializers
 from .models import Genre, PreferenceVector, Media, UserFeedback, User
 
+
 class GenreSerializer(serializers.ModelSerializer):
     class Meta:
         model = Genre
-        fields = ['genreName']
+        fields = ['name']
 
 
 class PreferenceVectorSerializer(serializers.ModelSerializer):
-    genreName = GenreSerializer()
+    genre = GenreSerializer()
 
     class Meta:
         model = PreferenceVector
-        fields = ['id', 'genreName', 'preferences']
+        fields = ['id', 'genre', 'preferences']
 
 
 class MediaSerializer(serializers.ModelSerializer):
-    genreName = GenreSerializer()
+    genre = GenreSerializer()
 
     class Meta:
         model = Media
-        fields = ['id', 'spotifyMediaURI', 'title', 'artistName', 'genreName',
-                  'albumName', 'typeOfMedia', 'savedAt']
+        fields = [
+            'id', 'spotify_uri', 'title', 'artist_name',
+            'genre', 'album_name', 'media_type', 'saved_at'
+        ]
 
 
 class UserFeedbackSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserFeedback
-        fields = ['id', 'user', 'media', 'isLiked', 'source', 'feedbackAt']
+        fields = ['id', 'user', 'media', 'is_liked', 'source', 'feedback_at']
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -35,11 +38,14 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['id', 'spotifyUserId', 'displayName', 'createdAt', 'lastUpdated', 'curveballEnjoyment', 'preference_vectors']
-
+        fields = [
+            'id', 'spotify_user_id', 'display_name',
+            'created_at', 'last_updated', 'curveball_enjoyment',
+            'preference_vectors'
+        ]
 
 
 class RegisterSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['spotifyUserId', 'displayName']
+        fields = ['spotify_user_id', 'display_name']

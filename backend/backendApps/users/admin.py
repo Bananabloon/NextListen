@@ -4,17 +4,17 @@ from .models import User, Genre, Media, PreferenceVector, UserFeedback
 
 class UserAdmin(BaseUserAdmin):
     model = User
-    list_display = ('spotifyUserId', 'displayName', 'is_staff', 'is_superuser')
-    search_fields = ('spotifyUserId', 'displayName')
-    ordering = ('spotifyUserId',)
+    list_display = ('spotify_user_id', 'display_name', 'is_staff', 'is_superuser')
+    search_fields = ('spotify_user_id', 'display_name')
+    ordering = ('spotify_user_id',)
     fieldsets = (
-        (None, {'fields': ('spotifyUserId', 'displayName', 'password')}),
+        (None, {'fields': ('spotify_user_id', 'display_name', 'password')}),
         ('Permissions', {'fields': ('is_staff', 'is_active', 'is_superuser')}),
     )
     add_fieldsets = (
         (None, {
             'classes': ('wide',),
-            'fields': ('spotifyUserId', 'displayName', 'password1', 'password2', 'is_staff', 'is_active')}
+            'fields': ('spotify_user_id', 'display_name', 'password1', 'password2', 'is_staff', 'is_active')}
         ),
     )
 

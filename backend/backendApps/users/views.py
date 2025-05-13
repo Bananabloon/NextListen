@@ -1,9 +1,10 @@
 from rest_framework import generics, permissions
-from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework.response import Response
 from django.contrib.auth import get_user_model
+from rest_framework_simplejwt.tokens import RefreshToken
 
-from .models import User, PreferenceVector
+from .models import Genre, PreferenceVector
 from .serializers import RegisterSerializer, UserSerializer, PreferenceVectorSerializer
 
 User = get_user_model()
@@ -12,19 +13,19 @@ class SpotifyLoginView(APIView):
     def post(self, request):
         access_token = request.data.get("access_token")
         if not access_token:
-            return Response({"error": "No access token"}, status=400)
+            return Response({"error": "No access token provided."}, status=400)
 
-        # Znajdź użytkownika po tokenie (lepiej byłoby po ID)
         try:
-            user = User.objects.get(spotifyAccessToken=access_token)
+            user = User.objects.get(spotify_access_token=access_token)
         except User.DoesNotExist:
-            return Response({"error": "User not found"}, status=404)
+            return Response({"error": "User not found."}, status=404)
 
         refresh = RefreshToken.for_user(user)
         return Response({
             "refresh": str(refresh),
             "access": str(refresh.access_token),
         })
+
 
 class RegisterView(generics.CreateAPIView):
     queryset = User.objects.all()
@@ -33,8 +34,6 @@ class RegisterView(generics.CreateAPIView):
 
     def perform_create(self, serializer):
         user = serializer.save()
-        # default PreferenceVector:
-        # PreferenceVector.objects.create(user=user, genreName=some_genre, preferences={})
         return user
 
 
@@ -55,17 +54,19 @@ class PreferenceVectorView(APIView):
         return Response(serializer.data)
 
     def post(self, request):
-        genre_name = request.data.get("genreName")
+        genre_name = request.data.get("genre")
         preferences = request.data.get("preferences")
 
         try:
-            genre = Genre.objects.get(genreName=genre_name)
+            genre = Genre.objects.get(name=genre_name)
         except Genre.DoesNotExist:
-            return Response({"error": "Genre not found"}, status=400)
+            return Response({"error": "Genre not found."}, status=400)
 
-        vector, created = PreferenceVector.objects.update_or_create(
+        vector, _ = PreferenceVector.objects.update_or_create(
             user=request.user,
-            genreName=genre,
+            genre=genre,
             defaults={"preferences": preferences}
         )
-        return Response({"message": "Updated", "data": PreferenceVectorSerializer(vector).data})
+
+        serializer = PreferenceVectorSerializer(vector)
+        return Response({"message": "Preferences updated", "data": serializer.data})
