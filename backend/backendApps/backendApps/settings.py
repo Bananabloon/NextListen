@@ -43,7 +43,8 @@ INSTALLED_APPS = [
     "rest_framework_simplejwt",
     'users',
     'authentication',
-    'spotifyData'
+    'spotifyData',
+    'songs'
 ]
 
 REST_FRAMEWORK = {
@@ -147,3 +148,5 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 SPOTIFY_CLIENT_ID='d1dbc90e178d4d83bf9c0e9e875726b3'
 SPOTIFY_CLIENT_SECRET='1c8942cb7f824bc4a696a251e304d565'
 SPOTIFY_REDIRECT_URI='http://127.0.0.1:8000/auth/spotify/callback/'
+
+OPENAI_API_KEY = "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"

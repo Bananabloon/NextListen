@@ -29,6 +29,7 @@ urlpatterns = [
     path('about/', views.about),
     path('users/', include('users.urls')),
     path('spotify/', include('spotifyData.urls')),
+    path('songs/', include('songs.urls')),
     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh')
 ]
