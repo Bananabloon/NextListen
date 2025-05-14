@@ -61,11 +61,12 @@ class User(AbstractBaseUser, PermissionsMixin):
     spotify_access_token = models.CharField(max_length=1024, null=True, blank=True)
     spotify_refresh_token = models.CharField(max_length=1024, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
-    last_updated = models.DateTimeField(auto_now=True)
+    last_updated = models.DateTimeField(null=True, blank=True)
     curveball_enjoyment = models.IntegerField(
         default=5,
         validators=[MinValueValidator(0), MaxValueValidator(10)]
     )
+    market = models.CharField(max_length=2, null=True, blank=True)
     is_staff = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
     password = models.CharField(max_length=128, null=True, blank=True)
@@ -78,6 +79,18 @@ class User(AbstractBaseUser, PermissionsMixin):
     def __str__(self):
         return self.display_name
 
+class Artist(models.Model):
+    id = models.AutoField(primary_key=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='top_artists', db_column='userId')
+    spotify_uri = models.CharField(max_length=100, db_column='SpotifyURI')
+    name = models.CharField(max_length=255, db_column='Name')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('user', 'spotify_uri')
+
+    def __str__(self):
+        return f"{self.name} ({self.user.display_name})"
 
 class PreferenceVector(models.Model):
     id = models.AutoField(primary_key=True)
@@ -87,7 +100,6 @@ class PreferenceVector(models.Model):
 
     def __str__(self):
         return f"{self.user.display_name}'s preferences for {self.genre}"
-
 
 class UserFeedback(models.Model):
     id = models.AutoField(primary_key=True)
