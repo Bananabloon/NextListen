@@ -5,6 +5,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from openai import OpenAI
+from django.shortcuts import get_object_or_404
 
 class SongAnalysisView(APIView):
     permission_classes = [IsAuthenticated]
@@ -42,3 +43,25 @@ class SongAnalysisView(APIView):
 
         data = response.choices[0].message.content
         return Response({"analysis": data})
+
+class SongFeedbackView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        song_id = request.data.get("song_id")
+        feedback = request.data.get("feedback")  # "like", "dislike", "none"
+
+        if not song_id or feedback not in ["like", "dislike", "none"]:
+            return Response({"error": "Invalid input"}, status=400)
+
+        #AnalyzedSong - temp. (not working)
+        song = get_object_or_404(AnalyzedSong, id=song_id, user=request.user)
+
+        if song.is_curveball:
+            if feedback == "like":
+                request.user.curveball_enjoyment = min(10, request.user.curveball_enjoyment + 1)
+            elif feedback == "dislike":
+                request.user.curveball_enjoyment = max(1, request.user.curveball_enjoyment - 1)
+            request.user.save()
+
+        return Response({"status": "ok", "curveball_enjoyment": request.user.curveball_enjoyment})
