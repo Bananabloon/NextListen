@@ -82,3 +82,21 @@ class SpotifyAPI:
 
     def get_audio_features(self, track_id: str):
         return self._get(f"/audio-features/{track_id}")
+
+    def search(self, query, type="track", limit=1):
+        url = f"{self.BASE_URL}/search"
+        params = {
+            "q": query,
+            "type": type,
+            "limit": limit
+        }
+        response = requests.get(url, headers=self.headers, params=params)
+
+        if response.status_code == 401 and self.refresh_token:
+            self._refresh_access_token()
+            response = requests.get(url, headers=self.headers, params=params)
+
+        if response.status_code != 200:
+            return {"error": f"Spotify API error: {response.status_code}", "response": response.text}
+
+        return response.json()

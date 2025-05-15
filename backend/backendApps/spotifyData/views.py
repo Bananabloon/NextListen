@@ -98,3 +98,31 @@ class AddTrackToQueueView(APIView):
             return Response({"message": "Track added to queue"}, status=200)
         else:
             return Response({"error": "Failed to add track to queue", "details": error}, status=400)
+
+class SpotifySearchView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        query = request.query_params.get("q")
+        search_type = request.query_params.get("type", "track")
+
+        if not query or search_type not in ["track", "artist"]:
+            return Response({"error": "Invalid query or type"}, status=400)
+
+        user = request.user
+        token = user.spotify_access_token
+
+        url = "https://api.spotify.com/v1/search"
+        params = {
+            "q": query,
+            "type": search_type,
+            "limit": 10
+        }
+        headers = {"Authorization": f"Bearer {token}"}
+        r = requests.get(url, headers=headers, params=params)
+
+        if r.status_code != 200:
+            return Response({"error": "Spotify API error"}, status=r.status_code)
+
+        return Response(r.json())
+    

@@ -164,10 +164,9 @@ class SpotifyCallbackView(APIView):
 
         Artist.objects.filter(user=user).delete()
 
-        for rank, artist in enumerate(artists, start=1):
+        for _, artist in enumerate(artists, start=1):
             Artist.objects.create(
                 user=user,
                 name=artist["name"],
                 spotify_uri=artist["uri"],
-                rank=rank
             )

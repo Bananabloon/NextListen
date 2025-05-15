@@ -6,8 +6,8 @@ from .views import (
     CurrentlyPlayingView,
     GeneratePreferencesFromTopTracksView,
     AudioFeaturesView,
-    AddTrackToQueueView
-
+    AddTrackToQueueView,
+    SpotifySearchView,
 )
 
 urlpatterns = [
@@ -17,5 +17,6 @@ urlpatterns = [
     path('currently-playing/', CurrentlyPlayingView.as_view()),
     path('generate-preferences/', GeneratePreferencesFromTopTracksView.as_view()),
     path('audio-features/<str:track_id>/', AudioFeaturesView.as_view()),
+    path('search/', SpotifySearchView.as_view()),
     path("queue/add/", AddTrackToQueueView.as_view(), name="add-track-to-queue"),
 ]
