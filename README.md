@@ -22,7 +22,7 @@ Zainstaluj zależności:
    ```
 
 # Formatowanie kodu (automatyczne)
-1. Plik .pre-commit-config.yaml kofiguruje narzędzia sprawdzające i fomratujące kod
+1. Plik .pre-commit-config.yaml kofiguruje narzędzia sprawdzające i formatujące kod
 2. W plikach danych narzędzi możemy znaleźć ustawione konfiguracje dla danych środowisk/języków
 3. Black - format w pyrhonie; Flake8 - błędy formatu w pytonie; ESLint - sprawdza błędy w JavaScript; Prettier - formatuje JavaScript, CSS, JSON.
 4. !!! PLIK .editorconfig W VS CODE DZIAŁA TYLKO Z ROZSZERZENIEM "EditorConfig for VS code" !!! - plik ten zmienia ustawienia edytora
