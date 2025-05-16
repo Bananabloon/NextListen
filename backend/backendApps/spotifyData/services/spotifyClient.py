@@ -47,6 +47,8 @@ class SpotifyAPI:
             self.user.spotifyAccessToken = self.access_token
             self.user.save()
 
+            
+
     def add_to_queue(self, track_uri):
         if not self.access_token:
             return False, {"error": "Missing access token"}
@@ -57,7 +59,7 @@ class SpotifyAPI:
 
         response = requests.post(url, headers=headers, params=params)
 
-        if response.status_code == 204:
+        if response.status_code in [200, 204]:
             return True, None
         try:
             return False, response.json()
