@@ -44,7 +44,7 @@ INSTALLED_APPS = [
     'users',
     'authentication',
     'spotifyData',
-    'songs'
+    'songs',
 ]
 
 REST_FRAMEWORK = {
@@ -64,9 +64,10 @@ MIDDLEWARE = [
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
+   # 'backendapps.JWTmiddleware.JWTFromCookieMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'django.middleware.clickjacking.XFrameOptionsMiddleware',#dodaj spowrotem 'corsheaders.middleware.CorsMiddleware'
 ]
 
 ROOT_URLCONF = 'backendApps.urls'
@@ -86,7 +87,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'backendApps.wsgi.application'
+#WSGI_APPLICATION = 'backendApps.wsgi.application'  Przy przejściu na gunicorn
 
 
 # Database
@@ -150,3 +151,9 @@ SPOTIFY_CLIENT_SECRET='1c8942cb7f824bc4a696a251e304d565'
 SPOTIFY_REDIRECT_URI='http://127.0.0.1:8000/auth/spotify/callback/'
 
 OPENAI_API_KEY = "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"
+
+#CORS_ALLOW_ORIGINS = [
+#    "http://localhost:5173",  #Vite
+#]
+
+#CORS_ALLOW_CREDENTIALS = True

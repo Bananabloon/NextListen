@@ -3,6 +3,7 @@ djangorestframework
 djangorestframework-simplejwt
 mysqlclient>=2.1.1
 python-dotenv
+gunicorn
 requests
 numpy
 qdrant-client

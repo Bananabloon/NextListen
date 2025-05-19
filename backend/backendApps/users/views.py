@@ -5,7 +5,7 @@ from django.contrib.auth import get_user_model
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from .models import Genre, PreferenceVector
-from .serializers import RegisterSerializer, UserSerializer, PreferenceVectorSerializer
+from .serializers import  PreferenceVectorSerializer
 
 User = get_user_model()
 

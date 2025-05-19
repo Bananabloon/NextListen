@@ -4,6 +4,7 @@ from django.shortcuts import redirect
 
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from rest_framework import status
 
 from authentication.services.spotify_service import SpotifyService
 from authentication.services.spotify_auth_service import SpotifyAuthService
@@ -33,6 +34,8 @@ class SpotifyOAuthRedirectView(APIView):
         url = f"https://accounts.spotify.com/authorize?{urlencode(params)}"
         return redirect(url)
 
+from rest_framework.response import Response
+
 class SpotifyCallbackView(APIView):
     def get(self, request):
         code = request.query_params.get("code")
@@ -49,4 +52,27 @@ class SpotifyCallbackView(APIView):
         data, error = SpotifyAuthService.authenticate_spotify_user(spotify_access_token, refresh_token)
         if error:
             return error
-        return Response(data)
+
+        response = redirect("http://localhost:5173/callback")  # frontend url bez parametrów
+
+        # Ustawiamy tokeny w httpOnly cookie (np. na 1h i 7 dni)
+        response.set_cookie(
+            key='access_token',
+            value=data['access'],
+            httponly=True,
+            secure=True,  # wymaga HTTPS, narazie False. Do zmiany
+            max_age=1800,
+            samesite='None', 
+            path='/',
+        )
+        response.set_cookie(
+            key='refresh_token',
+            value=data['refresh'],
+            httponly=True,
+            secure=True,
+            max_age=7*24*1800,
+            samesite='None',
+            path='/',
+        )
+
+        return response
