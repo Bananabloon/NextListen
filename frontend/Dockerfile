@@ -1,12 +1,29 @@
-FROM node:18-alpine as build
+# Etap 1: Build Vite
+FROM node:18-alpine AS build
 
 WORKDIR /app
-COPY package*.json ./
+
+# Skopiuj zależności i zainstaluj
+COPY frontendApps/package*.json ./
 RUN npm install
-COPY . .
+
+
+COPY frontendApps/ .
+
 RUN npm run build
 
-FROM nginx:stable-alpine
-COPY --from=build /app/dist /usr/share/nginx/html
-EXPOSE 80
-CMD ["nginx", "-g", "daemon off;"]
+FROM node:18-alpine
+
+WORKDIR /app
+
+
+RUN npm install -g serve
+
+
+COPY --from=build /app/dist .
+
+
+EXPOSE 5173
+
+# Uruchamiamy serwer
+CMD ["serve", "-s", ".", "-l", "5173"]

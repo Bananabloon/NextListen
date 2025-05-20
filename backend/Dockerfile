@@ -10,7 +10,7 @@ RUN apt-get update && apt-get install -y \
     libffi-dev \
     && rm -rf /var/lib/apt/lists/*
 
-WORKDIR /backend
+WORKDIR /backend/backendApps
 #WORKDIR /backend/backendApps dla gunicorn, odhashować tu, docker-compose i w settings, wszystko podpisane. Jak będziemy robić migracje na produkcje
 COPY /backendApps/ ./backendApps
 COPY requirements.txt .
