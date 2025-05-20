@@ -12,7 +12,9 @@ import requests
 from spotifyData.services.spotifyClient import SpotifyAPI
 from users.models import Media
 
-from ..constants import SPOTIFY_PLAYLIST_TRACKS_URL, SPOTIFY_PLAYLIST_URL
+import sys
+sys.path.append("..")
+from constants import SPOTIFY_PLAYLIST_TRACKS_URL, SPOTIFY_PLAYLIST_URL
 
 class SongAnalysisView(APIView):
     permission_classes = [IsAuthenticated]

@@ -6,7 +6,9 @@ import requests
 from django.conf import settings
 from .profile import get_spotify_instance
 
-from ...constants import SPOTYFY_SEARCH_URL
+import sys
+sys.path.append("..")
+from constants import SPOTYFY_SEARCH_URL
 
 class TopTracksView(APIView):
     permission_classes = [IsAuthenticated]

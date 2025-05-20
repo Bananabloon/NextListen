@@ -3,7 +3,9 @@ from django.contrib.auth import get_user_model
 from django.conf import settings
 
 User = get_user_model()
-from ...constants import SPOTIFY_PROFILE_URL, SPOTIFY_TOKEN_URL, SPOTIFY_QUEUE_URL
+import sys
+sys.path.append("..")
+from constants import SPOTIFY_PROFILE_URL, SPOTIFY_TOKEN_URL, SPOTIFY_QUEUE_URL
 
 class SpotifyAPI:
     BASE_URL = SPOTIFY_PROFILE_URL

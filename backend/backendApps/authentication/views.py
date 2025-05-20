@@ -12,7 +12,9 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from datetime import timedelta
 from django.utils import timezone
 
-from ..constants import SPOTIFY_PROFILE_URL, SPOTIFY_TOP_ARTISTS_URL, SPOTIFY_AUTHORIZE_URL, SPOTIFY_TOKEN_URL
+import sys
+sys.path.append("..")
+from constants import SPOTIFY_PROFILE_URL, SPOTIFY_TOP_ARTISTS_URL, SPOTIFY_AUTHORIZE_URL, SPOTIFY_TOKEN_URL
 
 from users.models import Artist
 from users.models import User
