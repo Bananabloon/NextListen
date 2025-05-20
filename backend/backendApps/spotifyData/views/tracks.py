@@ -6,6 +6,8 @@ import requests
 from django.conf import settings
 from .profile import get_spotify_instance
 
+from ...constants import SPOTYFY_SEARCH_URL
+
 class TopTracksView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -27,19 +29,19 @@ class CurrentlyPlayingView(APIView):
         spotify = get_spotify_instance(request.user)
         return Response(spotify.get_current_playing())
 
-class AudioFeaturesView(APIView):
-    permission_classes = [IsAuthenticated]
+# class AudioFeaturesView(APIView):
+#     permission_classes = [IsAuthenticated]
 
-    def get(self, request, track_id):
-        token = request.user.spotify_access_token
-        headers = {"Authorization": f"Bearer {token}"}
-        url = f"https://api.spotify.com/v1/audio-features/{track_id}"
-        response = requests.get(url, headers=headers)
+#     def get(self, request, track_id):
+#         token = request.user.spotify_access_token
+#         headers = {"Authorization": f"Bearer {token}"}
+#         url = f"https://api.spotify.com/v1/audio-features/{track_id}"
+#         response = requests.get(url, headers=headers)
 
-        if response.status_code != 200:
-            return Response({"error": "Nie udało się pobrać danych"}, status=response.status_code)
+#         if response.status_code != 200:
+#             return Response({"error": "Nie udało się pobrać danych"}, status=response.status_code)
 
-        return Response(response.json())
+#         return Response(response.json())
 
 class AddTrackToQueueView(APIView):
     permission_classes = [IsAuthenticated]
@@ -67,7 +69,7 @@ class SpotifySearchView(APIView):
             return Response({"error": "Invalid query or type"}, status=400)
 
         token = request.user.spotify_access_token
-        url = "https://api.spotify.com/v1/search"
+        url = SPOTYFY_SEARCH_URL
         params = {"q": query, "type": search_type, "limit": 10}
         headers = {"Authorization": f"Bearer {token}"}
         response = requests.get(url, headers=headers, params=params)

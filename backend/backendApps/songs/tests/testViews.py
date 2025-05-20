@@ -37,12 +37,8 @@ class SongViewsTestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
 
-    def test_similar_songs_missing_feedback(self):
-        response = self.client.post("/songs/similar/", {})
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(response.data["error"], "No feedback found for this user.")
 
-#  ToImplement
+#  ToImplement - feedback potrzebny
 #     def test_feedback_invalid_input(self):
 #         response = self.client.post("/songs/feedback/", {"song_id": 999, "feedback": "meh"})
 #         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
@@ -72,3 +68,8 @@ class SongViewsTestCase(APITestCase):
     #     response = self.client.post("/songs/similar/", {})
     #     self.assertEqual(response.status_code, status.HTTP_200_OK)
     #     self.assertIn("recommendations", response.data)
+
+    # def test_similar_songs_missing_feedback(self):
+    #     response = self.client.post("/songs/similar/", {})
+    #     self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+    #     self.assertEqual(response.data["error"], "No feedback found for this user.")

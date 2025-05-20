@@ -3,10 +3,11 @@ from django.contrib.auth import get_user_model
 from django.conf import settings
 
 User = get_user_model()
+from ...constants import SPOTIFY_PROFILE_URL, SPOTIFY_TOKEN_URL, SPOTIFY_QUEUE_URL
 
 class SpotifyAPI:
-    BASE_URL = "https://api.spotify.com/v1"
-    TOKEN_URL = "https://accounts.spotify.com/api/token"
+    BASE_URL = SPOTIFY_PROFILE_URL
+    TOKEN_URL = SPOTIFY_TOKEN_URL
 
     def __init__(self, access_token, refresh_token=None, user=None):
         self.access_token = access_token
@@ -53,7 +54,7 @@ class SpotifyAPI:
         if not self.access_token:
             return False, {"error": "Missing access token"}
 
-        url = "https://api.spotify.com/v1/me/player/queue"
+        url = SPOTIFY_QUEUE_URL
         headers = {"Authorization": f"Bearer {self.access_token}"}
         params = {"uri": track_uri}
 

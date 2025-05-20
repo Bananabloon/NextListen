@@ -11,8 +11,10 @@ from rest_framework.request import Request
 from rest_framework_simplejwt.tokens import RefreshToken
 from datetime import timedelta
 from django.utils import timezone
-from users.models import Artist
 
+from ..constants import SPOTIFY_PROFILE_URL, SPOTIFY_TOP_ARTISTS_URL, SPOTIFY_AUTHORIZE_URL, SPOTIFY_TOKEN_URL
+
+from users.models import Artist
 from users.models import User
 
 logger = logging.getLogger(__name__)
@@ -48,7 +50,7 @@ class SpotifyLoginView(APIView):
 
     def _get_user_profile(self, access_token):
         response = requests.get(
-            "https://api.spotify.com/v1/me",
+            SPOTIFY_PROFILE_URL,
             headers={"Authorization": f"Bearer {access_token}"}
         )
         if response.status_code != 200:
@@ -69,7 +71,7 @@ class SpotifyOAuthRedirectView(APIView):
             )
 
         }
-        url = f"https://accounts.spotify.com/authorize?{urlencode(params)}"
+        url = f"{SPOTIFY_AUTHORIZE_URL}?{urlencode(params)}"
         return redirect(url)
 
 
@@ -106,7 +108,7 @@ class SpotifyCallbackView(APIView):
         }
 
         headers = {"Content-Type": "application/x-www-form-urlencoded"}
-        response = requests.post("https://accounts.spotify.com/api/token", data=payload, headers=headers)
+        response = requests.post(SPOTIFY_TOKEN_URL, data=payload, headers=headers)
 
         if response.status_code != 200:
             logger.error("Failed token exchange: %s", response.text)
@@ -116,7 +118,7 @@ class SpotifyCallbackView(APIView):
 
     def _get_user_info(self, access_token):
         response = requests.get(
-            "https://api.spotify.com/v1/me",
+            SPOTIFY_PROFILE_URL,
             headers={"Authorization": f"Bearer {access_token}"}
         )
         if response.status_code != 200:
@@ -151,7 +153,7 @@ class SpotifyCallbackView(APIView):
 
 
     def fetch_and_update_top_artists(self, user, access_token):
-        url = "https://api.spotify.com/v1/me/top/artists?limit=50"
+        url = SPOTIFY_TOP_ARTISTS_URL
         headers = {"Authorization": f"Bearer {access_token}"}
         response = requests.get(url, headers=headers)
 

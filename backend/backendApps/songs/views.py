@@ -12,6 +12,8 @@ import requests
 from spotifyData.services.spotifyClient import SpotifyAPI
 from users.models import Media
 
+from ..constants import SPOTIFY_PLAYLIST_TRACKS_URL, SPOTIFY_PLAYLIST_URL
+
 class SongAnalysisView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -207,7 +209,7 @@ class CreateLikedPlaylistView(APIView):
         }
 
         create_response = requests.post(
-            f"https://api.spotify.com/v1/users/{user_id}/playlists",
+            SPOTIFY_PLAYLIST_URL,
             headers=spotify.headers,
             json=playlist_data
         )
@@ -222,7 +224,7 @@ class CreateLikedPlaylistView(APIView):
         for i in range(0, len(uris), chunk_size):
             chunk = uris[i:i + chunk_size]
             add_response = requests.post(
-                f"https://api.spotify.com/v1/playlists/{playlist_id}/tracks",
+                SPOTIFY_PLAYLIST_TRACKS_URL,
                 headers=spotify.headers,
                 json={"uris": chunk}
             )
