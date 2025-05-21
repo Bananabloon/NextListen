@@ -35,3 +35,19 @@ def ask_openai(system_prompt, user_prompt):
         temperature=GPT_TEMPERATURE
     )
     return response.choices[0].message.content.strip()
+
+def extract_filters(request_data):
+    filters = []
+    mood = request_data.get("mood")
+    tempo = request_data.get("tempo")
+    style = request_data.get("style")
+
+    if mood:
+        filters.append(f"nastroju {mood}")
+    if tempo:
+        filters.append(f"tempa {tempo}")
+    if style:
+        filters.append(f"stylu {style}")
+
+    filter_str = ", ".join(filters)
+    return f" które pasują do: {filter_str}" if filters else ""

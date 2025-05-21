@@ -126,22 +126,27 @@ class GenerateQueueBase(APIView):
         return json.loads(content)
 
 
+from songs.utils import ask_openai, should_send_curveball, update_curveball_enjoyment, extract_filters
+
 class GenerateQueueView(GenerateQueueBase):
     def post(self, request):
         user = request.user
         title = request.data.get("title")
         artist = request.data.get("artist")
-        num_tracks = request.data.get("count", 10)
+        count = int(request.data.get("count", 10))
 
         if not title or not artist:
             return Response({"error": "title and artist required"}, status=400)
 
+        filter_str = extract_filters(request.data)
         spotify = SpotifyAPI(user.spotify_access_token, refresh_token=user.spotify_refresh_token, user=user)
 
         prompt = f"""
-        Podaj {num_tracks} utworów podobnych do:
+        Podaj {count} utworów podobnych do:
         Tytuł: {title}
         Artysta: {artist}
+        {filter_str}
+
         Format JSON:
         [
           {{"title": "tytuł", "artist": "artysta"}}
@@ -151,21 +156,23 @@ class GenerateQueueView(GenerateQueueBase):
         try:
             raw_response = ask_openai("Jesteś ekspertem muzycznym i podajesz podobne utwory.", prompt)
             songs = self.parse_openai_json(raw_response)
-            added, errors = self.add_songs_to_queue(user, songs, spotify, curveball_every=max(1, 50 // (user.curveball_enjoyment or 5)))
+            added, errors = self.add_songs_to_queue(
+                user, songs, spotify,
+                curveball_every=max(1, 50 // (user.curveball_enjoyment or 5))
+            )
 
-            return Response({
-                "message": "Queue generated",
-                "added": added,
-                "errors": errors
-            })
+            return Response({"message": "Queue generated", "added": added, "errors": errors})
         except Exception as e:
             return Response({"error": str(e)}, status=500)
+
 
 
 class GenerateFromTopView(GenerateQueueBase):
     def post(self, request):
         user = request.user
         count = int(request.data.get("count", 10))
+        filter_str = extract_filters(request.data)
+
         spotify = SpotifyAPI(user.spotify_access_token, refresh_token=user.spotify_refresh_token, user=user)
 
         top_tracks = [f"{t['name']} by {t['artists'][0]['name']}" for t in spotify.get_top_tracks().get("items", [])]
@@ -180,6 +187,7 @@ class GenerateFromTopView(GenerateQueueBase):
 
         i ulubionych artystów:
         {json.dumps(top_artists, indent=2)}
+        {filter_str}
 
         Podaj {count} nowych rekomendacji muzycznych w formacie JSON:
         [
@@ -188,17 +196,17 @@ class GenerateFromTopView(GenerateQueueBase):
         """
 
         try:
-            raw_response = ask_openai("Jesteś ekspertem muzycznym. Generujesz nowe utwory dla użytkownika na podstawie jego gustu.", prompt)
+            raw_response = ask_openai("Jesteś ekspertem muzycznym. Generujesz nowe utwory na podstawie gustu użytkownika.", prompt)
             songs = self.parse_openai_json(raw_response)
-            added, errors = self.add_songs_to_queue(user, songs, spotify, curveball_every=max(1, 50 // (user.curveball_enjoyment or 5)))
+            added, errors = self.add_songs_to_queue(
+                user, songs, spotify,
+                curveball_every=max(1, 50 // (user.curveball_enjoyment or 5))
+            )
 
-            return Response({
-                "message": "Queue generated based on top tracks",
-                "added": added,
-                "errors": errors
-            })
+            return Response({"message": "Queue from top tracks", "added": added, "errors": errors})
         except Exception as e:
             return Response({"error": str(e)}, status=500)
+
 
 
 class CreateLikedPlaylistView(APIView):
@@ -218,8 +226,8 @@ class CreateLikedPlaylistView(APIView):
             return Response({"error": "Failed to get Spotify user ID"}, status=500)
 
         playlist_payload = {
-            "name": "My Favorite Curveballs",
-            "description": "Playlist of liked curveballs from the app",
+            "name": "Liked Songs from App",
+            "description": "Playlist of liked songs from the app",
             "public": False
         }
 
@@ -242,3 +250,46 @@ class CreateLikedPlaylistView(APIView):
             "message": "Playlist created and tracks added",
             "playlist_url": create_response.json().get("external_urls", {}).get("spotify")
         })
+
+class GenerateFromArtistsView(GenerateQueueBase):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        user = request.user
+        artists = request.data.get("artists", [])
+        count = int(request.data.get("count", 10))
+
+        if not artists or not isinstance(artists, list):
+            return Response({"error": "List of artists is required"}, status=400)
+
+        filter_str = extract_filters(request.data)
+        spotify = SpotifyAPI(user.spotify_access_token, refresh_token=user.spotify_refresh_token, user=user)
+
+        prompt = f"""
+        Podaj {count} utworów{filter_str}, inspirowanych twórczością artystów:
+        {json.dumps(artists, indent=2)}
+
+        Format JSON:
+        [
+          {{"title": "tytuł", "artist": "artysta"}}
+        ]
+        """
+
+        try:
+            raw_response = ask_openai(
+                "Jesteś ekspertem muzycznym. Generujesz nowe utwory inspirowane stylem podanych artystów i zgodne z określonym nastrojem, tempem lub stylem muzycznym.",
+                prompt
+            )
+            songs = self.parse_openai_json(raw_response)
+            added, errors = self.add_songs_to_queue(
+                user, songs, spotify,
+                curveball_every=max(1, 50 // (user.curveball_enjoyment or 5))
+            )
+
+            return Response({
+                "message": "Queue generated from artists with filters",
+                "added": added,
+                "errors": errors
+            })
+        except Exception as e:
+            return Response({"error": str(e)}, status=500)
