@@ -5,10 +5,10 @@ from django.conf import settings
 User = get_user_model()
 import sys
 sys.path.append("..")
-from constants import SPOTIFY_PROFILE_URL, SPOTIFY_TOKEN_URL, SPOTIFY_QUEUE_URL
+from constants import SPOTIFY_API_BASE_URL, SPOTIFY_TOKEN_URL, SPOTIFY_QUEUE_URL
 
 class SpotifyAPI:
-    BASE_URL = SPOTIFY_PROFILE_URL
+    BASE_URL = SPOTIFY_API_BASE_URL
     TOKEN_URL = SPOTIFY_TOKEN_URL
 
     def __init__(self, access_token, refresh_token=None, user=None):

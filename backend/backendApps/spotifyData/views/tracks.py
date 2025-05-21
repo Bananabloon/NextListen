@@ -31,20 +31,6 @@ class CurrentlyPlayingView(APIView):
         spotify = get_spotify_instance(request.user)
         return Response(spotify.get_current_playing())
 
-# class AudioFeaturesView(APIView):
-#     permission_classes = [IsAuthenticated]
-
-#     def get(self, request, track_id):
-#         token = request.user.spotify_access_token
-#         headers = {"Authorization": f"Bearer {token}"}
-#         url = f"https://api.spotify.com/v1/audio-features/{track_id}"
-#         response = requests.get(url, headers=headers)
-
-#         if response.status_code != 200:
-#             return Response({"error": "Nie udało się pobrać danych"}, status=response.status_code)
-
-#         return Response(response.json())
-
 class AddTrackToQueueView(APIView):
     permission_classes = [IsAuthenticated]
 
