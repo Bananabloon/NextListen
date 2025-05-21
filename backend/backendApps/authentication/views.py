@@ -36,7 +36,7 @@ class SpotifyOAuthRedirectView(APIView):
 
 from rest_framework.response import Response
 
-class SpotifyCallbackView(APIView):
+class SpotifyCallbackView(APIView): #możliwe, że refaktoryzacja
     def get(self, request):
         code = request.query_params.get("code")
         if not code:
@@ -60,19 +60,37 @@ class SpotifyCallbackView(APIView):
             key='access_token',
             value=data['access'],
             httponly=True,
-            secure=True,  # wymaga HTTPS, narazie False. Do zmiany
+            secure=False,  # wymaga HTTPS, narazie False. Do zmiany
             max_age=1800,
-            samesite='None', 
+            samesite='Lax', 
             path='/',
         )
         response.set_cookie(
             key='refresh_token',
             value=data['refresh'],
             httponly=True,
-            secure=True,
+            secure=False,
             max_age=7*24*1800,
-            samesite='None',
+            samesite='Lax',
             path='/',
         )
 
         return response
+    
+    from rest_framework.views import APIView
+from rest_framework.response import Response
+
+class MeView(APIView):
+    def get(self, request):
+        access_token = request.COOKIES.get('access_token')
+        refresh_token = request.COOKIES.get('refresh_token')
+
+        print("Cookies on backend:", request.COOKIES)
+        print("Access token:", access_token)
+        print("Refresh token:", refresh_token)
+
+        if access_token:
+            
+            return Response({"message": "Token received!", "access_token": access_token})
+        else:
+            return Response({"error": "No access token in cookies"}, status=401)

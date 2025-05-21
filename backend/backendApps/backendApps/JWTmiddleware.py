@@ -8,3 +8,4 @@ class JWTFromCookieMiddleware:
             request.META["HTTP_AUTHORIZATION"] = f"Bearer {token}"
         response = self.get_response(request)
         return response
+#Możliwe, że do usunięcia

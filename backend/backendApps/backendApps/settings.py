@@ -56,7 +56,10 @@ REST_FRAMEWORK = {
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(minutes=30),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
-    "AUTH_HEADER_TYPES": ("Bearer",),
+    'ROTATE_REFRESH_TOKENS': True,
+    'BLACKLIST_AFTER_ROTATION': True,
+    'AUTH_HEADER_TYPES': ('Bearer',),
+    'AUTH_TOKEN_CLASSES': ('rest_framework_simplejwt.tokens.AccessToken',),
 }
 
 MIDDLEWARE = [
@@ -64,7 +67,6 @@ MIDDLEWARE = [
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
-   # 'backendapps.JWTmiddleware.JWTFromCookieMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',#dodaj spowrotem 'corsheaders.middleware.CorsMiddleware'
@@ -87,7 +89,8 @@ TEMPLATES = [
     },
 ]
 
-#WSGI_APPLICATION = 'backendApps.wsgi.application'  Przy przejściu na gunicorn
+#WSGI_APPLICATION = 'backendApps.wsgi.application'  
+#Przy przejściu na gunicorn
 
 
 # Database

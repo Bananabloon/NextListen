@@ -1,29 +1,13 @@
-# Etap 1: Build Vite
-FROM node:18-alpine AS build
-
-WORKDIR /app
-
-# Skopiuj zależności i zainstaluj
-COPY frontendApps/package*.json ./
-RUN npm install
-
-
-COPY frontendApps/ .
-
-RUN npm run build
-
+# Dev Dockerfile, będzie trzeba wyłączyć hot reload
 FROM node:18-alpine
 
 WORKDIR /app
 
+COPY frontendApps/package*.json ./
+RUN npm install
 
-RUN npm install -g serve
-
-
-COPY --from=build /app/dist .
-
+COPY frontendApps/ .
 
 EXPOSE 5173
 
-# Uruchamiamy serwer
-CMD ["serve", "-s", ".", "-l", "5173"]
+CMD ["npm", "run", "dev"]
