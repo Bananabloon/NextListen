@@ -8,3 +8,4 @@ requests
 numpy
 qdrant-client
 openai
+python-decouple

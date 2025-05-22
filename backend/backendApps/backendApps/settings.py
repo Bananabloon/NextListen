@@ -23,6 +23,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 
 from pathlib import Path
 from datetime import timedelta
+from decouple import config
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -30,12 +31,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
-
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-fqseoqov&h)+q)aynf2drh5g2oyet#d#kko9o-e3fhz$3v668q'
-
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+SECRET_KEY = config("SECRET_KEY")
+DEBUG = config("DEBUG", cast=bool)
 
 ALLOWED_HOSTS = [
     os.getenv("NGROK_URL").replace("https://", "").replace("http://", ""),
@@ -121,13 +118,14 @@ TEMPLATES = [
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'spotify_db',
-        'USER': 'user',
-        'PASSWORD': 'novell123',
-        'HOST': 'db',
-        'PORT': '3306',
+        'NAME': config('DB_NAME'),
+        'USER': config('DB_USER'),
+        'PASSWORD': config('DB_PASSWORD'),
+        'HOST': config('DB_HOST'),
+        'PORT': config('DB_PORT'),
     }
 }
+
 
 
 # Password validation
@@ -171,6 +169,7 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+<<<<<<< HEAD
 SPOTIFY_CLIENT_ID='d1dbc90e178d4d83bf9c0e9e875726b3'
 SPOTIFY_CLIENT_SECRET='1c8942cb7f824bc4a696a251e304d565'
 
@@ -179,3 +178,11 @@ OPENAI_API_KEY = "sk-proj-aFNoc5e5kEjAFzWTvAn7vUS5QouU2WoYNR0cCMgojw15PtY0uGNLkB
 
 SPOTIFY_REDIRECT_URI = f"{NGROK_URL}/api/auth/spotify/callback/"
 CSRF_TRUSTED_ORIGINS = [NGROK_URL]
+=======
+SPOTIFY_CLIENT_ID = config("SPOTIFY_CLIENT_ID")
+SPOTIFY_CLIENT_SECRET = config("SPOTIFY_CLIENT_SECRET")
+SPOTIFY_REDIRECT_URI = config("SPOTIFY_REDIRECT_URI")
+
+OPENAI_API_KEY = config("OPENAI_API_KEY")
+
+>>>>>>> origin/backend
