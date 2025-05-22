@@ -16,7 +16,6 @@ import sys
 sys.path.append("..")
 from constants import SPOTIFY_PROFILE_URL, SPOTIFY_TOP_ARTISTS_URL, SPOTIFY_AUTHORIZE_URL, SPOTIFY_TOKEN_URL
 
-from users.models import Artist
 from users.models import User
 
 logger = logging.getLogger(__name__)
@@ -71,7 +70,6 @@ class SpotifyOAuthRedirectView(APIView):
                 "user-read-email user-read-private user-top-read user-read-playback-state "
                 "user-modify-playback-state user-read-currently-playing user-read-recently-played"
             )
-
         }
         url = f"{SPOTIFY_AUTHORIZE_URL}?{urlencode(params)}"
         return redirect(url)
@@ -96,6 +94,7 @@ class SpotifyCallbackView(APIView):
 
         user = self._create_or_update_user(user_info, access_token, refresh_token)
 
+        # Forward to SpotifyLoginView
         fake_request = Request(request._request)
         fake_request._full_data = {"access_token": access_token}
         return SpotifyLoginView().post(fake_request)
@@ -128,7 +127,6 @@ class SpotifyCallbackView(APIView):
             return None
         return response.json()
 
-
     def _create_or_update_user(self, user_info, access_token, refresh_token):
         spotify_user_id = user_info["id"]
         display_name = user_info.get("display_name", "Unknown")
@@ -141,36 +139,6 @@ class SpotifyCallbackView(APIView):
         if refresh_token:
             user.spotify_refresh_token = refresh_token
 
-        now = timezone.now()
-
-        if not user.last_updated or now - user.last_updated > timedelta(days=1):
-            logger.info(f"Fetching top artists for user {user.display_name}")
-            self.fetch_and_update_top_artists(user, access_token)
-            user.last_updated = now
-        else:
-            logger.info(f"Skipping top artist update for {user.display_name}: updated less than 24h ago")
-
+        user.last_updated = timezone.now()
         user.save()
         return user
-
-
-    def fetch_and_update_top_artists(self, user, access_token):
-        url = SPOTIFY_TOP_ARTISTS_URL
-        headers = {"Authorization": f"Bearer {access_token}"}
-        response = requests.get(url, headers=headers)
-
-        if response.status_code != 200:
-            logger.error(f"Failed to fetch top artists: {response.status_code} {response.text}")
-            return
-
-        data = response.json()
-        artists = data.get("items", [])
-
-        Artist.objects.filter(user=user).delete()
-
-        for _, artist in enumerate(artists, start=1):
-            Artist.objects.create(
-                user=user,
-                name=artist["name"],
-                spotify_uri=artist["uri"],
-            )

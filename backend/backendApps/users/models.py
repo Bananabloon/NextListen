@@ -2,14 +2,6 @@ from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 from django.core.validators import MinValueValidator, MaxValueValidator
 
-
-class Genre(models.Model):
-    name = models.CharField(max_length=100, primary_key=True)
-
-    def __str__(self):
-        return self.name
-
-
 class Media(models.Model):
     SONG = 'song'
     ALBUM = 'album'
@@ -23,7 +15,7 @@ class Media(models.Model):
     spotify_uri = models.CharField(max_length=255, unique=True)
     title = models.CharField(max_length=255)
     artist_name = models.CharField(max_length=255)
-    genre = models.ForeignKey(Genre, on_delete=models.CASCADE)
+    genre = models.JSONField(default=list) 
     album_name = models.CharField(max_length=255)
     media_type = models.CharField(max_length=10, choices=TYPE_CHOICES)
     saved_at = models.DateTimeField()
@@ -79,28 +71,6 @@ class User(AbstractBaseUser, PermissionsMixin):
     def __str__(self):
         return self.display_name
 
-class Artist(models.Model):
-    id = models.AutoField(primary_key=True)
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='top_artists', db_column='userId')
-    spotify_uri = models.CharField(max_length=100, db_column='SpotifyURI')
-    name = models.CharField(max_length=255, db_column='Name')
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    class Meta:
-        unique_together = ('user', 'spotify_uri')
-
-    def __str__(self):
-        return f"{self.name} ({self.user.display_name})"
-
-class PreferenceVector(models.Model):
-    id = models.AutoField(primary_key=True)
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    genre = models.ForeignKey(Genre, on_delete=models.CASCADE, null=True, blank=True)
-    preferences = models.JSONField(default=dict)
-
-    def __str__(self):
-        return f"{self.user.display_name}'s preferences for {self.genre}"
-
 class UserFeedback(models.Model):
     id = models.AutoField(primary_key=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -111,3 +81,4 @@ class UserFeedback(models.Model):
 
     def __str__(self):
         return f"Feedback by {self.user.display_name} on {self.media.title}"
+

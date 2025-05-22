@@ -4,8 +4,7 @@ from rest_framework.response import Response
 from django.contrib.auth import get_user_model
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from .models import Genre, PreferenceVector
-from .serializers import RegisterSerializer, UserSerializer, PreferenceVectorSerializer
+from .serializers import RegisterSerializer, UserSerializer
 
 User = get_user_model()
 
@@ -43,30 +42,3 @@ class MeView(APIView):
     def get(self, request):
         serializer = UserSerializer(request.user)
         return Response(serializer.data)
-
-
-class PreferenceVectorView(APIView):
-    permission_classes = [permissions.IsAuthenticated]
-
-    def get(self, request):
-        vectors = PreferenceVector.objects.filter(user=request.user)
-        serializer = PreferenceVectorSerializer(vectors, many=True)
-        return Response(serializer.data)
-
-    def post(self, request):
-        genre_name = request.data.get("genre")
-        preferences = request.data.get("preferences")
-
-        try:
-            genre = Genre.objects.get(name=genre_name)
-        except Genre.DoesNotExist:
-            return Response({"error": "Genre not found."}, status=400)
-
-        vector, _ = PreferenceVector.objects.update_or_create(
-            user=request.user,
-            genre=genre,
-            defaults={"preferences": preferences}
-        )
-
-        serializer = PreferenceVectorSerializer(vector)
-        return Response({"message": "Preferences updated", "data": serializer.data})

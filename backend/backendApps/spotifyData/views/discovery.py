@@ -5,6 +5,7 @@ from ..services.spotifyClient import SpotifyAPI
 from openai import OpenAI
 from django.conf import settings
 import json
+from songs.utils import find_best_match
 
 class DiscoveryGenerateView(APIView):
     permission_classes = [IsAuthenticated]
@@ -47,7 +48,7 @@ class DiscoveryGenerateView(APIView):
             ],
             temperature=0.8
         )
-
+        
         raw_content = response.choices[0].message.content.strip()
         if raw_content.startswith("```") and raw_content.endswith("```"):
             raw_content = "\n".join(raw_content.split("\n")[1:-1])
@@ -63,13 +64,17 @@ class DiscoveryGenerateView(APIView):
             search_result = spotify.search(query=query, type="track")
 
             try:
-                uri = search_result["tracks"]["items"][0]["uri"]
-                success, error = spotify.add_to_queue(uri)
-                if success:
-                    added.append({"title": song["title"], "artist": song["artist"], "uri": uri})
+                matched = find_best_match(search_result["tracks"]["items"], song["title"], song["artist"])
+                if matched:
+                    uri = matched["uri"]
+                    success, error = spotify.add_to_queue(uri)
+                    if success:
+                        added.append({"title": song["title"], "artist": song["artist"], "uri": uri})
+                    else:
+                        errors.append({"song": song, "error": error or "Could not add to queue"})
                 else:
-                    errors.append({"song": song, "error": error or "Could not add to queue"})
+                    errors.append({"song": song, "error": "No match found"})
             except Exception as e:
                 errors.append({"song": song, "error": str(e)})
-
+        
         return Response({"message": f"Discovery queue generated for genre: {genre}", "genre": genre, "added": added, "errors": errors})
