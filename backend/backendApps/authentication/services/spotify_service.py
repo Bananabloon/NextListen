@@ -33,7 +33,7 @@ class SpotifyService:
         return response.json()
 
     @staticmethod
-    def get_top_artists(access_token: str):
+    def get_top_artists(access_token: str): #to też nie powinno tutaj być raczej
         url = "https://api.spotify.com/v1/me/top/artists?limit=50"
         headers = {"Authorization": f"Bearer {access_token}"}
         response = requests.get(url, headers=headers)

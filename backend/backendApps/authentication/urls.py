@@ -1,9 +1,8 @@
 from django.urls import path
-from .views import SpotifyOAuthRedirectView, SpotifyCallbackView, SpotifyLoginView, MeView
+from .views import SpotifyOAuthRedirectView, SpotifyCallbackView, ProtectedView
 
 urlpatterns = [
     path("spotify/login/", SpotifyOAuthRedirectView.as_view(), name="spotify-login"),
     path("spotify/callback/", SpotifyCallbackView.as_view(), name="spotify-callback"),
-    path("spotify/token-login/", SpotifyLoginView.as_view(), name="spotify-token-login"),
-    path("spotify/JWTtokens/", MeView.as_view(), name="spotify-me-view"),
+    path("spotify/ProtectedView/", ProtectedView.as_view(), name="spotify-me-view"),
 ]

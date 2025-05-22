@@ -26,7 +26,13 @@ SECRET_KEY = 'django-insecure-fqseoqov&h)+q)aynf2drh5g2oyet#d#kko9o-e3fhz$3v668q
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    '86d5-92-63-39-59.ngrok-free.app',
+    "localhost",
+    "127.0.0.1",
+    "[::1]",
+    "0.0.0.0"
+                 ]
 
 
 AUTH_USER_MODEL = 'users.User'
@@ -40,7 +46,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
-    "rest_framework_simplejwt",
+    'rest_framework_simplejwt',
     'users',
     'authentication',
     'spotifyData',
@@ -58,6 +64,8 @@ SIMPLE_JWT = {
     "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
     'ROTATE_REFRESH_TOKENS': True,
     'BLACKLIST_AFTER_ROTATION': True,
+    "ALGORITHM": "HS256",
+    "SIGNING_KEY": SECRET_KEY,
     'AUTH_HEADER_TYPES': ('Bearer',),
     'AUTH_TOKEN_CLASSES': ('rest_framework_simplejwt.tokens.AccessToken',),
 }
@@ -69,7 +77,8 @@ MIDDLEWARE = [
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',#dodaj spowrotem 'corsheaders.middleware.CorsMiddleware'
+    'django.middleware.clickjacking.XFrameOptionsMiddleware', 
+
 ]
 
 ROOT_URLCONF = 'backendApps.urls'
@@ -151,12 +160,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 SPOTIFY_CLIENT_ID='d1dbc90e178d4d83bf9c0e9e875726b3'
 SPOTIFY_CLIENT_SECRET='1c8942cb7f824bc4a696a251e304d565'
-SPOTIFY_REDIRECT_URI='http://127.0.0.1:8000/auth/spotify/callback/'
+SPOTIFY_REDIRECT_URI='https://86d5-92-63-39-59.ngrok-free.app/api/auth/spotify/callback/'
 
 OPENAI_API_KEY = "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"
 
-#CORS_ALLOW_ORIGINS = [
-#    "http://localhost:5173",  #Vite
-#]
-
-#CORS_ALLOW_CREDENTIALS = True

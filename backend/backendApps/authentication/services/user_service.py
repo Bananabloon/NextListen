@@ -34,7 +34,7 @@ class UserService:
         return user
 
     @staticmethod
-    def fetch_and_update_top_artists(user, access_token):
+    def fetch_and_update_top_artists(user, access_token): #to chyba nie powinno tutaj być
         artists = SpotifyService.get_top_artists(access_token)
         Artist.objects.filter(user=user).delete()
         for artist in artists:

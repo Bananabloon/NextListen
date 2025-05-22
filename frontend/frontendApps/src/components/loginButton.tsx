@@ -1,7 +1,7 @@
 
 const LoginButton = () => {
   const handleLogin = () => {
-    window.location.href = "http://localhost:8000/auth/spotify/login/";
+    window.location.href = "https://86d5-92-63-39-59.ngrok-free.app/api/auth/spotify/login/";
   };
 
   return (

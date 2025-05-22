@@ -4,21 +4,11 @@ from django.shortcuts import redirect
 
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework import status
+from rest_framework.permissions import IsAuthenticated
 
 from authentication.services.spotify_service import SpotifyService
 from authentication.services.spotify_auth_service import SpotifyAuthService
 
-class SpotifyLoginView(APIView):
-    def post(self, request):
-        spotify_access_token = request.data.get("access_token")
-        if not spotify_access_token:
-            return Response({"error": "spotify_access_token required"}, status=400)
-
-        data, error = SpotifyAuthService.authenticate_spotify_user(spotify_access_token)
-        if error:
-            return error
-        return Response(data)
 
 class SpotifyOAuthRedirectView(APIView):
     def get(self, request):
@@ -36,6 +26,8 @@ class SpotifyOAuthRedirectView(APIView):
 
 from rest_framework.response import Response
 
+
+
 class SpotifyCallbackView(APIView): #możliwe, że refaktoryzacja
     def get(self, request):
         code = request.query_params.get("code")
@@ -47,32 +39,34 @@ class SpotifyCallbackView(APIView): #możliwe, że refaktoryzacja
             return Response({"error": "Failed to get access token"}, status=400)
 
         spotify_access_token = token_data.get("access_token")
-        refresh_token = token_data.get("refresh_token")
+        spotify_refresh_token = token_data.get("refresh_token")
 
-        data, error = SpotifyAuthService.authenticate_spotify_user(spotify_access_token, refresh_token)
+        data, error = SpotifyAuthService.authenticate_spotify_user(spotify_access_token, spotify_refresh_token)
         if error:
             return error
 
-        response = redirect("http://localhost:5173/callback")  # frontend url bez parametrów
+        #Miejsce na zwrot JWT
+        response = redirect("https://86d5-92-63-39-59.ngrok-free.app/callback")
 
-        # Ustawiamy tokeny w httpOnly cookie (np. na 1h i 7 dni)
         response.set_cookie(
-            key='access_token',
+            key='NextListen_access_token',
             value=data['access'],
             httponly=True,
-            secure=False,  # wymaga HTTPS, narazie False. Do zmiany
+            secure=True,
             max_age=1800,
             samesite='Lax', 
             path='/',
+
         )
         response.set_cookie(
-            key='refresh_token',
+            key='NextListen_refresh_token',
             value=data['refresh'],
             httponly=True,
-            secure=False,
+            secure=True,
             max_age=7*24*1800,
             samesite='Lax',
             path='/',
+
         )
 
         return response
@@ -80,17 +74,9 @@ class SpotifyCallbackView(APIView): #możliwe, że refaktoryzacja
     from rest_framework.views import APIView
 from rest_framework.response import Response
 
-class MeView(APIView):
+
+class ProtectedView(APIView):
+    permission_classes = [IsAuthenticated]
+
     def get(self, request):
-        access_token = request.COOKIES.get('access_token')
-        refresh_token = request.COOKIES.get('refresh_token')
-
-        print("Cookies on backend:", request.COOKIES)
-        print("Access token:", access_token)
-        print("Refresh token:", refresh_token)
-
-        if access_token:
-            
-            return Response({"message": "Token received!", "access_token": access_token})
-        else:
-            return Response({"error": "No access token in cookies"}, status=401)
+        return Response({"message": "You are authenticated!", "user": request.user.username})
