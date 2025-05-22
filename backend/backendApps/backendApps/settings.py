@@ -1,3 +1,14 @@
+from dotenv import load_dotenv #tylko dla dev, potrzebne do ngroka
+import os
+from pathlib import Path
+
+BASE_DIR = Path(__file__).resolve().parent  # katalog backendApps/backendApps
+load_dotenv(dotenv_path=BASE_DIR / '../.env')  # wskazuje na backend/.env
+
+NGROK_URL = os.getenv("NGROK_URL")
+if NGROK_URL is None:
+    raise Exception("NGROK_URL is not set in .env file!")
+
 """
 Django settings for backendApps project.
 
@@ -27,7 +38,7 @@ SECRET_KEY = 'django-insecure-fqseoqov&h)+q)aynf2drh5g2oyet#d#kko9o-e3fhz$3v668q
 DEBUG = True
 
 ALLOWED_HOSTS = [
-    '86d5-92-63-39-59.ngrok-free.app',
+    os.getenv("NGROK_URL").replace("https://", "").replace("http://", ""),
     "localhost",
     "127.0.0.1",
     "[::1]",
@@ -56,6 +67,8 @@ INSTALLED_APPS = [
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
         "rest_framework_simplejwt.authentication.JWTAuthentication",
+        'backendApps.JWTAuth.CookieJWTAuthentication',
+
     ),
 }
 
@@ -160,7 +173,9 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 SPOTIFY_CLIENT_ID='d1dbc90e178d4d83bf9c0e9e875726b3'
 SPOTIFY_CLIENT_SECRET='1c8942cb7f824bc4a696a251e304d565'
-SPOTIFY_REDIRECT_URI='https://86d5-92-63-39-59.ngrok-free.app/api/auth/spotify/callback/'
+
 
 OPENAI_API_KEY = "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"
 
+SPOTIFY_REDIRECT_URI = f"{NGROK_URL}/api/auth/spotify/callback/"
+CSRF_TRUSTED_ORIGINS = [NGROK_URL]

@@ -1,7 +1,8 @@
-
+const ngrokUrl = import.meta.env.VITE_NGROK_URL;
 const LoginButton = () => {
   const handleLogin = () => {
-    window.location.href = "https://86d5-92-63-39-59.ngrok-free.app/api/auth/spotify/login/";
+    
+  window.location.href = `${ngrokUrl}/api/auth/spotify/login/`;
   };
 
   return (

@@ -3,7 +3,7 @@ import reactLogo from './assets/react.svg'
 import viteLogo from '/vite.svg'
 import './App.css'
 import LoginButton from './components/loginButton'
-import CheckAuth from './components/checkAuth'
+import TopArtists from './components/fetchArtistsButton'
 
 function App() {
   const [count, setCount] = useState(0)
@@ -33,7 +33,8 @@ function App() {
       </p>
       <div className="App">
       <h1>Welcome to NextListen</h1>
-      <CheckAuth />
+      <TopArtists/>
+
     </div>
     </>
   )

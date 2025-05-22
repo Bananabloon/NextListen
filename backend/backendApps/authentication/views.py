@@ -46,7 +46,7 @@ class SpotifyCallbackView(APIView): #możliwe, że refaktoryzacja
             return error
 
         #Miejsce na zwrot JWT
-        response = redirect("https://86d5-92-63-39-59.ngrok-free.app/callback")
+        response = redirect(f"{settings.NGROK_URL}/callback")
 
         response.set_cookie(
             key='NextListen_access_token',

@@ -18,6 +18,8 @@ services:
   backend:
     build:
       context: ./backend
+    env_file:
+      - ./backend/.env
     #command: ["gunicorn", "backendApps.wsgi:application", "--bind", "0.0.0.0:8000"] gunicorn
     command: ["python", "manage.py", "runserver", "0.0.0.0:8000"]
     volumes:
