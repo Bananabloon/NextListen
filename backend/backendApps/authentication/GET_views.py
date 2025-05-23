@@ -7,7 +7,7 @@ from authentication.services.spotify_service import SpotifyService
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def get_top_artists(request):
-    user = request.user  # ← pochodzi z JWT
+    user = request.user  
     spotify_access_token = user.spotify_access_token
 
     if not spotify_access_token:

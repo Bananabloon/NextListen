@@ -1,8 +1,6 @@
 from datetime import timedelta
 from django.utils import timezone
-from users.models import User, Artist
-from rest_framework.response import Response
-from .spotify_service import SpotifyService
+from users.models import User
 import logging
 
 logger = logging.getLogger(__name__)
@@ -32,14 +30,3 @@ class UserService:
 
         user.save()
         return user
-
-    @staticmethod
-    def fetch_and_update_top_artists(user, access_token): #to chyba nie powinno tutaj być
-        artists = SpotifyService.get_top_artists(access_token)
-        Artist.objects.filter(user=user).delete()
-        for artist in artists:
-            Artist.objects.create(
-                user=user,
-                name=artist["name"],
-                spotify_uri=artist["uri"]
-            )
