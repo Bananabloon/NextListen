@@ -2,14 +2,19 @@ from urllib.parse import urlencode
 from django.conf import settings
 from django.shortcuts import redirect
 
+from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated
+from rest_framework_simplejwt.exceptions import TokenError
+from rest_framework.permissions import AllowAny
 
-from authentication.services.spotify_service import SpotifyService
-from authentication.services.spotify_auth_service import SpotifyAuthService
-from authentication.services.token_service import TokenService
+
+from .services.spotify_service import SpotifyService
+from .services.spotify_auth_service import SpotifyAuthService
+from .services.token_service import TokenService, CustomRefreshToken
 from constants import SPOTIFY_AUTHORIZE_URL
+
+
 
 
 
@@ -27,7 +32,7 @@ class SpotifyOAuthRedirectView(APIView):
         url = f"{SPOTIFY_AUTHORIZE_URL}?{urlencode(params)}" 
         return redirect(url)
 
-from rest_framework.response import Response
+
 
 
 
@@ -54,3 +59,24 @@ class SpotifyCallbackView(APIView):
         TokenService.set_cookie_refresh_token(response, data['refresh'])
         return response
     
+class RefreshAccessToken(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        refresh_token_str = request.data.get('refresh')
+        if not refresh_token_str:
+            return Response({"detail": "No refresh token provided."}, status=status.HTTP_400_BAD_REQUEST)
+        
+        try:
+            refresh = CustomRefreshToken(refresh_token_str)
+            new_access_token = refresh.access_token
+
+            response = Response({
+                "access": str(new_access_token),
+            })
+      
+            TokenService.set_cookie_access_token(response, str(new_access_token))
+            return response
+
+        except TokenError as e:
+            return Response({"detail": "Invalid refresh token."}, status=status.HTTP_401_UNAUTHORIZED)

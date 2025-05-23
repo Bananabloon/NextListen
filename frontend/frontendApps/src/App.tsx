@@ -3,7 +3,7 @@ import reactLogo from './assets/react.svg'
 import viteLogo from '/vite.svg'
 import './App.css'
 import LoginButton from './components/loginButton'
-import TopArtists from './components/fetchArtistsButton'
+import TopArtists from './components/fetchArtists'
 
 function App() {
   const [count, setCount] = useState(0)
