@@ -1,8 +1,7 @@
 from rest_framework.test import APITestCase, APIClient
 from rest_framework import status
 from django.contrib.auth import get_user_model
-from users.models import User
-from users.models import Media
+from users.models import UserFeedback, User
 
 
 User = get_user_model()
@@ -36,7 +35,7 @@ class SongViewsTestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_feedback_success(self):
-        media = Media.objects.create(user=self.user, media_id="track123", media_type="track")
+        media = UserFeedback.objects.create(user=self.user, media="track123", is_iked=True)
         data = {
             "song_id": media.media_id,
             "feedback": "positive"
@@ -53,9 +52,8 @@ class SongViewsTestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_similar_songs_success(self):
-        # Użytkownik ma jedną ocenioną piosenkę
-        media = Media.objects.create(user=self.user, media_id="track123", media_type="track")
-        Feedback.objects.create(user=self.user, song=media, feedback="positive")
+        media = UserFeedback.objects.create(user=self.user, media="track123", is_iked=True)
+        feedback = UserFeedback.objects.create(user=self.user,media=media,is_liked=True,source="test_case")
 
         response = self.client.post("/songs/similar/", {})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -64,4 +62,4 @@ class SongViewsTestCase(APITestCase):
     def test_similar_songs_missing_feedback(self):
         response = self.client.post("/songs/similar/", {})
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(response.data["error"], "No feedback found for this user.")
+        self.assertEqual(response.data["error"], "title and artist are required")
