@@ -6,7 +6,7 @@ logger = logging.getLogger(__name__)
 
 class SpotifyService:
     @staticmethod
-    def exchange_code_for_token(code: str):
+    def exchange_code_for_spotify_token(code: str):
         payload = {
             "grant_type": "authorization_code",
             "code": code,
@@ -31,14 +31,3 @@ class SpotifyService:
             logger.error("Failed to fetch user profile from Spotify.")
             return None
         return response.json()
-
-    @staticmethod
-    def get_top_artists(access_token: str): #to też nie powinno tutaj być raczej
-        url = "https://api.spotify.com/v1/me/top/artists?limit=50"
-        headers = {"Authorization": f"Bearer {access_token}"}
-        response = requests.get(url, headers=headers)
-        if response.status_code != 200:
-            logger.error(f"Failed to fetch top artists: {response.status_code} {response.text}")
-            return []
-        data = response.json()
-        return data.get("items", [])

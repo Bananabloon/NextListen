@@ -8,7 +8,7 @@ from rest_framework.permissions import IsAuthenticated
 
 from authentication.services.spotify_service import SpotifyService
 from authentication.services.spotify_auth_service import SpotifyAuthService
-
+from authentication.services.token_service import TokenService
 from constants import SPOTIFY_AUTHORIZE_URL
 
 
@@ -31,13 +31,13 @@ from rest_framework.response import Response
 
 
 
-class SpotifyCallbackView(APIView): #możliwe, że refaktoryzacja, oddzielenie przesyłania JWT
+class SpotifyCallbackView(APIView): 
     def get(self, request):
         code = request.query_params.get("code")
         if not code:
             return Response({"error": "No code provided"}, status=400)
 
-        token_data = SpotifyService.exchange_code_for_token(code)
+        token_data = SpotifyService.exchange_code_for_spotify_token(code)
         if not token_data:
             return Response({"error": "Failed to get access token"}, status=400)
 
@@ -50,36 +50,7 @@ class SpotifyCallbackView(APIView): #możliwe, że refaktoryzacja, oddzielenie p
 
         
         response = redirect(f"{settings.NGROK_URL}/callback")
-
-        response.set_cookie(
-            key='NextListen_access_token',
-            value=data['access'],
-            httponly=True,
-            secure=True,
-            max_age=1800,
-            samesite='Lax', 
-            path='/',
-
-        )
-        response.set_cookie(
-            key='NextListen_refresh_token',
-            value=data['refresh'],
-            httponly=True,
-            secure=True,
-            max_age=7*24*1800,
-            samesite='Lax',
-            path='/',
-
-        )
-
+        TokenService.set_cookie_access_token(response, data['access'])
+        TokenService.set_cookie_refresh_token(response, data['refresh'])
         return response
     
-    from rest_framework.views import APIView
-from rest_framework.response import Response
-
-
-class ProtectedView(APIView):
-    permission_classes = [IsAuthenticated]
-
-    def get(self, request):
-        return Response({"message": "You are authenticated!", "user": request.user.username})

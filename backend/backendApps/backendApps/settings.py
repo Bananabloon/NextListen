@@ -25,7 +25,7 @@ DEBUG = config("DEBUG", cast=bool)
 NGROK_URL = config("NGROK_URL")
 
 ALLOWED_HOSTS = [
-    NGROK_URL.replace("https://", ""),
+    NGROK_URL.replace("https://", "").replace("http://", ""),
     "localhost",
     "127.0.0.1",
     "[::1]",

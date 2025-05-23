@@ -12,7 +12,7 @@ const TopArtists: React.FC = () => {
   useEffect(() => {
     const fetchTopArtists = async () => {
       try {
-        const res = await fetch(`${ngrokUrl}/api/auth/spotify/get-top-artists/`, { credentials: 'include' });
+        const res = await fetch(`${ngrokUrl}/api/spotify/profile/`, { credentials: 'include' });
         if (!res.ok) throw new Error(`Błąd sieci: ${res.status}`);
         const data = await res.json();
         setArtists(data.top_artists);

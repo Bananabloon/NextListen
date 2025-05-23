@@ -81,4 +81,4 @@ class UserFeedback(models.Model):
 
     def __str__(self):
         return f"Feedback by {self.user.display_name} on {self.media.title}"
-
+    

@@ -2,6 +2,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.response import Response
 from .spotify_service import SpotifyService
 from .user_service import UserService
+from .token_service import TokenService
 
 class SpotifyAuthService:
     @staticmethod
@@ -12,27 +13,6 @@ class SpotifyAuthService:
 
      
         user = UserService.create_or_update_user(user_info, spotify_access_token, spotify_refresh_token)
+        tokens = TokenService.generate_tokens_for_user(user)
 
-        jwt_refresh_token = CustomRefreshToken.for_user(user)
-        jwt_access_token = jwt_refresh_token.access_token
-
-        return {
-            "access": str(jwt_access_token),
-            "refresh": str(jwt_refresh_token),
-            "user": {
-                "id": user.id,
-                "spotify_user_id": user.spotify_user_id,
-                "display_name": user.display_name
-            }
-        }, None
-class CustomRefreshToken(RefreshToken):
-    @classmethod
-    def for_user(cls, user):
-        token = super().for_user(user)
-
-        token['id'] = user.id
-        token['spotify_user_id'] = user.spotify_user_id
-        token['display_name'] = user.display_name
-        
-
-        return token
+        return tokens, None

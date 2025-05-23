@@ -19,14 +19,5 @@ class UserService:
         if refresh_token:
             user.spotify_refresh_token = refresh_token
 
-        now = timezone.now()
-
-        if not user.last_updated or now - user.last_updated > timedelta(days=1):
-            logger.info(f"Fetching top artists for user {user.display_name}")
-            UserService.fetch_and_update_top_artists(user, access_token)
-            user.last_updated = now
-        else:
-            logger.info(f"Skipping top artist update for {user.display_name}: updated less than 24h ago")
-
         user.save()
         return user
