@@ -180,3 +180,5 @@ Postman
 db.sqlite3
 __pycache__/
 .env
+
+backend/wait-for-it.sh

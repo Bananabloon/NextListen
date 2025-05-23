@@ -5,11 +5,35 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from django.shortcuts import get_object_or_404
 import json
+from users.models import UserFeedback
 from spotifyData.services.spotifyClient import SpotifyAPI
 from songs.utils import ask_openai, should_send_curveball, update_curveball_enjoyment, extract_filters, find_best_match
 
 class GenerateQueueBase(APIView):
     permission_classes = [IsAuthenticated]
+
+    def get_user_preferences(self, user):
+        feedbacks = UserFeedback.objects.select_related("media").filter(user=user)
+
+        liked_genres = []
+        liked_artists = []
+        disliked_genres = []
+        disliked_artists = []
+
+        for feedback in feedbacks:
+            if feedback.is_liked:
+                liked_genres.extend(feedback.media.genre)
+                liked_artists.append(feedback.media.artist_name)
+            else:
+                disliked_genres.extend(feedback.media.genre)
+                disliked_artists.append(feedback.media.artist_name)
+
+        return {
+            "liked_genres": list(set(liked_genres)),
+            "liked_artists": list(set(liked_artists)),
+            "disliked_genres": list(set(disliked_genres)),
+            "disliked_artists": list(set(disliked_artists)),
+        }
 
     def add_songs_to_queue(self, user, songs, spotify, curveball_every):
         added, errors = [], []
@@ -65,12 +89,19 @@ class GenerateQueueView(GenerateQueueBase):
         filter_str = extract_filters(request.data)
         spotify = SpotifyAPI(user.spotify_access_token, refresh_token=user.spotify_refresh_token, user=user)
 
+        preferences = self.get_user_preferences(user)
+
         prompt = f"""
         Podaj {count} utworów podobnych do:
         Tytuł: {title}
         Artysta: {artist}
         {filter_str}
 
+        Preferencje użytkownika:
+        Lubi gatunki: {", ".join(preferences["liked_genres"])}
+        Lubi artystów: {", ".join(preferences["liked_artists"])}
+        Nie lubi gatunków: {", ".join(preferences["disliked_genres"])}
+        Nie lubi artystów: {", ".join(preferences["disliked_artists"])}
         Tylko utwory i artyści, którzy rzeczywiście istnieją i są dostępni na Spotify.
 
         Format JSON:
@@ -106,6 +137,8 @@ class GenerateFromTopView(GenerateQueueBase):
         if not top_tracks and not top_artists:
             return Response({"error": "No top tracks or artists available"}, status=400)
 
+        preferences = self.get_user_preferences(user)
+
         prompt = f"""
         Na podstawie ulubionych utworów:
         {json.dumps(top_tracks, indent=2)}
@@ -114,8 +147,13 @@ class GenerateFromTopView(GenerateQueueBase):
         {json.dumps(top_artists, indent=2)}
         {filter_str}
 
-        Podaj {count} nowych rekomendacji muzycznych.
+        Preferencje użytkownika:
+        Lubi gatunki: {", ".join(preferences["liked_genres"])}
+        Lubi artystów: {", ".join(preferences["liked_artists"])}
+        Nie lubi gatunków: {", ".join(preferences["disliked_genres"])}
+        Nie lubi artystów: {", ".join(preferences["disliked_artists"])}
 
+        Podaj {count} nowych rekomendacji muzycznych.
         Tylko utwory i artyści, którzy rzeczywiście istnieją i są dostępni na Spotify.
 
         Format JSON:
@@ -149,9 +187,17 @@ class GenerateFromArtistsView(GenerateQueueBase):
         filter_str = extract_filters(request.data)
         spotify = SpotifyAPI(user.spotify_access_token, refresh_token=user.spotify_refresh_token, user=user)
 
+        preferences = self.get_user_preferences(user)
+
         prompt = f"""
         Podaj {count} utworów {filter_str}, inspirowanych twórczością artystów:
         {json.dumps(artists, indent=2)}
+
+        Preferencje użytkownika:
+        Lubi gatunki: {", ".join(preferences["liked_genres"])}
+        Lubi artystów: {", ".join(preferences["liked_artists"])}
+        Nie lubi gatunków: {", ".join(preferences["disliked_genres"])}
+        Nie lubi artystów: {", ".join(preferences["disliked_artists"])}
 
         Tylko utwory i artyści, którzy rzeczywiście istnieją i są dostępni na Spotify.
 

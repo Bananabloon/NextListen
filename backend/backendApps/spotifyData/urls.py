@@ -10,7 +10,6 @@ from .views.tracks import (TopTracksView,
                            )
 
 
-
 urlpatterns = [
     path('profile/', CurrentUserProfileView.as_view()),
     path('top-tracks/', TopTracksView.as_view()),

@@ -1,9 +1,9 @@
 from rest_framework.test import APITestCase, APIClient
 from rest_framework import status
 from django.contrib.auth import get_user_model
-from users.models import UserFeedback, User
-
-
+from users.models import UserFeedback, User, Media
+from django.utils import timezone
+from datetime import date
 User = get_user_model()
 
 class SongViewsTestCase(APITestCase):
@@ -35,14 +35,25 @@ class SongViewsTestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_feedback_success(self):
-        media = UserFeedback.objects.create(user=self.user, media="track123", is_iked=True)
+        media = Media.objects.create(
+            spotify_uri="track123",
+            title="Some Track",
+            artist_name="Some Artist",
+            genre=[],
+            album_name="Some Album",
+            media_type=Media.SONG,
+            saved_at=timezone.now()
+        )
+
         data = {
-            "song_id": media.media_id,
+            "song_id": media.id,
             "feedback": "positive"
         }
         response = self.client.post("/songs/feedback/", data)
+
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data["message"], "Feedback saved successfully.")
+
 
     def test_feedback_invalid_song(self):
         response = self.client.post("/songs/feedback/", {
@@ -52,12 +63,33 @@ class SongViewsTestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_similar_songs_success(self):
-        media = UserFeedback.objects.create(user=self.user, media="track123", is_iked=True)
-        feedback = UserFeedback.objects.create(user=self.user,media=media,is_liked=True,source="test_case")
+        media = Media.objects.create(
+            spotify_uri="track123",
+            title="Some Track",
+            artist_name="Some Artist",
+            genre=["pop"],
+            album_name="Some Album",
+            media_type=Media.SONG,
+            saved_at=timezone.now()
+        )
 
-        response = self.client.post("/songs/similar/", {})
+        UserFeedback.objects.create(
+            user=self.user,
+            media=media,
+            is_liked=True,
+            source="test",
+            feedback_at=timezone.now()
+        )
+
+        response = self.client.post("/songs/similar/", {
+            "title": "Some Track",
+            "artist": "Some Artist"
+        })
+
+
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIn("recommendations", response.data)
+
 
     def test_similar_songs_missing_feedback(self):
         response = self.client.post("/songs/similar/", {})

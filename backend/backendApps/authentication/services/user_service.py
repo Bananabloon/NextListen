@@ -9,9 +9,9 @@ class UserService:
     @staticmethod
     def create_or_update_user(user_info, access_token, refresh_token=None):
         spotify_user_id = user_info["id"]
-        display_name = user_info.get("display_name", "Unknown")
+        display_name = user_info.get("displayname", "Unknown")
 
-        user, _ = User.objects.get_or_create(spotify_user_id=spotify_user_id)
+        user,_= User.objects.get_or_create(spotify_user_id=spotify_user_id)
         user.display_name = display_name
         user.spotify_access_token = access_token
         user.market = user_info.get("country")
@@ -20,13 +20,6 @@ class UserService:
             user.spotify_refresh_token = refresh_token
 
         now = timezone.now()
-
-        if not user.last_updated or now - user.last_updated > timedelta(days=1):
-            logger.info(f"Fetching top artists for user {user.display_name}")
-            UserService.fetch_and_update_top_artists(user, access_token)
-            user.last_updated = now
-        else:
-            logger.info(f"Skipping top artist update for {user.display_name}: updated less than 24h ago")
 
         user.save()
         return user
