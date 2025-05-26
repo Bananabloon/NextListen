@@ -78,7 +78,7 @@ class CreateLikedPlaylistsView(APIView):
         playlist_id = create_response.json().get("id")
 
         for i in range(0, len(uris), 100):
-            chunk = uris[i : i + 100]
+            chunk = uris[i:i + 100]
             add_response = requests.post(
                 SPOTIFY_PLAYLIST_TRACKS_URL.format(playlist_id=playlist_id),
                 headers=spotify.headers,

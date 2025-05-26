@@ -6,7 +6,7 @@ from spotifyData.services.spotifyClient import SpotifyAPI
 from songs.utils import (
     ask_openai,
     should_send_curveball,
-    #update_curveball_enjoyment,
+    # update_curveball_enjoyment,
     extract_filters,
     find_best_match,
 )
