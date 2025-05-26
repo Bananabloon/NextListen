@@ -4,7 +4,16 @@ from django.contrib.auth import get_user_model
 from users.models import UserFeedback, User, Media
 from django.utils import timezone
 from datetime import date
+from rest_framework_simplejwt.tokens import AccessToken
+
 User = get_user_model()
+
+def authenticate_client():
+    user = User.objects.create_user(spotify_user_id="testuser", password="testpass")
+    token = AccessToken.for_user(user)
+    client = APIClient()
+    client.credentials(HTTP_AUTHORIZATION=f"Bearer {str(token)}")
+    return client, user
 
 class SongViewsTestCase(APITestCase):
     def setUp(self):
@@ -35,6 +44,8 @@ class SongViewsTestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_feedback_success(self):
+        client, user = authenticate_client()
+
         media = Media.objects.create(
             spotify_uri="track123",
             title="Some Track",
@@ -47,12 +58,13 @@ class SongViewsTestCase(APITestCase):
 
         data = {
             "song_id": media.id,
-            "feedback": "positive"
+            "feedback": "like"  # musi być jedna z: like, dislike, none
         }
-        response = self.client.post("/songs/feedback/", data)
+
+        response = client.post("/songs/feedback/", data, format="json")
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data["message"], "Feedback saved successfully.")
+        self.assertEqual(response.data["status"], "ok")
 
 
     def test_feedback_invalid_song(self):
@@ -62,33 +74,33 @@ class SongViewsTestCase(APITestCase):
         })
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
-    def test_similar_songs_success(self):
-        media = Media.objects.create(
-            spotify_uri="track123",
-            title="Some Track",
-            artist_name="Some Artist",
-            genre=["pop"],
-            album_name="Some Album",
-            media_type=Media.SONG,
-            saved_at=timezone.now()
-        )
+    # def test_similar_songs_success(self): wypisuje losowe info, wiec nie wiem czy jest sens to runowac i zurzywac toekny
+    #     media = Media.objects.create(
+    #         spotify_uri="track123",
+    #         title="Some Track",
+    #         artist_name="Some Artist",
+    #         genre=["pop"],
+    #         album_name="Some Album",
+    #         media_type=Media.SONG,
+    #        saved_at=timezone.now()
+    #     )
 
-        UserFeedback.objects.create(
-            user=self.user,
-            media=media,
-            is_liked=True,
-            source="test",
-            feedback_at=timezone.now()
-        )
+    #     UserFeedback.objects.create(
+    #         user=self.user,
+    #         media=media,
+    #         is_liked=True,
+    #         source="test",
+    #         feedback_at=timezone.now()
+    #     )
 
-        response = self.client.post("/songs/similar/", {
-            "title": "Some Track",
-            "artist": "Some Artist"
-        })
+    #     response = self.client.post("/songs/similar/", {
+    #         "title": "Some Track",
+    #         "artist": "Some Artist"
+    #     })
 
 
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertIn("recommendations", response.data)
+    #     self.assertEqual(response.status_code, status.HTTP_200_OK)
+    #     self.assertIn("recommendations", response.data)
 
 
     def test_similar_songs_missing_feedback(self):
