@@ -2,7 +2,7 @@ import pytest
 from unittest.mock import MagicMock
 from songs.views.generationViews import GenerateFromArtistsView
 from rest_framework.test import APIRequestFactory
-from django.contrib.auth.models import AnonymousUser
+
 
 @pytest.mark.django_db
 def test_generate_from_artists_success(monkeypatch):
@@ -14,16 +14,22 @@ def test_generate_from_artists_success(monkeypatch):
     user.spotify_refresh_token = "test"
     user.curveball_enjoyment = 5
 
-    request = factory.post("/generate", {
-        "artists": ["Massive Attack", "Radiohead"],
-        "count": 2,
-        "mood": "chill",
-        "tempo": "slow"
-    }, format="json")
+    request = factory.post(
+        "/generate",
+        {
+            "artists": ["Massive Attack", "Radiohead"],
+            "count": 2,
+            "mood": "chill",
+            "tempo": "slow",
+        },
+        format="json",
+    )
     request.user = user
 
     mock_spotify = MagicMock()
-    monkeypatch.setattr("generationViews.SpotifyAPI", lambda *args, **kwargs: mock_spotify)
+    monkeypatch.setattr(
+        "generationViews.SpotifyAPI", lambda *args, **kwargs: mock_spotify
+    )
 
     mock_spotify.search.return_value = {
         "tracks": {
@@ -31,7 +37,7 @@ def test_generate_from_artists_success(monkeypatch):
                 {
                     "name": "Teardrop",
                     "artists": [{"name": "Massive Attack"}],
-                    "uri": "spotify:track:456"
+                    "uri": "spotify:track:456",
                 }
             ]
         }
@@ -39,12 +45,15 @@ def test_generate_from_artists_success(monkeypatch):
 
     mock_spotify.add_to_queue.return_value = (True, None)
 
-    monkeypatch.setattr("generationViews.ask_openai", lambda *args, **kwargs: """
+    monkeypatch.setattr(
+        "generationViews.ask_openai",
+        lambda *args, **kwargs: """
     [
       {"title": "Teardrop", "artist": "Massive Attack"},
       {"title": "Idioteque", "artist": "Radiohead"}
     ]
-    """)
+    """,
+    )
 
     response = view(request)
     assert response.status_code == 200

@@ -4,9 +4,12 @@ from unittest.mock import patch
 
 User = get_user_model()
 
+
 class SpotifyDataViewsTest(APITestCase):
     def setUp(self):
-        self.user = User.objects.create_user(display_name="TestUser", spotify_user_id="test123")
+        self.user = User.objects.create_user(
+            display_name="TestUser", spotify_user_id="test123"
+        )
         self.user.spotify_access_token = "fake-access-token"
         self.user.spotify_refresh_token = "fake-refresh-token"
         self.user.save()
@@ -17,9 +20,14 @@ class SpotifyDataViewsTest(APITestCase):
     @patch("spotifyData.services.spotifyClient.SpotifyAPI.get_top_artists")
     @patch("builtins.open")
     @patch("json.load")
-    def test_discovery_genres_view(self, mock_json_load, mock_open, mock_get_top_artists):
+    def test_discovery_genres_view(
+        self, mock_json_load, mock_open, mock_get_top_artists
+    ):
         mock_get_top_artists.return_value = {"items": [{"genres": ["pop"]}]}
-        mock_json_load.return_value = [{"category": "rock", "popularity": 100}, {"category": "jazz", "popularity": 80}]
+        mock_json_load.return_value = [
+            {"category": "rock", "popularity": 100},
+            {"category": "jazz", "popularity": 80},
+        ]
 
         response = self.client.get("/spotify/discover/?count=2")
 
@@ -32,17 +40,33 @@ class SpotifyDataViewsTest(APITestCase):
     @patch("spotifyData.services.spotifyClient.SpotifyAPI.get_top_artists")
     @patch("spotifyData.services.spotifyClient.SpotifyAPI.search")
     @patch("spotifyData.services.spotifyClient.SpotifyAPI.add_to_queue")
-    def test_discovery_generate_view(self, mock_add, mock_search, mock_artists, mock_tracks, mock_openai):
+    def test_discovery_generate_view(
+        self, mock_add, mock_search, mock_artists, mock_tracks, mock_openai
+    ):
         mock_artists.return_value = {"items": [{"name": "artist", "genres": ["pop"]}]}
-        mock_tracks.return_value = {"items": [{"name": "song", "artists": [{"name": "artist"}]}]}
+        mock_tracks.return_value = {
+            "items": [{"name": "song", "artists": [{"name": "artist"}]}]
+        }
 
         mock_openai.return_value.chat.completions.create.return_value.choices = [
-            type("obj", (object,), {"message": type("msg", (object,), {"content": '[{"title": "test", "artist": "someone"}]'})})()
+            type(
+                "obj",
+                (object,),
+                {
+                    "message": type(
+                        "msg",
+                        (object,),
+                        {"content": '[{"title": "test", "artist": "someone"}]'},
+                    )
+                },
+            )()
         ]
         mock_search.return_value = {"tracks": {"items": [{"uri": "spotify:track:123"}]}}
         mock_add.return_value = (True, None)
 
-        response = self.client.post("/spotify/discover/generate/", {"genre": "rock", "count": 1})
+        response = self.client.post(
+            "/spotify/discover/generate/", {"genre": "rock", "count": 1}
+        )
 
         self.assertEqual(response.status_code, 200)
         self.assertIn("added", response.data)
@@ -79,7 +103,9 @@ class SpotifyDataViewsTest(APITestCase):
     @patch("spotifyData.services.spotifyClient.SpotifyAPI.add_to_queue")
     def test_add_track_to_queue(self, mock_add):
         mock_add.return_value = (True, None)
-        response = self.client.post("/spotify/queue/add/", {"track_uri": "spotify:track:abc"})
+        response = self.client.post(
+            "/spotify/queue/add/", {"track_uri": "spotify:track:abc"}
+        )
 
         self.assertEqual(response.status_code, 200)
         self.assertIn("message", response.data)

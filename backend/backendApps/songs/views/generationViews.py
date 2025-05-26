@@ -1,12 +1,16 @@
-from django.conf import settings
-from django.shortcuts import render
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
-from django.shortcuts import get_object_or_404
 import json
 from spotifyData.services.spotifyClient import SpotifyAPI
-from songs.utils import ask_openai, should_send_curveball, update_curveball_enjoyment, extract_filters, find_best_match
+from songs.utils import (
+    ask_openai,
+    should_send_curveball,
+    #update_curveball_enjoyment,
+    extract_filters,
+    find_best_match,
+)
+
 
 class GenerateQueueBase(APIView):
     permission_classes = [IsAuthenticated]
@@ -31,12 +35,14 @@ class GenerateQueueBase(APIView):
                 success, error = spotify.add_to_queue(uri)
 
                 if success:
-                    added.append({
-                        "title": song["title"],
-                        "artist": song["artist"],
-                        "uri": uri,
-                        "curveball": is_curveball
-                    })
+                    added.append(
+                        {
+                            "title": song["title"],
+                            "artist": song["artist"],
+                            "uri": uri,
+                            "curveball": is_curveball,
+                        }
+                    )
                 else:
                     errors.append({"song": song, "error": error})
 
@@ -63,7 +69,11 @@ class GenerateQueueView(GenerateQueueBase):
             return Response({"error": "title and artist required"}, status=400)
 
         filter_str = extract_filters(request.data)
-        spotify = SpotifyAPI(user.spotify_access_token, refresh_token=user.spotify_refresh_token, user=user)
+        spotify = SpotifyAPI(
+            user.spotify_access_token,
+            refresh_token=user.spotify_refresh_token,
+            user=user,
+        )
 
         prompt = f"""
         Podaj {count} utworów podobnych do:
@@ -80,14 +90,20 @@ class GenerateQueueView(GenerateQueueBase):
         """
 
         try:
-            raw_response = ask_openai("Jesteś ekspertem muzycznym i podajesz podobne utwory.", prompt)
+            raw_response = ask_openai(
+                "Jesteś ekspertem muzycznym i podajesz podobne utwory.", prompt
+            )
             songs = self.parse_openai_json(raw_response)
             added, errors = self.add_songs_to_queue(
-                user, songs, spotify,
-                curveball_every=max(1, 50 // (user.curveball_enjoyment or 5))
+                user,
+                songs,
+                spotify,
+                curveball_every=max(1, 50 // (user.curveball_enjoyment or 5)),
             )
 
-            return Response({"message": "Queue generated", "added": added, "errors": errors})
+            return Response(
+                {"message": "Queue generated", "added": added, "errors": errors}
+            )
         except Exception as e:
             return Response({"error": str(e)}, status=500)
 
@@ -98,9 +114,16 @@ class GenerateFromTopView(GenerateQueueBase):
         count = int(request.data.get("count", 10))
         filter_str = extract_filters(request.data)
 
-        spotify = SpotifyAPI(user.spotify_access_token, refresh_token=user.spotify_refresh_token, user=user)
+        spotify = SpotifyAPI(
+            user.spotify_access_token,
+            refresh_token=user.spotify_refresh_token,
+            user=user,
+        )
 
-        top_tracks = [f"{t['name']} by {t['artists'][0]['name']}" for t in spotify.get_top_tracks().get("items", [])]
+        top_tracks = [
+            f"{t['name']} by {t['artists'][0]['name']}"
+            for t in spotify.get_top_tracks().get("items", [])
+        ]
         top_artists = [a["name"] for a in spotify.get_top_artists().get("items", [])]
 
         if not top_tracks and not top_artists:
@@ -125,14 +148,21 @@ class GenerateFromTopView(GenerateQueueBase):
         """
 
         try:
-            raw_response = ask_openai("Jesteś ekspertem muzycznym. Generujesz nowe utwory na podstawie gustu użytkownika.", prompt)
+            raw_response = ask_openai(
+                "Jesteś ekspertem muzycznym. Generujesz nowe utwory na podstawie gustu użytkownika.",
+                prompt,
+            )
             songs = self.parse_openai_json(raw_response)
             added, errors = self.add_songs_to_queue(
-                user, songs, spotify,
-                curveball_every=max(1, 50 // (user.curveball_enjoyment or 5))
+                user,
+                songs,
+                spotify,
+                curveball_every=max(1, 50 // (user.curveball_enjoyment or 5)),
             )
 
-            return Response({"message": "Queue from top tracks", "added": added, "errors": errors})
+            return Response(
+                {"message": "Queue from top tracks", "added": added, "errors": errors}
+            )
         except Exception as e:
             return Response({"error": str(e)}, status=500)
 
@@ -147,7 +177,11 @@ class GenerateFromArtistsView(GenerateQueueBase):
             return Response({"error": "List of artists is required"}, status=400)
 
         filter_str = extract_filters(request.data)
-        spotify = SpotifyAPI(user.spotify_access_token, refresh_token=user.spotify_refresh_token, user=user)
+        spotify = SpotifyAPI(
+            user.spotify_access_token,
+            refresh_token=user.spotify_refresh_token,
+            user=user,
+        )
 
         prompt = f"""
         Podaj {count} utworów {filter_str}, inspirowanych twórczością artystów:
@@ -163,19 +197,25 @@ class GenerateFromArtistsView(GenerateQueueBase):
 
         try:
             raw_response = ask_openai(
-                "Jesteś ekspertem muzycznym. Generujesz nowe utwory inspirowane stylem podanych artystów i zgodne z określonym nastrojem, tempem lub stylem muzycznym.",
-                prompt
+                """Jesteś ekspertem muzycznym.
+                   Generujesz nowe utwory inspirowane stylem podanych artystów i zgodne z określonym nastrojem,
+                   tempem lub stylem muzycznym.""",
+                prompt,
             )
             songs = self.parse_openai_json(raw_response)
             added, errors = self.add_songs_to_queue(
-                user, songs, spotify,
-                curveball_every=max(1, 50 // (user.curveball_enjoyment or 5))
+                user,
+                songs,
+                spotify,
+                curveball_every=max(1, 50 // (user.curveball_enjoyment or 5)),
             )
 
-            return Response({
-                "message": "Queue generated from artists with filters",
-                "added": added,
-                "errors": errors
-            })
+            return Response(
+                {
+                    "message": "Queue generated from artists with filters",
+                    "added": added,
+                    "errors": errors,
+                }
+            )
         except Exception as e:
             return Response({"error": str(e)}, status=500)

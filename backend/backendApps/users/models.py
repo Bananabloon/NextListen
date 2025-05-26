@@ -1,21 +1,26 @@
 from django.db import models
-from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
+from django.contrib.auth.models import (
+    AbstractBaseUser,
+    BaseUserManager,
+    PermissionsMixin,
+)
 from django.core.validators import MinValueValidator, MaxValueValidator
 
+
 class Media(models.Model):
-    SONG = 'song'
-    ALBUM = 'album'
+    SONG = "song"
+    ALBUM = "album"
 
     TYPE_CHOICES = [
-        (SONG, 'Song'),
-        (ALBUM, 'Album'),
+        (SONG, "Song"),
+        (ALBUM, "Album"),
     ]
 
     id = models.AutoField(primary_key=True)
     spotify_uri = models.CharField(max_length=255, unique=True)
     title = models.CharField(max_length=255)
     artist_name = models.CharField(max_length=255)
-    genre = models.JSONField(default=list) 
+    genre = models.JSONField(default=list)
     album_name = models.CharField(max_length=255)
     media_type = models.CharField(max_length=10, choices=TYPE_CHOICES)
     saved_at = models.DateTimeField()
@@ -48,15 +53,16 @@ class UserManager(BaseUserManager):
 
 class User(AbstractBaseUser, PermissionsMixin):
     id = models.AutoField(primary_key=True)
-    spotify_user_id = models.CharField(max_length=100, unique=True, db_column='spotifyUserId')
-    display_name = models.CharField(max_length=100, db_column='displayName')
+    spotify_user_id = models.CharField(
+        max_length=100, unique=True, db_column="spotifyUserId"
+    )
+    display_name = models.CharField(max_length=100, db_column="displayName")
     spotify_access_token = models.CharField(max_length=1024, null=True, blank=True)
     spotify_refresh_token = models.CharField(max_length=1024, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     last_updated = models.DateTimeField(null=True, blank=True)
     curveball_enjoyment = models.IntegerField(
-        default=5,
-        validators=[MinValueValidator(0), MaxValueValidator(10)]
+        default=5, validators=[MinValueValidator(0), MaxValueValidator(10)]
     )
     market = models.CharField(max_length=2, null=True, blank=True)
     is_staff = models.BooleanField(default=False)
@@ -71,6 +77,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     def __str__(self):
         return self.display_name
 
+
 class UserFeedback(models.Model):
     id = models.AutoField(primary_key=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -81,4 +88,3 @@ class UserFeedback(models.Model):
 
     def __str__(self):
         return f"Feedback by {self.user.display_name} on {self.media.title}"
-    

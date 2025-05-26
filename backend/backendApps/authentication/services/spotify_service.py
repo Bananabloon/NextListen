@@ -4,6 +4,7 @@ from django.conf import settings
 
 logger = logging.getLogger(__name__)
 
+
 class SpotifyService:
     @staticmethod
     def exchange_code_for_spotify_token(code: str):
@@ -15,7 +16,9 @@ class SpotifyService:
             "client_secret": settings.SPOTIFY_CLIENT_SECRET,
         }
         headers = {"Content-Type": "application/x-www-form-urlencoded"}
-        response = requests.post("https://accounts.spotify.com/api/token", data=payload, headers=headers)
+        response = requests.post(
+            "https://accounts.spotify.com/api/token", data=payload, headers=headers
+        )
         if response.status_code != 200:
             logger.error("Failed token exchange: %s", response.text)
             return None
@@ -25,7 +28,7 @@ class SpotifyService:
     def get_user_info(spotify_access_token: str):
         response = requests.get(
             "https://api.spotify.com/v1/me",
-            headers={"Authorization": f"Bearer {spotify_access_token}"}
+            headers={"Authorization": f"Bearer {spotify_access_token}"},
         )
         if response.status_code != 200:
             logger.error("Failed to fetch user profile from Spotify.")

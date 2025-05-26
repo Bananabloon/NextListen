@@ -1,16 +1,14 @@
-from django.conf import settings
-from django.shortcuts import render
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
-from django.shortcuts import get_object_or_404
 import requests
 from spotifyData.services.spotifyClient import SpotifyAPI
 from users.models import Media
-
-import sys
-sys.path.append("..")
 from constants import SPOTIFY_PLAYLIST_TRACKS_URL, SPOTIFY_PLAYLIST_URL
+import sys
+
+sys.path.append("..")
+
 
 class CreateLikedPlaylistsView(APIView):
     permission_classes = [IsAuthenticated]
@@ -20,10 +18,12 @@ class CreateLikedPlaylistsView(APIView):
         spotify = SpotifyAPI(
             user.spotify_access_token,
             refresh_token=user.spotify_refresh_token,
-            user=user
+            user=user,
         )
-        
-        all_liked_songs = Media.objects.filter(user=user, feedback="like").exclude(spotify_uri=None)
+
+        all_liked_songs = Media.objects.filter(user=user, feedback="like").exclude(
+            spotify_uri=None
+        )
         liked_curveballs = all_liked_songs.filter(is_curveball=True)
 
         all_liked_uris = [song.spotify_uri for song in all_liked_songs]
@@ -42,7 +42,7 @@ class CreateLikedPlaylistsView(APIView):
             spotify,
             name="Liked Songs from App",
             description="All songs you've liked in the app",
-            uris=all_liked_uris
+            uris=all_liked_uris,
         )
         if liked_playlist_url:
             created_playlists.append({"type": "all", "url": liked_playlist_url})
@@ -52,35 +52,37 @@ class CreateLikedPlaylistsView(APIView):
                 spotify,
                 name="Liked Curveballs from App",
                 description="Only curveballs you've liked in the app",
-                uris=curveball_uris
+                uris=curveball_uris,
             )
             if curveball_playlist_url:
-                created_playlists.append({"type": "curveballs", "url": curveball_playlist_url})
+                created_playlists.append(
+                    {"type": "curveballs", "url": curveball_playlist_url}
+                )
 
-        return Response({
-            "message": "Playlists created successfully",
-            "playlists": created_playlists
-        })
+        return Response(
+            {
+                "message": "Playlists created successfully",
+                "playlists": created_playlists,
+            }
+        )
 
     def _create_playlist_with_uris(self, spotify, name, description, uris):
-        playlist_payload = {
-            "name": name,
-            "description": description,
-            "public": False
-        }
+        playlist_payload = {"name": name, "description": description, "public": False}
 
-        create_response = requests.post(SPOTIFY_PLAYLIST_URL, headers=spotify.headers, json=playlist_payload)
+        create_response = requests.post(
+            SPOTIFY_PLAYLIST_URL, headers=spotify.headers, json=playlist_payload
+        )
         if create_response.status_code != 201:
             return None
 
         playlist_id = create_response.json().get("id")
 
         for i in range(0, len(uris), 100):
-            chunk = uris[i:i + 100]
+            chunk = uris[i : i + 100]
             add_response = requests.post(
                 SPOTIFY_PLAYLIST_TRACKS_URL.format(playlist_id=playlist_id),
                 headers=spotify.headers,
-                json={"uris": chunk}
+                json={"uris": chunk},
             )
             if add_response.status_code != 201:
                 return None

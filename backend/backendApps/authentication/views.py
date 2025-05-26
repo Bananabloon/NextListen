@@ -15,9 +15,6 @@ from .services.token_service import TokenService, CustomRefreshToken
 from constants import SPOTIFY_AUTHORIZE_URL
 
 
-
-
-
 class SpotifyOAuthRedirectView(APIView):
     def get(self, request):
         params = {
@@ -27,16 +24,13 @@ class SpotifyOAuthRedirectView(APIView):
             "scope": (
                 "user-read-email user-read-private user-top-read user-read-playback-state "
                 "user-modify-playback-state user-read-currently-playing user-read-recently-played"
-            )
+            ),
         }
-        url = f"{SPOTIFY_AUTHORIZE_URL}?{urlencode(params)}" 
+        url = f"{SPOTIFY_AUTHORIZE_URL}?{urlencode(params)}"
         return redirect(url)
 
 
-
-
-
-class SpotifyCallbackView(APIView): 
+class SpotifyCallbackView(APIView):
     def get(self, request):
         code = request.query_params.get("code")
         if not code:
@@ -49,34 +43,44 @@ class SpotifyCallbackView(APIView):
         spotify_access_token = token_data.get("access_token")
         spotify_refresh_token = token_data.get("refresh_token")
 
-        data, error = SpotifyAuthService.authenticate_spotify_user(spotify_access_token, spotify_refresh_token)
+        data, error = SpotifyAuthService.authenticate_spotify_user(
+            spotify_access_token, spotify_refresh_token
+        )
         if error:
             return error
 
-        
         response = redirect(f"{settings.NGROK_URL}/callback")
-        TokenService.set_cookie_access_token(response, data['access'])
-        TokenService.set_cookie_refresh_token(response, data['refresh'])
+        TokenService.set_cookie_access_token(response, data["access"])
+        TokenService.set_cookie_refresh_token(response, data["refresh"])
         return response
-    
+
+
 class RefreshAccessToken(APIView):
     permission_classes = [AllowAny]
 
     def post(self, request):
-        refresh_token_str = request.data.get('refresh')
+        refresh_token_str = request.data.get("refresh")
         if not refresh_token_str:
-            return Response({"detail": "No refresh token provided."}, status=status.HTTP_400_BAD_REQUEST)
-        
+            return Response(
+                {"detail": "No refresh token provided."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
         try:
             refresh = CustomRefreshToken(refresh_token_str)
             new_access_token = refresh.access_token
 
-            response = Response({
-                "access": str(new_access_token),
-            })
-      
+            response = Response(
+                {
+                    "access": str(new_access_token),
+                }
+            )
+
             TokenService.set_cookie_access_token(response, str(new_access_token))
             return response
 
-        except TokenError as e:
-            return Response({"detail": "Invalid refresh token."}, status=status.HTTP_401_UNAUTHORIZED)
+        except TokenError:
+            return Response(
+                {"detail": "Invalid refresh token."},
+                status=status.HTTP_401_UNAUTHORIZED,
+            )

@@ -6,9 +6,12 @@ from users.models import UserFeedback, User
 
 User = get_user_model()
 
+
 class SongViewsTestCase(APITestCase):
     def setUp(self):
-        self.user = User.objects.create_user(display_name="testuser", spotify_user_id="dummy_spotify_id")
+        self.user = User.objects.create_user(
+            display_name="testuser", spotify_user_id="dummy_spotify_id"
+        )
         self.client = APIClient()
         self.client.force_authenticate(user=self.user)
 
@@ -18,42 +21,45 @@ class SongViewsTestCase(APITestCase):
         self.assertIn("error", response.data)
 
     def test_song_analysis_success(self):
-        data = {
-            "access_token": "mocked_token",  
-            "song_id": "sample_id"
-        }
+        data = {"access_token": "mocked_token", "song_id": "sample_id"}
         response = self.client.post("/songs/analysis/", data)
         # Zewętrzne API - mocking tylko
-        self.assertIn(response.status_code, [status.HTTP_200_OK, status.HTTP_400_BAD_REQUEST])
+        self.assertIn(
+            response.status_code, [status.HTTP_200_OK, status.HTTP_400_BAD_REQUEST]
+        )
 
     def test_similar_songs_missing_data(self):
         response = self.client.post("/songs/similar/", {})
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_feedback_invalid_input(self):
-        response = self.client.post("/songs/feedback/", {"song_id": 999, "feedback": "meh"})
+        response = self.client.post(
+            "/songs/feedback/", {"song_id": 999, "feedback": "meh"}
+        )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_feedback_success(self):
-        media = UserFeedback.objects.create(user=self.user, media="track123", is_iked=True)
-        data = {
-            "song_id": media.media_id,
-            "feedback": "positive"
-        }
+        media = UserFeedback.objects.create(
+            user=self.user, media="track123", is_iked=True
+        )
+        data = {"song_id": media.media_id, "feedback": "positive"}
         response = self.client.post("/songs/feedback/", data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data["message"], "Feedback saved successfully.")
 
     def test_feedback_invalid_song(self):
-        response = self.client.post("/songs/feedback/", {
-            "song_id": "nonexistent",
-            "feedback": "positive"
-        })
+        response = self.client.post(
+            "/songs/feedback/", {"song_id": "nonexistent", "feedback": "positive"}
+        )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_similar_songs_success(self):
-        media = UserFeedback.objects.create(user=self.user, media="track123", is_iked=True)
-        feedback = UserFeedback.objects.create(user=self.user,media=media,is_liked=True,source="test_case")
+        media = UserFeedback.objects.create(
+            user=self.user, media="track123", is_iked=True
+        )
+        feedback = UserFeedback.objects.create(
+            user=self.user, media=media, is_liked=True, source="test_case"
+        )
 
         response = self.client.post("/songs/similar/", {})
         self.assertEqual(response.status_code, status.HTTP_200_OK)

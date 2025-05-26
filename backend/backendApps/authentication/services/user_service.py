@@ -1,9 +1,8 @@
-from datetime import timedelta
-from django.utils import timezone
 from users.models import User
 import logging
 
 logger = logging.getLogger(__name__)
+
 
 class UserService:
     @staticmethod

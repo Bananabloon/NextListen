@@ -1,11 +1,15 @@
 import requests
 from django.contrib.auth import get_user_model
 from django.conf import settings
+import sys
+
+from constants import SPOTIFY_API_BASE_URL, SPOTIFY_TOKEN_URL, SPOTIFY_QUEUE_URL
 
 User = get_user_model()
-import sys
+
+
 sys.path.append("..")
-from constants import SPOTIFY_API_BASE_URL, SPOTIFY_TOKEN_URL, SPOTIFY_QUEUE_URL
+
 
 class SpotifyAPI:
     BASE_URL = SPOTIFY_API_BASE_URL
@@ -50,8 +54,6 @@ class SpotifyAPI:
             self.user.spotifyAccessToken = self.access_token
             self.user.save()
 
-            
-
     def add_to_queue(self, track_uri):
         if not self.access_token:
             return False, {"error": "Missing access token"}
@@ -67,8 +69,10 @@ class SpotifyAPI:
         try:
             return False, response.json()
         except Exception:
-            return False, {"error": "Unexpected response", "status": response.status_code}
-
+            return False, {
+                "error": "Unexpected response",
+                "status": response.status_code,
+            }
 
     def get_user_profile(self):
         return self._get("/me")
@@ -90,11 +94,7 @@ class SpotifyAPI:
 
     def search(self, query, type="track", limit=1):
         url = f"{self.BASE_URL}/search"
-        params = {
-            "q": query,
-            "type": type,
-            "limit": limit
-        }
+        params = {"q": query, "type": type, "limit": limit}
         response = requests.get(url, headers=self.headers, params=params)
 
         if response.status_code == 401 and self.refresh_token:
@@ -102,6 +102,9 @@ class SpotifyAPI:
             response = requests.get(url, headers=self.headers, params=params)
 
         if response.status_code != 200:
-            return {"error": f"Spotify API error: {response.status_code}", "response": response.text}
+            return {
+                "error": f"Spotify API error: {response.status_code}",
+                "response": response.text,
+            }
 
         return response.json()

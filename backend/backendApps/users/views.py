@@ -8,6 +8,7 @@ from .serializers import RegisterSerializer, UserSerializer
 
 User = get_user_model()
 
+
 class SpotifyLoginView(APIView):
     def post(self, request):
         access_token = request.data.get("access_token")
@@ -20,10 +21,12 @@ class SpotifyLoginView(APIView):
             return Response({"error": "User not found."}, status=404)
 
         refresh = RefreshToken.for_user(user)
-        return Response({
-            "refresh": str(refresh),
-            "access": str(refresh.access_token),
-        })
+        return Response(
+            {
+                "refresh": str(refresh),
+                "access": str(refresh.access_token),
+            }
+        )
 
 
 class RegisterView(generics.CreateAPIView):
