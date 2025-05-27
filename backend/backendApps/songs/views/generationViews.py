@@ -7,7 +7,7 @@ from django.shortcuts import get_object_or_404
 import json
 from users.models import UserFeedback
 from spotifyData.services.spotifyClient import SpotifyAPI
-from songs.utils import ask_openai, should_send_curveball, update_curveball_enjoyment, extract_filters, find_best_match
+from songs.utils import ask_openai, should_send_curveball, extract_filters, find_best_match
 
 class GenerateQueueBase(APIView):
     permission_classes = [IsAuthenticated]
@@ -223,5 +223,45 @@ class GenerateFromArtistsView(GenerateQueueBase):
                 "added": added,
                 "errors": errors
             })
+        except Exception as e:
+            return Response({"error": str(e)}, status=500)
+
+class GenerateQueueFromPromptView(GenerateQueueBase):
+    def post(self, request):
+        user = request.user
+        prompt_input = request.data.get("prompt")
+        count = int(request.data.get("count", 10))
+        if not prompt_input:
+            return Response({"error": "Prompt is required"}, status=400)
+
+        preferences = self.get_user_preferences(user)
+        spotify = SpotifyAPI(user.spotify_access_token, refresh_token=user.spotify_refresh_token, user=user)
+
+        full_prompt = f"""
+        Podaj {count} utworów pasujących do opisu:
+        "{prompt_input}"
+
+        Preferencje użytkownika:
+        Lubi gatunki: {", ".join(preferences["liked_genres"])}
+        Lubi artystów: {", ".join(preferences["liked_artists"])}
+        Nie lubi gatunków: {", ".join(preferences["disliked_genres"])}
+        Nie lubi artystów: {", ".join(preferences["disliked_artists"])}
+
+        Tylko utwory i artyści, którzy rzeczywiście istnieją i są dostępni na Spotify.
+
+        Format JSON:
+        [
+          {{"title": "tytuł", "artist": "artysta"}}
+        ]
+        """
+
+        try:
+            raw_response = ask_openai("Jesteś ekspertem muzycznym i podajesz utwory na podstawie promptu.", full_prompt)
+            songs = self.parse_openai_json(raw_response)
+            added, errors = self.add_songs_to_queue(
+                user, songs, spotify,
+                curveball_every=max(1, 50 // (user.curveball_enjoyment or 5))
+            )
+            return Response({"message": "Queue generated from prompt", "added": added, "errors": errors})
         except Exception as e:
             return Response({"error": str(e)}, status=500)
