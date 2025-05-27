@@ -1,5 +1,5 @@
 # Dev Dockerfile, będzie trzeba wyłączyć hot reload
-FROM node:18-alpine
+FROM node:23-alpine
 
 WORKDIR /app
 

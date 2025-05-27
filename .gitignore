@@ -71,6 +71,9 @@ instance/
 # Sphinx documentation
 docs/_build/
 
+# Docker
+*.swp
+
 # PyBuilder
 .pybuilder/
 target/
