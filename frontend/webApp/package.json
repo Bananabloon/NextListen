@@ -1,11 +1,11 @@
 {
-    "name": "webApp",
+    "name": "next_listen_web_app",
     "private": true,
     "version": "0.0.0",
     "type": "module",
     "scripts": {
-        "dev": "vite --port 3000",
-        "host": "vite --host",
+        "dev": "vite --host localhost --port 3000",
+        "host": "vite --host 0.0.0.0",
         "build": "tsc -b && vite build",
         "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
         "format": "prettier --write .",

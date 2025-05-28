@@ -3,7 +3,7 @@ FROM node:23-alpine
 
 WORKDIR /app
 
-COPY webApp/package*.json ./
+COPY webApp/package.json /app/package.json
 RUN npm install
 
 COPY webApp/ .
