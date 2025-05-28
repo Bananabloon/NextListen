@@ -3,10 +3,10 @@ FROM node:23-alpine
 
 WORKDIR /app
 
-COPY frontendApps/package*.json ./
+COPY webApp/package*.json ./
 RUN npm install
 
-COPY frontendApps/ .
+COPY webApp/ .
 
 EXPOSE 5173
 
