@@ -1,0 +1,22 @@
+:root {
+    --background-color-1: #040404;
+    --background-color-2: #0c0c0c;
+    --background-color-3: #141414;
+    --background-color-4: #1c1c1c;
+    --background-color-5: #242424;
+
+    --text-color: #ffffff;
+    --text-color-dimmed: #bdbdbd;
+
+    --radius-xs: 4px;
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 16px;
+    --radius-xl: 20px;
+
+    --spacing-xs: 4px;
+    --spacing-sm: 8px;
+    --spacing-md: 12px;
+    --spacing-lg: 16px;
+    --spacing-xl: 20px;
+}

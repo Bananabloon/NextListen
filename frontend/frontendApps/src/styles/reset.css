@@ -1,0 +1,89 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* Remove text decorations on links and inherit color */
+a {
+    text-decoration: none;
+    color: inherit;
+}
+
+/* Set base font smoothing */
+html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* Remove border and outline from inputs, buttons, and textareas */
+input,
+textarea,
+button,
+select {
+    border: none;
+    outline: none;
+    font: inherit;
+    background: none;
+    color: inherit;
+}
+
+/* Make buttons and inputs inherit cursor properly */
+button,
+[type='button'],
+[type='submit'],
+[role='button'] {
+    cursor: pointer;
+    background: none;
+    border: none;
+}
+
+/* Normalize images */
+img,
+picture,
+video,
+canvas,
+svg {
+    display: block;
+    max-width: 100%;
+    height: auto;
+}
+
+/* Tables - remove spacing */
+table {
+    border-collapse: collapse;
+    border-spacing: 0;
+}
+
+/* Remove default fieldset and legend styles */
+fieldset {
+    border: none;
+    margin: 0;
+    padding: 0;
+}
+legend {
+    padding: 0;
+}
+
+/* Prevent text overflow */
+textarea {
+    resize: vertical;
+    overflow: auto;
+}
+
+/* Normalize headings */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    font-weight: normal;
+    font-size: inherit;
+}
+
+/* Prevent tap highlight on mobile */
+a,
+button {
+    -webkit-tap-highlight-color: transparent;
+}
