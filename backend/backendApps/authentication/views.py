@@ -11,16 +11,14 @@ from authentication.services.spotify_auth_service import SpotifyAuthService
 
 from constants import SPOTIFY_AUTHORIZE_URL
 
-
-
 class SpotifyOAuthRedirectView(APIView):
     def get(self, request):
         params = {
             "client_id": settings.SPOTIFY_CLIENT_ID,
             "response_type": "code",
             "redirect_uri": settings.SPOTIFY_REDIRECT_URI,
-            "scope": (
-                "user-read-email user-read-private user-top-read user-read-playback-state "
+           "scope": (
+                "streaming user-read-email user-read-private user-top-read user-read-playback-state "
                 "user-modify-playback-state user-read-currently-playing user-read-recently-played"
             )
         }
@@ -28,8 +26,6 @@ class SpotifyOAuthRedirectView(APIView):
         return redirect(url)
 
 from rest_framework.response import Response
-
-
 
 class SpotifyCallbackView(APIView): #możliwe, że refaktoryzacja, oddzielenie przesyłania JWT
     def get(self, request):
@@ -47,7 +43,6 @@ class SpotifyCallbackView(APIView): #możliwe, że refaktoryzacja, oddzielenie p
         data, error = SpotifyAuthService.authenticate_spotify_user(spotify_access_token, spotify_refresh_token)
         if error:
             return error
-
         
         response = redirect(f"{settings.NGROK_URL}/callback")
 

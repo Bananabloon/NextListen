@@ -58,23 +58,32 @@ class DiscoveryGenerateView(APIView):
         except Exception:
             return Response({"error": "Failed to parse OpenAI response", "raw": raw_content}, status=500)
 
-        added, errors = [], []
+        discovered, errors = [], []
         for song in songs:
             query = f"{song['title']} {song['artist']}"
-            search_result = spotify.search(query=query, type="track")
-
             try:
+                search_result = spotify.search(query=query, type="track")
                 matched = find_best_match(search_result["tracks"]["items"], song["title"], song["artist"])
+
                 if matched:
-                    uri = matched["uri"]
-                    success, error = spotify.add_to_queue(uri)
-                    if success:
-                        added.append({"title": song["title"], "artist": song["artist"], "uri": uri})
-                    else:
-                        errors.append({"song": song, "error": error or "Could not add to queue"})
+                    if not user.explicit_content_enabled and matched.get("explicit", False):
+                        errors.append({"song": song, "error": "Explicit content not allowed"})
+                        continue
+
+                    discovered.append({
+                        "title": song["title"],
+                        "artist": song["artist"],
+                        "uri": matched["uri"],
+                        "explicit": matched.get("explicit", False)
+                    })
                 else:
                     errors.append({"song": song, "error": "No match found"})
             except Exception as e:
                 errors.append({"song": song, "error": str(e)})
         
-        return Response({"message": f"Discovery queue generated for genre: {genre}", "genre": genre, "added": added, "errors": errors})
+        return Response({
+            "message": f"Discovery songs generated for genre: {genre}",
+            "genre": genre,
+            "songs": discovered,
+            "errors": errors
+        })

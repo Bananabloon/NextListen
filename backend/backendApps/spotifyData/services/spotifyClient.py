@@ -50,8 +50,6 @@ class SpotifyAPI:
             self.user.spotifyAccessToken = self.access_token
             self.user.save()
 
-            
-
     def add_to_queue(self, track_uri):
         if not self.access_token:
             return False, {"error": "Missing access token"}
@@ -105,3 +103,9 @@ class SpotifyAPI:
             return {"error": f"Spotify API error: {response.status_code}", "response": response.text}
 
         return response.json()
+
+    def get_access_token(self):
+        if not self.access_token:
+            raise Exception("Brak access tokena.")
+
+        return self.access_token

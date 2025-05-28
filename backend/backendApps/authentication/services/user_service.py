@@ -15,6 +15,8 @@ class UserService:
         user.display_name = display_name
         user.spotify_access_token = access_token
         user.market = user_info.get("country")
+        explicit = user_info.get("explicit_content", {})
+        user.explicit_content_enabled = not explicit.get("filter_enabled", False)
 
         if refresh_token:
             user.spotify_refresh_token = refresh_token

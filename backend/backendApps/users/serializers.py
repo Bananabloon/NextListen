@@ -22,6 +22,7 @@ class UserSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'spotify_user_id', 'display_name',
             'created_at', 'last_updated', 'curveball_enjoyment',
+            'explicit_content_enabled'
         ]
 
 
