@@ -1,8 +1,8 @@
-import { Outlet } from 'react-router-dom';
-import Fluid from '../../atoms/Fluid/Fluid';
+import { Outlet } from "react-router-dom";
+import Fluid from "../../atoms/Fluid/Fluid";
 
 const ApplicationTemplate = (): React.JSX.Element => {
-    return <Fluid>{/* <Outlet /> */}</Fluid>;
+    return <Fluid style={{ background: "var(--background-color-1)" }}>{/* <Outlet /> */}</Fluid>;
 };
 
 export default ApplicationTemplate;

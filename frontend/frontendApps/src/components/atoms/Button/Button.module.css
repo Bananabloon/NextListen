@@ -1,0 +1,33 @@
+.button {
+    width: fit-content;
+    height: fit-content;
+    background-color: var(--background-color-4);
+    border-radius: var(--radius-md);
+    padding: var(--spacing-md) var(--spacing-lg);
+}
+
+.button[data-size="xs"] {
+    font-size: var(--font-size-xs);
+}
+
+.button[data-size="sm"] {
+    font-size: var(--font-size-sm);
+}
+
+.button[data-size="md"] {
+    font-size: var(--font-size-md);
+}
+
+.button[data-size="lg"] {
+    font-size: var(--font-size-lg);
+}
+
+.button[data-size="xl"] {
+    font-size: var(--font-size-xl);
+}
+
+.section {
+    height: 100%;
+    width: fit-content;
+    aspect-ratio: 1/1;
+}
