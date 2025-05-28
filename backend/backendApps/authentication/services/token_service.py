@@ -1,5 +1,4 @@
 import logging
-from django.conf import settings
 from rest_framework_simplejwt.tokens import RefreshToken
 
 logger = logging.getLogger(__name__)
@@ -20,7 +19,7 @@ class TokenService:
             key="NextListen_access_token",
             value=access,
             httponly=True,
-            secure=not settings.DEBUG,
+            secure=True,
             max_age=1800,
             samesite="Lax",
             path="/",
@@ -32,7 +31,7 @@ class TokenService:
             key="NextListen_refresh_token",
             value=refresh,
             httponly=True,
-            secure=not settings.DEBUG,
+            secure=True,
             max_age=7 * 24 * 3600,
             samesite="Lax",
             path="/",
