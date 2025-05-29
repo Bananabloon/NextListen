@@ -36,19 +36,19 @@ services:
         networks:
             - mynetwork
 
-    # frontend:
-    #     build:
-    #         context: ./frontend
-    #         dockerfile: Dockerfile
-    #     volumes:
-    #         - ./frontend/webApp:/app
-    #         # - /app/node_modules
-    #     ports:
-    #         - "5173:5173"
-    #     networks:
-    #         - mynetwork
-    #     environment:
-    #         - CHOKIDAR_USEPOLLING=true
+    frontend:
+        build:
+            context: ./frontend
+            dockerfile: Dockerfile
+        volumes:
+            - ./frontend/webApp/src:/app/src
+            - ./frontend/webApp/public:/app/public
+        ports:
+            - "5173:5173"
+        networks:
+            - mynetwork
+        environment:
+            - CHOKIDAR_USEPOLLING=true
 
     phpmyadmin:
         image: phpmyadmin/phpmyadmin
