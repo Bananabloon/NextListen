@@ -49,8 +49,15 @@
     translate: 2px 2px !important;
 }
 
+.content {
+    align-items: center;
+}
+
 .section {
     height: 100%;
-    width: fit-content;
-    aspect-ratio: 1/1;
+    width: 20px;
+}
+
+.section:last-of-type {
+    margin-left: auto;
 }

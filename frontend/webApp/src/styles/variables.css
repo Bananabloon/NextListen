@@ -5,6 +5,9 @@
     --background-color-4: #1c1c1c;
     --background-color-5: #242424;
 
+    --scrollbar-background-color: #242424;
+    --scrollbar-color: #606060;
+
     --spotify-green: #1ed760;
     --spotify-black: #121212;
 
@@ -22,6 +25,8 @@
     --spacing-md: 0.75rem;
     --spacing-lg: 1rem;
     --spacing-xl: 1.25rem;
+    --spacing-xxl: 1.5rem;
+    --spacing-xxxl: 2rem;
 
     --font-size-xs: 0.6rem;
     --font-size-sm: 0.75rem;

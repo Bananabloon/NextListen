@@ -16,7 +16,12 @@ interface useRequestsReturn {
 export const useRequests = (): useRequestsReturn => {
     const getPath = (path: string): string => (API_URL ? `${API_URL}${normalizePath(path)}` : "");
 
-    const refreshTokens = () => {};
+    const refreshTokens = async () => {
+        console.log("refreshing tokens");
+        const res = await sendRequest("POST", "/token/refresh/");
+        console.log(res);
+        console.log("refreshed tokens?? i hope");
+    };
 
     const handleRequestError = async (response: Response) => {
         let errorBody = await response.text().catch(() => "Unable to read error body");

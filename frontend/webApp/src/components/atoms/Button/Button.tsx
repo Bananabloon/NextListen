@@ -26,7 +26,7 @@ const Button = ({
             data-variant={variant}
             {...props}
         >
-            <Group style={{ alignItems: "center" }}>
+            <Group className={classes.content}>
                 <div className={classes.section}>{leftSection}</div>
                 {children}
                 <div className={classes.section}>{rightSection}</div>
