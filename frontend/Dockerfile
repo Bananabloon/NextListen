@@ -1,13 +1,17 @@
-# Dev Dockerfile, będzie trzeba wyłączyć hot reload
-FROM node:23-alpine
+# production
+FROM node:22-alpine
 
 WORKDIR /app
 
-COPY webApp/package.json /app/package.json
-RUN npm install
+COPY ./webApp/package.json ./webApp/package-lock.json  ./
 
-COPY webApp/ .
+RUN npm i
+RUN npm i -g serve
+
+COPY --exclude=./webApp/package.json ./webApp /app
+
+RUN npm run build
 
 EXPOSE 5173
 
-CMD ["npm", "run", "host"]
+CMD [ "serve", "-l", "5173", "-s", "dist" ]
