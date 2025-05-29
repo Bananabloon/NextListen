@@ -180,3 +180,6 @@ Postman
 db.sqlite3
 __pycache__/
 .env
+
+#SSL certs
+certs/
