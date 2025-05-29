@@ -1,0 +1,9 @@
+.container {
+    width: 330px;
+    height: 72px;
+    background-color: var(--background-color-3);
+
+    justify-content: space-between;
+    padding: 0 var(--spacing-md);
+    border-radius: var(--radius-md);
+}
