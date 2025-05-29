@@ -8,9 +8,10 @@ import json
 from users.models import UserFeedback
 from spotifyData.services.spotifyClient import SpotifyAPI
 from songs.utils import ask_openai, should_send_curveball, extract_filters, find_best_match
+from songs.services.songGeneration import build_preferences_prompt, parse_openai_json, generate_songs_with_buffer
 import logging
-logging.basicConfig(level=logging.DEBUG)
-
+logger = logging.getLogger(__name__)
+GENERATION_BUFFER_MULTIPLIER = 1.5
 class GenerateQueueBase(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -36,12 +37,6 @@ class GenerateQueueBase(APIView):
             "disliked_artists": list(disliked_artists),
         }
 
-    def parse_openai_json(self, content):
-        if not isinstance(content, str) or not content.strip():
-            logging.error(f"Otrzymano pustą lub nieprawidłową odpowiedź z OpenAI: {repr(content)}")
-            raise ValueError("Otrzymano pustą odpowiedź z OpenAI")
-        content = content.strip()
-
     def prepare_song_list_only(self, user, songs, spotify):
         prepared = []
         for song in songs:
@@ -63,37 +58,46 @@ class GenerateQueueBase(APIView):
     def generate_valid_songs(self, prompt, user, count):
         preferences = self.get_user_preferences(user)
         spotify = SpotifyAPI(user.spotify_access_token, refresh_token=user.spotify_refresh_token, user=user)
+        base_prompt = "Jesteś ekspertem muzycznym."
+
+        multiplier = GENERATION_BUFFER_MULTIPLIER
+        requested_total_count = int(count * multiplier)  
 
         try:
-            raw_response = ask_openai("Jesteś ekspertem muzycznym.", prompt)
-            logging.debug(f"RAW RESPONSE: {repr(raw_response)}")
+            all_songs, _ = generate_songs_with_buffer(prompt, base_prompt, requested_total_count)
         except Exception as e:
-            logging.exception("Błąd podczas pobierania danych z OpenAI")
             raise ValueError("Nie udało się pobrać odpowiedzi z OpenAI") from e
 
         prepared = []
-        overflow = 10  # zapasowych utworów
-        total = count + overflow
 
-        for song in all_songs:
+        for i, song in enumerate(all_songs):
             if len(prepared) >= count:
                 break
+
+            query = f"{song['title']} {song['artist']}"
             try:
-                query = f"{song['title']} {song['artist']}"
                 tracks = spotify.search(query=query, type="track")["tracks"]["items"]
-                best_match = find_best_match(tracks, song["title"], song["artist"])
-                if best_match:
-                    prepared.append({
-                        "title": song["title"],
-                        "artist": song["artist"],
-                        "uri": best_match["uri"],
-                        "explicit": best_match["explicit"],
-                        "curveball": should_send_curveball(user, len(prepared) + 1)
-                    })
-            except Exception:
-                continue
+                if not tracks:
+                    logger.warning(f"[{i}] Brak wyników z Spotify dla: {query}")
+                else:
+                    best_match = find_best_match(tracks, song["title"], song["artist"])
+                    if best_match:
+                        logger.info(f"[{i}] Znaleziono dopasowanie: {best_match['name']} by {best_match['artists'][0]['name']}")
+                        prepared.append({
+                            "title": song["title"],
+                            "artist": song["artist"],
+                            "uri": best_match["uri"],
+                            "explicit": best_match["explicit"],
+                            "curveball": should_send_curveball(user, len(prepared) + 1)
+                        })
+                    else:
+                        logger.warning(f"[{i}] Nie znaleziono dopasowania wśród {len(tracks)} wyników dla: {query}")
+            except Exception as e:
+                logger.error(f"[{i}] Błąd podczas wyszukiwania dla '{query}': {e}")
+
 
         return prepared[:count]
+
 
 class BaseGenerateView(GenerateQueueBase):
     prompt_type = ""
@@ -112,6 +116,7 @@ class BaseGenerateView(GenerateQueueBase):
             songs = self.generate_valid_songs(prompt, user, count)
             return Response({"message": "Generated", "songs": songs})
         except Exception as e:
+            logger.exception("Unhandled exception occurred in generate endpoint")
             return Response({"error": str(e)}, status=500)
 
 
@@ -126,17 +131,12 @@ class GenerateQueueView(BaseGenerateView):
         preferences = self.get_user_preferences(user)
 
         prompt = f"""
-        Podaj {count} utworów podobnych do:
+        Podaj {count*GENERATION_BUFFER_MULTIPLIER} utworów podobnych do:
         Tytuł: {title}
         Artysta: {artist}
         {filter_str}
 
-        Preferencje użytkownika:
-        Lubi gatunki: {", ".join(preferences["liked_genres"])}
-        Lubi artystów: {", ".join(preferences["liked_artists"])}
-        Nie lubi gatunków: {", ".join(preferences["disliked_genres"])}
-        Nie lubi artystów: {", ".join(preferences["disliked_artists"])}
-        Czy użytkownik może dostawać explicit content? - {", ".join(preferences["explicit_content"])}
+        {build_preferences_prompt(preferences)}
         Tylko utwory i artyści, którzy rzeczywiście istnieją i są dostępni na Spotify.
 
         Format JSON:
@@ -144,7 +144,8 @@ class GenerateQueueView(BaseGenerateView):
           {{"title": "tytuł", "artist": "artysta"}}
         ]
         """
-        
+        return prompt 
+    
 class GenerateFromTopView(BaseGenerateView):
     def get_prompt(self, user, data):
         count = data.get("count")
@@ -154,11 +155,11 @@ class GenerateFromTopView(BaseGenerateView):
 
         top_tracks = [f"{t['name']} by {t['artists'][0]['name']}" for t in spotify.get_top_tracks().get("items", [])]
         top_artists = [a["name"] for a in spotify.get_top_artists().get("items", [])]
-
+        
         if not top_tracks and not top_artists:
-            return Response({"error": "No top tracks or artists available"}, status=400)
+            raise ValueError("Brak danych o ulubionych utworach lub artystach")
         if not count:
-            return Response({"error": "count is required"}, status=400)
+            raise ValueError("count is required")
 
         preferences = self.get_user_preferences(user)
 
@@ -170,14 +171,8 @@ class GenerateFromTopView(BaseGenerateView):
         {json.dumps(top_artists, indent=2)}
         {filter_str}
 
-        Preferencje użytkownika:
-        Lubi gatunki: {", ".join(preferences["liked_genres"])}
-        Lubi artystów: {", ".join(preferences["liked_artists"])}
-        Nie lubi gatunków: {", ".join(preferences["disliked_genres"])}
-        Nie lubi artystów: {", ".join(preferences["disliked_artists"])}
-        Czy użytkownik może dostawać explicit content? - {preferences["explicit_content"]}
-
-        Podaj {count} nowych rekomendacji muzycznych.
+        {build_preferences_prompt(preferences)}
+        Podaj {count*GENERATION_BUFFER_MULTIPLIER} nowych rekomendacji muzycznych.
         Tylko utwory i artyści, którzy rzeczywiście istnieją i są dostępni na Spotify.
 
         Format JSON:
@@ -185,6 +180,7 @@ class GenerateFromTopView(BaseGenerateView):
           {{"title": "tytuł", "artist": "artysta"}}
         ]
         """
+        return prompt 
 
 class GenerateFromArtistsView(BaseGenerateView):
     def get_prompt(self, user, data):
@@ -200,15 +196,10 @@ class GenerateFromArtistsView(BaseGenerateView):
         spotify = SpotifyAPI(user.spotify_access_token, refresh_token=user.spotify_refresh_token, user=user)
 
         prompt = f"""
-        Podaj {count} utworów {filter_str}, inspirowanych twórczością artystów:
+        Podaj {count*GENERATION_BUFFER_MULTIPLIER} utworów {filter_str}, inspirowanych twórczością artystów:
         {json.dumps(artists, indent=2)}
 
-        Preferencje użytkownika:
-        Lubi gatunki: {", ".join(preferences["liked_genres"])}
-        Lubi artystów: {", ".join(preferences["liked_artists"])}
-        Nie lubi gatunków: {", ".join(preferences["disliked_genres"])}
-        Nie lubi artystów: {", ".join(preferences["disliked_artists"])}
-        Czy użytkownik może dostawać explicit content? - {preferences["explicit_content"]}
+        {build_preferences_prompt(preferences)}
 
         Tylko utwory i artyści, którzy rzeczywiście istnieją i są dostępni na Spotify.
 
@@ -217,6 +208,7 @@ class GenerateFromArtistsView(BaseGenerateView):
           {{"title": "tytuł", "artist": "artysta"}}
         ]
         """
+        return prompt 
 
 class GenerateQueueFromPromptView(BaseGenerateView):
     def get_prompt(self, user, data):
@@ -228,21 +220,15 @@ class GenerateQueueFromPromptView(BaseGenerateView):
         if not count:
             return Response({"error": "count is required"}, status=400)
         
-        full_prompt = f"""
-        Podaj {count} utworów pasujących do opisu:
+        prompt = f"""
+        Podaj {count*GENERATION_BUFFER_MULTIPLIER} utworów pasujących do opisu:
         "{prompt_input}"
 
-        Preferencje użytkownika:
-        Lubi gatunki: {", ".join(preferences["liked_genres"])}
-        Lubi artystów: {", ".join(preferences["liked_artists"])}
-        Nie lubi gatunków: {", ".join(preferences["disliked_genres"])}
-        Nie lubi artystów: {", ".join(preferences["disliked_artists"])}
-        Czy użytkownik może dostawać explicit content? - {preferences["explicit_content"]}
-
-        Tylko utwory i artyści, którzy rzeczywiście istnieją i są dostępni na Spotify.
+        {build_preferences_prompt(preferences)}
 
         Format JSON:
         [
           {{"title": "tytuł", "artist": "artysta"}}
         ]
         """
+        return prompt 

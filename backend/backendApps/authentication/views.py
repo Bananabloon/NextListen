@@ -19,7 +19,7 @@ class SpotifyOAuthRedirectView(APIView):
             "redirect_uri": settings.SPOTIFY_REDIRECT_URI,
            "scope": (
                 "streaming user-read-email user-read-private user-top-read user-read-playback-state "
-                "user-modify-playback-state user-read-currently-playing user-read-recently-played"
+                "user-modify-playback-state user-read-currently-playing user-read-recently-played playlist-read-private playlist-modify-private"
             )
         }
         url = f"{SPOTIFY_AUTHORIZE_URL}?{urlencode(params)}" 
