@@ -51,8 +51,8 @@ services:
             context: ./frontend
             dockerfile: Dockerfile
         volumes:
-            - ./frontend/webApp/src:/app/src
-            - ./frontend/webApp/public:/app/public
+            - ./frontend/webApp/:/app
+            - /app/node_modules
         ports:
             - "5173:5173"
         networks:
@@ -82,6 +82,7 @@ services:
             - "443:443"
             - "80:80"
         depends_on:
+            - frontend
             - backend
         networks:
             - mynetwork

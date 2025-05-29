@@ -1,0 +1,9 @@
+.container {
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+}
+
+.container > * {
+    transform: translateY(-50%);
+}
