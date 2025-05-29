@@ -183,3 +183,5 @@ __pycache__/
 
 #SSL certs
 certs/
+
+backend/wait-for-it.sh

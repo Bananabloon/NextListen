@@ -11,7 +11,9 @@ from songs.utils import (
     # extract_filters,
 )
 from django.utils import timezone
+import requests
 
+from constants import SPOTYFY_TRACK_URL
 
 class UserFeedbackView(APIView):
     permission_classes = [IsAuthenticated]
@@ -83,40 +85,6 @@ class SongAnalysisView(APIView):
         except Exception as e:
             return Response({"error": str(e)}, status=500)
 
-
-class SongFeedbackView(APIView):
-    permission_classes = [IsAuthenticated]
-
-    def post(self, request):
-        song_id = request.data.get("song_id")
-        feedback = request.data.get("feedback")  # "like", "dislike", "none"
-
-        if not song_id or feedback not in ["like", "dislike", "none"]:
-            return Response({"error": "Invalid input"}, status=400)
-
-        media = get_object_or_404(Media, id=song_id)
-
-        liked = {"like": True, "dislike": False, "none": None}[feedback]
-
-        if liked is not None:
-            UserFeedback.objects.update_or_create(
-                user=request.user,
-                media=media,
-                defaults={
-                    "is_liked": liked,
-                    "source": "feedback_button",
-                    "feedback_at": timezone.now().date(),
-                },
-            )
-
-        if getattr(media, "is_curveball", False):
-            update_curveball_enjoyment(request.user, liked)
-
-        return Response(
-            {"status": "ok", "curveball_enjoyment": request.user.curveball_enjoyment}
-        )
-
-
 class SimilarSongsView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -145,3 +113,59 @@ class SimilarSongsView(APIView):
             return Response({"results": response})
         except Exception as e:
             return Response({"error": str(e)}, status=500)
+        
+class SongFeedbackView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        spotify_uri = request.data.get("spotify_uri")
+        feedback = request.data.get("feedback")
+
+        if not spotify_uri or feedback not in ["like", "dislike", "none"]:
+            return Response({"error": "Invalid input"}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            media = Media.objects.get(spotify_uri=spotify_uri)
+        except Media.DoesNotExist:
+            token = request.user.spotify_access_token
+            spotify_id = spotify_uri.split(":")[-1]
+            headers = {"Authorization": f"Bearer {token}"}
+            url = SPOTYFY_TRACK_URL
+            resp = requests.get(url, headers=headers)
+
+            if resp.status_code != 200:
+                return Response({"error": "Could not fetch song data from Spotify"}, status=400)
+
+            data = resp.json()
+            media = Media.objects.create(
+                spotify_uri=spotify_uri,
+                title=data["name"],
+                artist_name=data["artists"][0]["name"],
+                album_name=data["album"]["name"],
+                media_type=Media.SONG,
+                genre=[],  # brak w track API
+                saved_at=timezone.now(),
+            )
+
+        liked = {"like": True, "dislike": False, "none": None}[feedback]
+
+        if liked is not None:
+            UserFeedback.objects.update_or_create(
+                user=request.user,
+                media=media,
+                defaults={
+                    'is_liked': liked,
+                    'source': "feedback_by_uri",
+                    'feedback_at': timezone.now().date()
+                }
+            )
+
+        if getattr(media, "is_curveball", False):
+            update_curveball_enjoyment(request.user, liked)
+
+        return Response({
+            "status": "ok",
+            "track_title": media.title,
+            "artist": media.artist_name,
+            "curveball_enjoyment": request.user.curveball_enjoyment,
+        })

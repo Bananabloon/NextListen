@@ -65,10 +65,10 @@ class User(AbstractBaseUser, PermissionsMixin):
         default=5, validators=[MinValueValidator(0), MaxValueValidator(10)]
     )
     market = models.CharField(max_length=2, null=True, blank=True)
+    explicit_content_enabled = models.BooleanField(null=True, blank=True)
     is_staff = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
     password = models.CharField(max_length=128, null=True, blank=True)
-
     objects = UserManager()
 
     USERNAME_FIELD = "spotify_user_id"

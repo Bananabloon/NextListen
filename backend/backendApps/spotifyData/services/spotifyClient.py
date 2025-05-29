@@ -108,3 +108,9 @@ class SpotifyAPI:
             }
 
         return response.json()
+
+    def get_access_token(self):
+        if not self.access_token:
+            raise Exception("Brak access tokena.")
+
+        return self.access_token

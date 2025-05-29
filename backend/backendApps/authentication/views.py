@@ -22,7 +22,7 @@ class SpotifyOAuthRedirectView(APIView):
             "response_type": "code",
             "redirect_uri": settings.SPOTIFY_REDIRECT_URI,
             "scope": (
-                "user-read-email user-read-private user-top-read user-read-playback-state "
+                "streaming user-read-email user-read-private user-top-read user-read-playback-state "
                 "user-modify-playback-state user-read-currently-playing user-read-recently-played"
             ),
         }
@@ -48,7 +48,6 @@ class SpotifyCallbackView(APIView):
         )
         if error:
             return error
-
         response = redirect(f"{settings.NGROK_URL}/callback")
         TokenService.set_cookie_access_token(response, data["access"])
         TokenService.set_cookie_refresh_token(response, data["refresh"])
@@ -71,9 +70,7 @@ class RefreshAccessToken(APIView):
             new_access_token = refresh.access_token
 
             response = Response(
-                {
-                    "access": str(new_access_token),
-                }
+                {"access": str(new_access_token),}
             )
 
             TokenService.set_cookie_access_token(response, str(new_access_token))

@@ -9,3 +9,4 @@ SPOTIFY_PLAYLIST_TRACKS_URL = (
 )
 SPOTIFY_QUEUE_URL = "https://api.spotify.com/v1/me/player/queue"
 SPOTYFY_SEARCH_URL = "https://api.spotify.com/v1/search"
+SPOTYFY_TRACK_URL="https://api.spotify.com/v1/tracks/{spotify_id}"
