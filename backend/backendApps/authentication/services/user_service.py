@@ -10,7 +10,7 @@ class UserService:
         spotify_user_id = user_info["id"]
         display_name = user_info.get("displayname", "Unknown")
 
-        user,_= User.objects.get_or_create(spotify_user_id=spotify_user_id)
+        user, _ = User.objects.get_or_create(spotify_user_id=spotify_user_id)
         user.display_name = display_name
         user.spotify_access_token = access_token
         user.market = user_info.get("country")

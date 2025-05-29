@@ -16,7 +16,8 @@ class CurrentUserProfileView(APIView):
     def get(self, request):
         spotify = get_spotify_instance(request.user)
         return Response(spotify.get_user_profile())
-    
+
+
 class SpotifyTokenView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -24,7 +25,7 @@ class SpotifyTokenView(APIView):
         spotify = SpotifyAPI(
             access_token=request.user.spotify_access_token,
             refresh_token=request.user.spotify_refresh_token,
-            user=request.user
+            user=request.user,
         )
         token = spotify.get_access_token()
         return Response({"access_token": token})

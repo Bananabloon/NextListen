@@ -1,5 +1,4 @@
 from rest_framework.test import APITestCase
-from rest_framework import status
 from ..services.user_service import UserService
 from users.models import User
 from ..services.spotify_auth_service import CustomRefreshToken
@@ -21,11 +20,7 @@ class SpotifyOAuthTests(APITestCase):
     #     self.assertIn("error", response.data)
 
     def test_create_user_success(self):
-        user_info = {
-            "id": "spotify123",
-            "displayname": "Test User",
-            "country": "PL"
-        }
+        user_info = {"id": "spotify123", "displayname": "Test User", "country": "PL"}
         user = UserService.create_or_update_user(user_info, access_token="abc123")
 
         self.assertEqual(user.spotify_user_id, "spotify123")

@@ -27,9 +27,13 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = [
-            'id', 'spotify_user_id', 'display_name',
-            'created_at', 'last_updated', 'curveball_enjoyment',
-            'explicit_content_enabled'
+            "id",
+            "spotify_user_id",
+            "display_name",
+            "created_at",
+            "last_updated",
+            "curveball_enjoyment",
+            "explicit_content_enabled",
         ]
 
 

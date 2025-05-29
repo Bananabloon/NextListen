@@ -80,7 +80,7 @@ class CreateLikedPlaylistsView(APIView):
         playlist_id = create_response.json().get("id")
 
         for i in range(0, len(uris), 100):
-            chunk = uris[i : i + 100]
+            chunk = uris[i:i + 100]
             add_response = requests.post(
                 SPOTIFY_PLAYLIST_TRACKS_URL.format(playlist_id=playlist_id),
                 headers=spotify.headers,
@@ -90,7 +90,8 @@ class CreateLikedPlaylistsView(APIView):
                 return None
 
         return create_response.json().get("external_urls", {}).get("spotify")
-    
+
+
 class CreatePlaylistFromPromptView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -106,7 +107,11 @@ class CreatePlaylistFromPromptView(APIView):
             return Response({"error": "Playlist name is required"}, status=400)
 
         preferences = self.get_user_preferences(user)
-        spotify = SpotifyAPI(user.spotify_access_token, refresh_token=user.spotify_refresh_token, user=user)
+        spotify = SpotifyAPI(
+            user.spotify_access_token,
+            refresh_token=user.spotify_refresh_token,
+            user=user,
+        )
 
         prompt = f"""
         Podaj {count} utworów pasujących do opisu:
@@ -127,11 +132,15 @@ class CreatePlaylistFromPromptView(APIView):
         """
 
         try:
-            raw_response = ask_openai("Jesteś ekspertem muzycznym i tworzysz playlistę do opisu.", prompt)
+            raw_response = ask_openai(
+                "Jesteś ekspertem muzycznym i tworzysz playlistę do opisu.", prompt
+            )
             songs = self.parse_openai_json(raw_response)
 
             if not songs:
-                return Response({"error": "No valid songs returned from AI"}, status=500)
+                return Response(
+                    {"error": "No valid songs returned from AI"}, status=500
+                )
 
             uris = []
             for song in songs:
@@ -143,17 +152,25 @@ class CreatePlaylistFromPromptView(APIView):
                     uris.append(best_match["uri"])
 
             if not uris:
-                return Response({"error": "No tracks found to create playlist"}, status=400)
+                return Response(
+                    {"error": "No tracks found to create playlist"}, status=400
+                )
 
             playlist_url = self._create_playlist_with_uris(
                 spotify,
                 name=playlist_name,
                 description=f"Generated playlist for: {prompt_input}",
-                uris=uris
+                uris=uris,
             )
             return Response({"message": "Playlist created", "url": playlist_url})
         except json.JSONDecodeError as e:
-            return Response({"error": f"JSON parsing error: {str(e)}", "raw_response": raw_response}, status=500)
+            return Response(
+                {
+                    "error": f"JSON parsing error: {str(e)}",
+                    "raw_response": raw_response,
+                },
+                status=500,
+            )
         except Exception as e:
             return Response({"error": str(e)}, status=500)
 
@@ -168,6 +185,7 @@ class CreatePlaylistFromPromptView(APIView):
 
     def get_user_preferences(self, user):
         from users.models import UserFeedback
+
         feedbacks = UserFeedback.objects.select_related("media").filter(user=user)
 
         liked_genres, liked_artists, disliked_genres, disliked_artists = [], [], [], []

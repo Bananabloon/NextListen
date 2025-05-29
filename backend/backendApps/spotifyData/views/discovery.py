@@ -74,27 +74,37 @@ class DiscoveryGenerateView(APIView):
             query = f"{song['title']} {song['artist']}"
             try:
                 search_result = spotify.search(query=query, type="track")
-                matched = find_best_match(search_result["tracks"]["items"], song["title"], song["artist"])
+                matched = find_best_match(
+                    search_result["tracks"]["items"], song["title"], song["artist"]
+                )
 
                 if matched:
-                    if not user.explicit_content_enabled and matched.get("explicit", False):
-                        errors.append({"song": song, "error": "Explicit content not allowed"})
+                    if not user.explicit_content_enabled and matched.get(
+                        "explicit", False
+                    ):
+                        errors.append(
+                            {"song": song, "error": "Explicit content not allowed"}
+                        )
                         continue
 
-                    discovered.append({
-                        "title": song["title"],
-                        "artist": song["artist"],
-                        "uri": matched["uri"],
-                        "explicit": matched.get("explicit", False)
-                    })
+                    discovered.append(
+                        {
+                            "title": song["title"],
+                            "artist": song["artist"],
+                            "uri": matched["uri"],
+                            "explicit": matched.get("explicit", False),
+                        }
+                    )
                 else:
                     errors.append({"song": song, "error": "No match found"})
             except Exception as e:
                 errors.append({"song": song, "error": str(e)})
-        
-        return Response({
-            "message": f"Discovery songs generated for genre: {genre}",
-            "genre": genre,
-            "songs": discovered,
-            "errors": errors
-        })
+
+        return Response(
+            {
+                "message": f"Discovery songs generated for genre: {genre}",
+                "genre": genre,
+                "songs": discovered,
+                "errors": errors,
+            }
+        )

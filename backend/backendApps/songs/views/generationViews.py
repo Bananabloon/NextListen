@@ -4,9 +4,16 @@ from rest_framework.permissions import IsAuthenticated
 import json
 from users.models import UserFeedback
 from spotifyData.services.spotifyClient import SpotifyAPI
-from songs.utils import ask_openai, should_send_curveball, extract_filters, find_best_match
+from songs.utils import (
+    ask_openai,
+    should_send_curveball,
+    extract_filters,
+    find_best_match,
+)
 import logging
+
 logging.basicConfig(level=logging.DEBUG)
+
 
 class GenerateQueueBase(APIView):
     permission_classes = [IsAuthenticated]
@@ -35,7 +42,9 @@ class GenerateQueueBase(APIView):
 
     def parse_openai_json(self, content):
         if not isinstance(content, str) or not content.strip():
-            logging.error(f"Otrzymano pustą lub nieprawidłową odpowiedź z OpenAI: {repr(content)}")
+            logging.error(
+                f"Otrzymano pustą lub nieprawidłową odpowiedź z OpenAI: {repr(content)}"
+            )
             raise ValueError("Otrzymano pustą odpowiedź z OpenAI")
         content = content.strip()
 
@@ -47,19 +56,25 @@ class GenerateQueueBase(APIView):
                 tracks = spotify.search(query=query, type="track")["tracks"]["items"]
                 best_match = find_best_match(tracks, song["title"], song["artist"])
                 if best_match:
-                    prepared.append({
-                        "title": song["title"],
-                        "artist": song["artist"],
-                        "uri": best_match["uri"],
-                        "explicit": best_match["explicit"]
-                    })
+                    prepared.append(
+                        {
+                            "title": song["title"],
+                            "artist": song["artist"],
+                            "uri": best_match["uri"],
+                            "explicit": best_match["explicit"],
+                        }
+                    )
             except Exception:
                 continue
         return prepared, []
 
     def generate_valid_songs(self, prompt, user, count):
         preferences = self.get_user_preferences(user)
-        spotify = SpotifyAPI(user.spotify_access_token, refresh_token=user.spotify_refresh_token, user=user)
+        spotify = SpotifyAPI(
+            user.spotify_access_token,
+            refresh_token=user.spotify_refresh_token,
+            user=user,
+        )
 
         try:
             raw_response = ask_openai("Jesteś ekspertem muzycznym.", prompt)
@@ -80,17 +95,20 @@ class GenerateQueueBase(APIView):
                 tracks = spotify.search(query=query, type="track")["tracks"]["items"]
                 best_match = find_best_match(tracks, song["title"], song["artist"])
                 if best_match:
-                    prepared.append({
-                        "title": song["title"],
-                        "artist": song["artist"],
-                        "uri": best_match["uri"],
-                        "explicit": best_match["explicit"],
-                        "curveball": should_send_curveball(user, len(prepared) + 1)
-                    })
+                    prepared.append(
+                        {
+                            "title": song["title"],
+                            "artist": song["artist"],
+                            "uri": best_match["uri"],
+                            "explicit": best_match["explicit"],
+                            "curveball": should_send_curveball(user, len(prepared) + 1),
+                        }
+                    )
             except Exception:
                 continue
 
         return prepared[:count]
+
 
 class BaseGenerateView(GenerateQueueBase):
     prompt_type = ""
@@ -102,7 +120,9 @@ class BaseGenerateView(GenerateQueueBase):
         user = request.user
         count = int(request.data.get("count", 0))
         if count <= 0:
-            return Response({"error": "count is required and must be positive"}, status=400)
+            return Response(
+                {"error": "count is required and must be positive"}, status=400
+            )
 
         try:
             prompt = self.get_prompt(user, request.data)
@@ -141,13 +161,18 @@ class GenerateQueueView(BaseGenerateView):
           {{"title": "tytuł", "artist": "artysta"}}
         ]
         """
-        
+
+
 class GenerateFromTopView(BaseGenerateView):
     def get_prompt(self, user, data):
         count = data.get("count")
         filter_str = extract_filters(data)
         preferences = self.get_user_preferences(user)
-        spotify = SpotifyAPI(user.spotify_access_token, refresh_token=user.spotify_refresh_token, user=user)
+        spotify = SpotifyAPI(
+            user.spotify_access_token,
+            refresh_token=user.spotify_refresh_token,
+            user=user,
+        )
 
         top_tracks = [
             f"{t['name']} by {t['artists'][0]['name']}"
@@ -186,6 +211,7 @@ class GenerateFromTopView(BaseGenerateView):
         ]
         """
 
+
 class GenerateFromArtistsView(BaseGenerateView):
     def get_prompt(self, user, data):
         artists = data.get("artists", [])
@@ -197,7 +223,11 @@ class GenerateFromArtistsView(BaseGenerateView):
         if not count:
             return Response({"error": "count is required"}, status=400)
 
-        spotify = SpotifyAPI(user.spotify_access_token, refresh_token=user.spotify_refresh_token, user=user)
+        spotify = SpotifyAPI(
+            user.spotify_access_token,
+            refresh_token=user.spotify_refresh_token,
+            user=user,
+        )
 
         prompt = f"""
         Podaj {count} utworów {filter_str}, inspirowanych twórczością artystów:
@@ -218,6 +248,7 @@ class GenerateFromArtistsView(BaseGenerateView):
         ]
         """
 
+
 class GenerateQueueFromPromptView(BaseGenerateView):
     def get_prompt(self, user, data):
         prompt_input = data.get("prompt")
@@ -227,7 +258,7 @@ class GenerateQueueFromPromptView(BaseGenerateView):
         preferences = self.get_user_preferences(user)
         if not count:
             return Response({"error": "count is required"}, status=400)
-        
+
         full_prompt = f"""
         Podaj {count} utworów pasujących do opisu:
         "{prompt_input}"

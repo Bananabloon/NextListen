@@ -184,4 +184,12 @@ __pycache__/
 #SSL certs
 certs/
 
+#wait-for-it script
 backend/wait-for-it.sh
+
+# Pacakage-lock.json
+package-lock.json
+
+#Docker
+.dockerignore
+.Dockerfile.swp

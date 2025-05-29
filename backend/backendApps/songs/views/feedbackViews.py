@@ -15,6 +15,7 @@ import requests
 
 from constants import SPOTYFY_TRACK_URL
 
+
 class UserFeedbackView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -85,6 +86,7 @@ class SongAnalysisView(APIView):
         except Exception as e:
             return Response({"error": str(e)}, status=500)
 
+
 class SimilarSongsView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -113,7 +115,8 @@ class SimilarSongsView(APIView):
             return Response({"results": response})
         except Exception as e:
             return Response({"error": str(e)}, status=500)
-        
+
+
 class SongFeedbackView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -122,7 +125,9 @@ class SongFeedbackView(APIView):
         feedback = request.data.get("feedback")
 
         if not spotify_uri or feedback not in ["like", "dislike", "none"]:
-            return Response({"error": "Invalid input"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"error": "Invalid input"}, status=status.HTTP_400_BAD_REQUEST
+            )
 
         try:
             media = Media.objects.get(spotify_uri=spotify_uri)
@@ -134,7 +139,9 @@ class SongFeedbackView(APIView):
             resp = requests.get(url, headers=headers)
 
             if resp.status_code != 200:
-                return Response({"error": "Could not fetch song data from Spotify"}, status=400)
+                return Response(
+                    {"error": "Could not fetch song data from Spotify"}, status=400
+                )
 
             data = resp.json()
             media = Media.objects.create(
@@ -154,18 +161,20 @@ class SongFeedbackView(APIView):
                 user=request.user,
                 media=media,
                 defaults={
-                    'is_liked': liked,
-                    'source': "feedback_by_uri",
-                    'feedback_at': timezone.now().date()
-                }
+                    "is_liked": liked,
+                    "source": "feedback_by_uri",
+                    "feedback_at": timezone.now().date(),
+                },
             )
 
         if getattr(media, "is_curveball", False):
             update_curveball_enjoyment(request.user, liked)
 
-        return Response({
-            "status": "ok",
-            "track_title": media.title,
-            "artist": media.artist_name,
-            "curveball_enjoyment": request.user.curveball_enjoyment,
-        })
+        return Response(
+            {
+                "status": "ok",
+                "track_title": media.title,
+                "artist": media.artist_name,
+                "curveball_enjoyment": request.user.curveball_enjoyment,
+            }
+        )
