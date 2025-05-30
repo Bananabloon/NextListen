@@ -37,6 +37,14 @@ class TokenService:
             path="/",
         )
 
+    @staticmethod
+    def delete_cookie_access_token(response):
+        response.delete_cookie("NextListen_access_token")
+
+    @staticmethod
+    def delete_cookie_refresh_token(response):
+        response.delete_cookie("NextListen_refresh_token")
+
 
 class CustomRefreshToken(RefreshToken):
     @classmethod
