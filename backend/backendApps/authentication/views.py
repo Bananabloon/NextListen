@@ -59,7 +59,7 @@ class RefreshAccessToken(APIView):
     permission_classes = [AllowAny]
 
     def post(self, request):
-        refresh_token_str = request.data.get("refresh")
+        refresh_token_str = request.data.get("NextListen_refresh_token")
         if not refresh_token_str:
             return Response(
                 {"detail": "No refresh token provided."},
@@ -71,9 +71,7 @@ class RefreshAccessToken(APIView):
             new_access_token = refresh.access_token
 
             response = Response(
-                {
-                    "access": str(new_access_token),
-                }
+                {"access": str(new_access_token),}
             )
 
             TokenService.set_cookie_access_token(response, str(new_access_token))
