@@ -209,3 +209,11 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+#SSL certs
+certs/
+
+#wait-for-it script
+backend/wait-for-it.sh
+
+#Docker
+.Dockerfile.swp

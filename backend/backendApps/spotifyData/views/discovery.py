@@ -75,24 +75,28 @@ class DiscoveryGenerateView(APIView):
             search_result = spotify.search(query=query, type="track")
 
             try:
+                search_result = spotify.search(query=query, type="track")
                 matched = find_best_match(
                     search_result["tracks"]["items"], song["title"], song["artist"]
                 )
+
                 if matched:
-                    uri = matched["uri"]
-                    success, error = spotify.add_to_queue(uri)
-                    if success:
-                        added.append(
-                            {
-                                "title": song["title"],
-                                "artist": song["artist"],
-                                "uri": uri,
-                            }
-                        )
-                    else:
+                    if not user.explicit_content_enabled and matched.get(
+                        "explicit", False
+                    ):
                         errors.append(
-                            {"song": song, "error": error or "Could not add to queue"}
+                            {"song": song, "error": "Explicit content not allowed"}
                         )
+                        continue
+
+                    discovered.append(
+                        {
+                            "title": song["title"],
+                            "artist": song["artist"],
+                            "uri": matched["uri"],
+                            "explicit": matched.get("explicit", False),
+                        }
+                    )
                 else:
                     errors.append({"song": song, "error": "No match found"})
             except Exception as e:
@@ -100,9 +104,9 @@ class DiscoveryGenerateView(APIView):
 
         return Response(
             {
-                "message": f"Discovery queue generated for genre: {genre}",
+                "message": f"Discovery songs generated for genre: {genre}",
                 "genre": genre,
-                "added": added,
+                "songs": discovered,
                 "errors": errors,
             }
         )

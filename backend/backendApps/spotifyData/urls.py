@@ -1,7 +1,7 @@
 from django.urls import path
 from .views.discovery import DiscoveryGenerateView
 from .views.genres import DiscoveryGenresView
-from .views.profile import CurrentUserProfileView, SpotifyAccessTokenView
+from .views.profile import CurrentUserProfileView, SpotifyTokenView
 from .views.tracks import (
     TopTracksView,
     TopArtistsView,
@@ -13,6 +13,7 @@ from .views.tracks import (
 
 urlpatterns = [
     path("profile/", CurrentUserProfileView.as_view()),
+    path("tokens/", SpotifyTokenView.as_view()),
     path("top-tracks/", TopTracksView.as_view()),
     path("top-artists/", TopArtistsView.as_view()),
     path("currently-playing/", CurrentlyPlayingView.as_view()),
@@ -20,5 +21,4 @@ urlpatterns = [
     path("queue/add/", AddTrackToQueueView.as_view(), name="add-track-to-queue"),
     path("discover/", DiscoveryGenresView.as_view()),
     path("discover/generate/", DiscoveryGenerateView.as_view()),
-    path("access-token/", SpotifyAccessTokenView.as_view()),
 ]

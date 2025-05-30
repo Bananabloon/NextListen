@@ -33,6 +33,7 @@ class UserSerializer(serializers.ModelSerializer):
             "created_at",
             "last_updated",
             "curveball_enjoyment",
+            "explicit_content_enabled",
         ]
 
 

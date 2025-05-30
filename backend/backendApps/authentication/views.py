@@ -6,7 +6,7 @@ from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework_simplejwt.exceptions import TokenError
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import IsAuthenticated, AllowAny
 
 
 from .services.spotify_service import SpotifyService
@@ -22,9 +22,10 @@ class SpotifyOAuthRedirectView(APIView):
             "response_type": "code",
             "redirect_uri": settings.SPOTIFY_REDIRECT_URI,
             "scope": (
-                "user-read-email user-read-private user-top-read user-read-playback-state "
+                "streaming user-read-email user-read-private user-top-read user-read-playback-state "
                 "user-modify-playback-state user-read-currently-playing user-read-recently-played"
             ),
+            "show_dialog": True,
         }
         url = f"{SPOTIFY_AUTHORIZE_URL}?{urlencode(params)}"
         return redirect(url)
@@ -48,7 +49,6 @@ class SpotifyCallbackView(APIView):
         )
         if error:
             return error
-
         response = redirect(f"{settings.NGROK_URL}/callback")
         TokenService.set_cookie_access_token(response, data["access"])
         TokenService.set_cookie_refresh_token(response, data["refresh"])
@@ -56,10 +56,10 @@ class SpotifyCallbackView(APIView):
 
 
 class RefreshAccessToken(APIView):
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
 
     def post(self, request):
-        refresh_token_str = request.COOKIES.get("NextListen_refresh_token")
+        refresh_token_str = request.COOKIE.get("NextListen_refresh_token")
         if not refresh_token_str:
             return Response(
                 {"detail": "No refresh token provided."},
@@ -82,3 +82,17 @@ class RefreshAccessToken(APIView):
                 {"detail": "Invalid refresh token."},
                 status=status.HTTP_401_UNAUTHORIZED,
             )
+
+
+class DeleteTokens(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        response = Response(
+            {"detail": "Tokens deleted successfully."}, status=status.HTTP_200_OK
+        )
+
+        TokenService.delete_cookie_access_token(response)
+        TokenService.delete_cookie_refresh_token(response)
+
+        return response
