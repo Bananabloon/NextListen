@@ -42,12 +42,9 @@ const NavMenu = ({ children, className, ...props }: NavMenuProps): React.JSX.Ele
     );
 
     return (
-        <Menu
-            className={cs(classes.container, className)}
-            {...props}
-        >
+        <Menu {...props}>
             <Menu.Target>
-                <Group>
+                <Group className={cs(classes.target, className)}>
                     <IconList
                         size={42}
                         stroke={1.5}

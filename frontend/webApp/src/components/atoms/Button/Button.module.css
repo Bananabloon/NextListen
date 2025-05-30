@@ -7,10 +7,6 @@
     font-weight: 600;
 }
 
-.button:hover {
-    background-color: var(--background-color-5);
-}
-
 .button * {
     color: inherit;
 }
@@ -49,9 +45,17 @@
 .button[data-variant="spotify"]:hover {
     filter: brightness(110%);
 }
+.button:disabled {
+    color: var(--text-color-disabled);
+    cursor: not-allowed;
+}
 
-.button:active {
-    translate: 2px 2px !important;
+.button:hover:not(:disabled) {
+    background-color: var(--background-color-5);
+}
+
+.button:active:not(:disabled) {
+    translate: 1px 1px !important;
 }
 
 .content {

@@ -1,0 +1,41 @@
+.container {
+    position: relative;
+}
+
+.footer {
+    margin-bottom: var(--spacing-xxxl);
+    height: 92px;
+    width: 100%;
+    background-color: var(--background-color-2);
+}
+
+.footer > * {
+    height: 100%;
+    flex: 1;
+    align-items: center;
+}
+
+.leftSection {
+    justify-content: start;
+}
+
+.centralSection {
+    justify-content: center;
+    gap: var(--spacing-md);
+}
+
+.rightSection {
+    justify-content: end;
+}
+
+.seekBarPositioner {
+    position: absolute;
+    width: 100%;
+    transform: translateY(-100%);
+    padding-bottom: var(--spacing-lg);
+}
+
+.playerSeekBar {
+    width: 50%;
+    margin: auto;
+}

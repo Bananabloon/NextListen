@@ -8,6 +8,7 @@ interface ButtonProps extends React.HTMLAttributes<HTMLButtonElement> {
     leftSection?: React.ReactNode;
     rightSection?: React.ReactNode;
     variant?: "default" | "spotify" | "menu";
+    disabled?: boolean;
 }
 
 const Button = ({
@@ -17,6 +18,7 @@ const Button = ({
     variant = "default",
     leftSection,
     rightSection,
+    disabled = false,
     ...props
 }: ButtonProps): React.JSX.Element => {
     return (
@@ -24,6 +26,7 @@ const Button = ({
             className={cs(classes.button, className)}
             data-size={size}
             data-variant={variant}
+            disabled={disabled}
             {...props}
         >
             <Group className={classes.content}>

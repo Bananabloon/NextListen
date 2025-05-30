@@ -6,19 +6,23 @@ import Menu from "../../atoms/Menu/Menu";
 import Stack from "../../atoms/Stack/Stack";
 import classes from "./ProfileControls.module.css";
 import Avatar from "../../atoms/Avatar/Avatar";
+import useRequests from "../../../hooks/useRequests";
+import { useNavigate } from "react-router-dom";
 
 interface ProfileControlsProps extends React.HTMLAttributes<HTMLDivElement> {}
 
 const ProfileControls = ({ className, ...props }: ProfileControlsProps): React.JSX.Element => {
     const { loading, data, error } = useFetch("/spotify/profile");
+    const { sendRequest } = useRequests();
+    const navigate = useNavigate();
 
-    const logout = () => {};
+    const logout = () => {
+        sendRequest("POST", "/auth/spotify/delete-tokens");
+        navigate("/");
+    };
 
     return (
-        <Menu
-            className={className}
-            {...props}
-        >
+        <Menu {...props}>
             <Menu.Target>
                 <Group className={classes.container}>
                     <Stack className={classes.textStack}>
@@ -41,6 +45,7 @@ const ProfileControls = ({ className, ...props }: ProfileControlsProps): React.J
                 </Button>
                 <Button
                     variant="menu"
+                    onClick={logout}
                     leftSection={
                         <IconLogout
                             size={20}

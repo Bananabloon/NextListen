@@ -26,8 +26,7 @@ const Avatar = ({ className, size = 24, src, style }: AvatarProps): React.JSX.El
     ) : (
         <IconUserCircle
             className={className}
-            size={size}
-            width={size}
+            size={size + 20}
             style={style}
             stroke={1.5}
         />
