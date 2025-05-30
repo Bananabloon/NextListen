@@ -12,15 +12,18 @@
         "preview": "vite preview"
     },
     "dependencies": {
+        "@mantine/hooks": "^8.0.2",
         "@tabler/icons-react": "3.17.0",
         "classnames": "^2.5.1",
         "lodash": "^4.17.21",
         "react": "^19.1.0",
         "react-dom": "^19.1.0",
-        "react-router-dom": "^7.6.1"
+        "react-router-dom": "^7.6.1",
+        "react-spinners": "^0.17.0"
     },
     "devDependencies": {
         "@eslint/js": "^9.27.0",
+        "@types/lodash": "^4.17.17",
         "@types/react": "^19.1.5",
         "@types/react-dom": "^19.1.5",
         "@typescript-eslint/eslint-plugin": "^8.32.1",

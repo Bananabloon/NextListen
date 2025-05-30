@@ -34,15 +34,10 @@
     line-height: 28px;
 }
 
-.menuButton {
-    width: 100%;
-    border-radius: 0;
+.dropdown button:first-child {
+    padding-top: var(--spacing-lg) !important;
 }
 
-.menuButton:first-child {
-    padding-top: var(--spacing-lg);
-}
-
-.menuButton:last-child {
-    padding-bottom: var(--spacing-lg);
+.dropdown button:last-child {
+    padding-bottom: var(--spacing-lg) !important;
 }

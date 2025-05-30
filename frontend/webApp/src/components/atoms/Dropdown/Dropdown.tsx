@@ -1,7 +1,7 @@
 import classes from "./Dropdown.module.css";
 import cs from "classnames";
 
-interface DropdownProps extends React.HTMLAttributes<HTMLDivElement> {}
+export interface DropdownProps extends React.HTMLAttributes<HTMLDivElement> {}
 
 const Dropdown = ({ children, className, ...props }: DropdownProps): React.JSX.Element => {
     return (

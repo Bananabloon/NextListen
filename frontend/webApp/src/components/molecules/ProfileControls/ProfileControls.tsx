@@ -12,6 +12,8 @@ interface ProfileControlsProps extends React.HTMLAttributes<HTMLDivElement> {}
 const ProfileControls = ({ className, ...props }: ProfileControlsProps): React.JSX.Element => {
     const { loading, data, error } = useFetch("/spotify/profile");
 
+    const logout = () => {};
+
     return (
         <Menu
             className={className}
@@ -30,15 +32,15 @@ const ProfileControls = ({ className, ...props }: ProfileControlsProps): React.J
                     />
                 </Group>
             </Menu.Target>
-            <Menu.Dropdown>
+            <Menu.Dropdown className={classes.dropdown}>
                 <Button
-                    className={classes.menuButton}
+                    variant="menu"
                     leftSection={<IconSettings size={20} />}
                 >
                     Settings
                 </Button>
                 <Button
-                    className={classes.menuButton}
+                    variant="menu"
                     leftSection={
                         <IconLogout
                             size={20}

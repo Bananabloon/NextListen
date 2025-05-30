@@ -1,4 +1,5 @@
 :root {
+    /* COLORS */
     --background-color-1: #040404;
     --background-color-2: #0c0c0c;
     --background-color-3: #141414;
@@ -13,6 +14,30 @@
 
     --text-color: #ffffff;
     --text-color-dimmed: #bdbdbd;
+
+    --primary-color-0: #f6e9ff;
+    --primary-color-1: #e6cfff;
+    --primary-color-2: #c99cfe;
+    --primary-color-3: #ab66fd;
+    --primary-color-4: #9139fb;
+    --primary-color-5: #811cfb;
+    --primary-color-6: #790dfc;
+    --primary-color-7: #6d02ee;
+    --primary-color-8: #5b00ca;
+    --primary-color-9: #4e00b1;
+
+    --secondary-color-0: #fff3e3;
+    --secondary-color-1: #ffe4cd;
+    --secondary-color-2: #fec89c;
+    --secondary-color-3: #fdaa67;
+    --secondary-color-4: #fc913a;
+    --secondary-color-5: #fc811e;
+    --secondary-color-6: #fc780f;
+    --secondary-color-7: #ee6c02;
+    --secondary-color-8: #c95a00;
+    --secondary-color-9: #af4c00;
+
+    /* SIZES */
 
     --radius-xs: 0.25rem;
     --radius-sm: 0.5rem;
@@ -33,4 +58,6 @@
     --font-size-md: 1rem;
     --font-size-lg: 1.25rem;
     --font-size-xl: 1.5rem;
+    --font-size-xxl: 2rem;
+    --font-size-xxxl: 3rem;
 }

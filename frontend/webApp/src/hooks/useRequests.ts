@@ -17,10 +17,7 @@ export const useRequests = (): useRequestsReturn => {
     const getPath = (path: string): string => (API_URL ? `${API_URL}${normalizePath(path)}` : "");
 
     const refreshTokens = async () => {
-        console.log("refreshing tokens");
-        const res = await sendRequest("POST", "/token/refresh/");
-        console.log(res);
-        console.log("refreshed tokens?? i hope");
+        return await sendRequest("POST", "auth/spotify/refresh-token");
     };
 
     const handleRequestError = async (response: Response) => {
@@ -56,7 +53,7 @@ export const useRequests = (): useRequestsReturn => {
         let response = await fetchData();
 
         if (response.status == 401) {
-            refreshTokens();
+            await refreshTokens();
             response = await fetchData();
         }
 

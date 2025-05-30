@@ -7,7 +7,7 @@ interface ButtonProps extends React.HTMLAttributes<HTMLButtonElement> {
     size?: Size;
     leftSection?: React.ReactNode;
     rightSection?: React.ReactNode;
-    variant?: "default" | "spotify";
+    variant?: "default" | "spotify" | "menu";
 }
 
 const Button = ({

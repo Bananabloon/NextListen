@@ -3,6 +3,10 @@
     font-family: Poppins;
 }
 
+:root {
+    background-color: var(--background-color-1);
+}
+
 /* Webkit */
 ::-webkit-scrollbar {
     width: 0.625rem;

@@ -5,3 +5,8 @@
 .target {
     cursor: pointer;
 }
+
+.dropdown {
+    position: absolute;
+    z-index: 1000;
+}

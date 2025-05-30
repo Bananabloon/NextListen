@@ -35,6 +35,11 @@
     font-size: var(--font-size-xl);
 }
 
+.button[data-variant="menu"] {
+    width: 100%;
+    border-radius: 0;
+}
+
 .button[data-variant="spotify"] {
     background-color: var(--spotify-green);
     color: var(--spotify-black) !important;
