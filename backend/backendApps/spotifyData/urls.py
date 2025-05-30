@@ -19,6 +19,6 @@ urlpatterns = [
     path("currently-playing/", CurrentlyPlayingView.as_view()),
     path("search/", SpotifySearchView.as_view()),
     path("queue/add/", AddTrackToQueueView.as_view(), name="add-track-to-queue"),
-    path("discover/", DiscoveryGenresView.as_view()),
-    path("discover/generate/", DiscoveryGenerateView.as_view()),
+    path("genres/", DiscoveryGenresView.as_view()),
+    path("genres/generate/", DiscoveryGenerateView.as_view()),
 ]
