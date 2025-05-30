@@ -2,15 +2,10 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
-from django.shortcuts import get_object_or_404
 from users.models import Media, UserFeedback
-from songs.utils import (
-    ask_openai,
-    # should_send_curveball,
-    update_curveball_enjoyment,
-    # extract_filters,
-)
+from songs.utils import ask_openai, update_curveball_enjoyment
 from django.utils import timezone
+import requests
 
 from constants import SPOTYFY_TRACK_URL
 
@@ -86,38 +81,6 @@ class SongAnalysisView(APIView):
             return Response({"error": str(e)}, status=500)
 
 
-class SongFeedbackView(APIView):
-    permission_classes = [IsAuthenticated]
-
-    def post(self, request):
-        song_id = request.data.get("song_id")
-        feedback = request.data.get("feedback")  # "like", "dislike", "none"
-
-        if not song_id or feedback not in ["like", "dislike", "none"]:
-            return Response({"error": "Invalid input"}, status=400)
-
-        media = get_object_or_404(Media, id=song_id)
-
-        liked = {"like": True, "dislike": False, "none": None}[feedback]
-
-        if liked is not None:
-            UserFeedback.objects.update_or_create(
-                user=request.user,
-                media=media,
-                defaults={
-                    "is_liked": liked,
-                    "source": "feedback_button",
-                    "feedback_at": timezone.now().date(),
-                },
-            )
-
-        if getattr(media, "is_curveball", False):
-            update_curveball_enjoyment(request.user, liked)
-
-        return Response(
-            {"status": "ok", "curveball_enjoyment": request.user.curveball_enjoyment}
-        )
-
 class SimilarSongsView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -164,7 +127,6 @@ class SongFeedbackView(APIView):
             media = Media.objects.get(spotify_uri=spotify_uri)
         except Media.DoesNotExist:
             token = request.user.spotify_access_token
-            spotify_id = spotify_uri.split(":")[-1]
             headers = {"Authorization": f"Bearer {token}"}
             url = SPOTYFY_TRACK_URL
             resp = requests.get(url, headers=headers)
