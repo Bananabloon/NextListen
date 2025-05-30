@@ -5,6 +5,8 @@ SPOTIFY_AUTHORIZE_URL = "https://accounts.spotify.com/authorize"
 SPOTIFY_TOP_ARTISTS_URL = "https://api.spotify.com/v1/me/top/artists?limit=50"
 SPOTIFY_PLAYLIST_URL = "https://api.spotify.com/v1/users/{user_id}/playlists"
 SPOTIFY_PLAYLIST_TRACKS_URL = "https://api.spotify.com/v1/playlists/{playlist_id}/tracks"
+SPOTIFY_PLAYLIST_ID_URL = "https://api.spotify.com/v1/playlists/{playlist_id}"
 SPOTIFY_QUEUE_URL = "https://api.spotify.com/v1/me/player/queue"
 SPOTYFY_SEARCH_URL= "https://api.spotify.com/v1/search"
 SPOTYFY_TRACK_URL="https://api.spotify.com/v1/tracks/{spotify_id}"
+GENERATION_BUFFER_MULTIPLIER = 1.5

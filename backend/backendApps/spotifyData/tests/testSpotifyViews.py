@@ -21,7 +21,7 @@ class SpotifyDataViewsTest(APITestCase):
         mock_get_top_artists.return_value = {"items": [{"genres": ["pop"]}]}
         mock_json_load.return_value = [{"category": "rock", "popularity": 100}, {"category": "jazz", "popularity": 80}]
 
-        response = self.client.get("/spotify/discover/?count=2")
+        response = self.client.get("/api/spotify/discover/?count=2")
 
         self.assertEqual(response.status_code, 200)
         self.assertIn("genres", response.data)
@@ -42,15 +42,15 @@ class SpotifyDataViewsTest(APITestCase):
         mock_search.return_value = {"tracks": {"items": [{"uri": "spotify:track:123"}]}}
         mock_add.return_value = (True, None)
 
-        response = self.client.post("/spotify/discover/generate/", {"genre": "rock", "count": 1})
+        response = self.client.post("/api/spotify/discover/generate/", {"genre": "rock", "count": 1})
 
         self.assertEqual(response.status_code, 200)
-        self.assertIn("added", response.data)
+        self.assertIn("songs", response.data)
 
     @patch("spotifyData.services.spotifyClient.SpotifyAPI.get_user_profile")
     def test_get_current_user_profile(self, mock_profile):
         mock_profile.return_value = {"id": "test123", "display_name": "TestUser"}
-        response = self.client.get("/spotify/profile/")
+        response = self.client.get("/api/spotify/profile/")
 
         self.assertEqual(response.status_code, 200)
         self.assertIn("id", response.data)
@@ -58,39 +58,39 @@ class SpotifyDataViewsTest(APITestCase):
     @patch("spotifyData.services.spotifyClient.SpotifyAPI.get_top_tracks")
     def test_get_top_tracks(self, mock_tracks):
         mock_tracks.return_value = {"items": []}
-        response = self.client.get("/spotify/top-tracks/")
+        response = self.client.get("/api/spotify/top-tracks/")
 
         self.assertEqual(response.status_code, 200)
 
     @patch("spotifyData.services.spotifyClient.SpotifyAPI.get_top_artists")
     def test_get_top_artists(self, mock_artists):
         mock_artists.return_value = {"items": []}
-        response = self.client.get("/spotify/top-artists/")
+        response = self.client.get("/api/spotify/top-artists/")
 
         self.assertEqual(response.status_code, 200)
 
     @patch("spotifyData.services.spotifyClient.SpotifyAPI.get_current_playing")
     def test_get_currently_playing(self, mock_current):
         mock_current.return_value = {"is_playing": True}
-        response = self.client.get("/spotify/currently-playing/")
+        response = self.client.get("/api/spotify/currently-playing/")
 
         self.assertEqual(response.status_code, 200)
 
     @patch("spotifyData.services.spotifyClient.SpotifyAPI.add_to_queue")
     def test_add_track_to_queue(self, mock_add):
         mock_add.return_value = (True, None)
-        response = self.client.post("/spotify/queue/add/", {"track_uri": "spotify:track:abc"})
+        response = self.client.post("/api/spotify/queue/add/", {"track_uri": "spotify:track:abc"})
 
         self.assertEqual(response.status_code, 200)
         self.assertIn("message", response.data)
 
     def test_add_track_to_queue_missing_uri(self):
-        response = self.client.post("/spotify/queue/add/", {})
+        response = self.client.post("/api/spotify/queue/add/", {})
         self.assertEqual(response.status_code, 400)
         self.assertIn("error", response.data)
 
     def test_spotify_search_invalid(self):
-        response = self.client.get("/spotify/search/")
+        response = self.client.get("/api/spotify/search/")
         self.assertEqual(response.status_code, 400)
 
     @patch("requests.get")
@@ -98,5 +98,5 @@ class SpotifyDataViewsTest(APITestCase):
         mock_get.return_value.status_code = 200
         mock_get.return_value.json.return_value = {"tracks": {"items": []}}
 
-        response = self.client.get("/spotify/search/?q=test&type=track")
+        response = self.client.get("/api/spotify/search/?q=test&type=track")
         self.assertEqual(response.status_code, 200)

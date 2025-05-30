@@ -4,9 +4,8 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
-from django.shortcuts import get_object_or_404
 from users.models import Media, UserFeedback
-from songs.utils import ask_openai, should_send_curveball, update_curveball_enjoyment, extract_filters
+from songs.utils import ask_openai, update_curveball_enjoyment
 from django.utils import timezone
 import requests
 
@@ -125,7 +124,6 @@ class SongFeedbackView(APIView):
             media = Media.objects.get(spotify_uri=spotify_uri)
         except Media.DoesNotExist:
             token = request.user.spotify_access_token
-            spotify_id = spotify_uri.split(":")[-1]
             headers = {"Authorization": f"Bearer {token}"}
             url = SPOTYFY_TRACK_URL
             resp = requests.get(url, headers=headers)

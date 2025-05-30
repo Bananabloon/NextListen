@@ -25,7 +25,7 @@ from rest_framework_simplejwt.views import (
 urlpatterns = [
     path('api/admin/', admin.site.urls),
     path('', views.homepage), 
-    path("auth/", include("authentication.urls")),
+    path("api/auth/", include("authentication.urls")),
     path('api/about/', views.about),
     path('api/users/', include('users.urls')),
     path('api/spotify/', include('spotifyData.urls')),

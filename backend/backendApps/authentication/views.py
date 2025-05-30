@@ -1,13 +1,14 @@
 from urllib.parse import urlencode
 from django.conf import settings
 from django.shortcuts import redirect
-
+from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 
 from authentication.services.spotify_service import SpotifyService
 from authentication.services.spotify_auth_service import SpotifyAuthService
+from authentication.services.user_service import UserService
 
 from constants import SPOTIFY_AUTHORIZE_URL
 
@@ -78,3 +79,11 @@ class ProtectedView(APIView):
 
     def get(self, request):
         return Response({"message": "You are authenticated!", "user": request.user.username})
+
+class DeleteAccountView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def delete(self, request):
+        user = request.user
+        UserService.delete_user_and_related_data(user)
+        return Response(status=status.HTTP_204_NO_CONTENT)

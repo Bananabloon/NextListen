@@ -3,15 +3,15 @@ from django.shortcuts import render
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
-from django.shortcuts import get_object_or_404
 import json
 from users.models import UserFeedback
 from spotifyData.services.spotifyClient import SpotifyAPI
-from songs.utils import ask_openai, should_send_curveball, extract_filters, find_best_match
-from songs.services.songGeneration import build_preferences_prompt, parse_openai_json, generate_songs_with_buffer
+from songs.utils import should_send_curveball, extract_filters, find_best_match
+from songs.services.songGeneration import build_preferences_prompt, generate_songs_with_buffer
 import logging
 logger = logging.getLogger(__name__)
-GENERATION_BUFFER_MULTIPLIER = 1.5
+from constants import GENERATION_BUFFER_MULTIPLIER
+
 class GenerateQueueBase(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -56,7 +56,6 @@ class GenerateQueueBase(APIView):
         return prepared, []
 
     def generate_valid_songs(self, prompt, user, count):
-        preferences = self.get_user_preferences(user)
         spotify = SpotifyAPI(user.spotify_access_token, refresh_token=user.spotify_refresh_token, user=user)
         base_prompt = "Jesteś ekspertem muzycznym."
 
@@ -192,8 +191,6 @@ class GenerateFromArtistsView(BaseGenerateView):
         preferences = self.get_user_preferences(user)
         if not count:
             return Response({"error": "count is required"}, status=400)
-
-        spotify = SpotifyAPI(user.spotify_access_token, refresh_token=user.spotify_refresh_token, user=user)
 
         prompt = f"""
         Podaj {count*GENERATION_BUFFER_MULTIPLIER} utworów {filter_str}, inspirowanych twórczością artystów:

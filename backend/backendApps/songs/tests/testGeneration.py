@@ -57,7 +57,7 @@ def mock_dependencies(monkeypatch):
 @pytest.mark.django_db
 def test_generate_from_artists_success(user, factory):
     view = GenerateFromArtistsView.as_view()
-    request = factory.post("/generate", {
+    request = factory.post("/api/generate", {
         "artists": ["Massive Attack", "Radiohead"],
         "count": 2,
         "mood": "chill",
@@ -76,7 +76,7 @@ def test_generate_prefers_liked(user, factory):
     UserFeedback.objects.create(user=user, track_name="Teardrop")
 
     view = GenerateFromArtistsView.as_view()
-    request = factory.post("/generate", {
+    request = factory.post("/api/generate", {
         "artists": ["Massive Attack"],
         "count": 2
     }, format="json")
