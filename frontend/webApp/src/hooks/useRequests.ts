@@ -17,7 +17,7 @@ export const useRequests = (): useRequestsReturn => {
     const getPath = (path: string): string => (API_URL ? `${API_URL}${normalizePath(path)}` : "");
 
     const refreshTokens = async () => {
-        return await sendRequest("POST", "auth/spotify/refresh-token");
+        return await sendRequest("POST", "auth/spotify/refresh-token", undefined, undefined, false);
     };
 
     const handleRequestError = async (response: Response) => {
@@ -29,7 +29,8 @@ export const useRequests = (): useRequestsReturn => {
         method: Method,
         path: string,
         options: RequestInit = {},
-        errorCallback: (response: Response) => void = handleRequestError
+        errorCallback: (response: Response) => void = handleRequestError,
+        allowRefresh: boolean = true
     ) => {
         const url = getPath(path);
 
@@ -51,8 +52,7 @@ export const useRequests = (): useRequestsReturn => {
         const fetchData = () => fetch(url, fetchOptions).catch(getServiceUnavailableResponse);
 
         let response = await fetchData();
-
-        if (response.status == 401) {
+        if (response.status == 401 && allowRefresh) {
             await refreshTokens();
             response = await fetchData();
         }
