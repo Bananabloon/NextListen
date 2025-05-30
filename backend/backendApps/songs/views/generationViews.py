@@ -28,6 +28,8 @@ class GenerateQueueBase(APIView):
                 result = spotify.search(query=query, type="track")
                 tracks = result["tracks"]["items"]
                 best_match = find_best_match(tracks, song["title"], song["artist"])
+            except:
+                pass
 
         return {
             "explicit_content": "Tak" if user.explicit_content_enabled else "Nie",
