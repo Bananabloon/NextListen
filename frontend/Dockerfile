@@ -1,13 +1,14 @@
-# Dev Dockerfile, będzie trzeba wyłączyć hot reload
-FROM node:18-alpine
+# development
+FROM node:22-alpine
 
 WORKDIR /app
 
-COPY frontendApps/package*.json ./
-RUN npm install
+COPY ./webApp/package.json ./webApp/package-lock.json  ./
 
-COPY frontendApps/ .
+RUN npm i
+
+COPY ./webApp ./
 
 EXPOSE 5173
 
-CMD ["npm", "run", "dev"]
+CMD [ "npm", "run", "host" ]

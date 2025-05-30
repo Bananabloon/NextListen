@@ -1,0 +1,63 @@
+:root {
+    /* COLORS */
+    --background-color-1: #040404;
+    --background-color-2: #0c0c0c;
+    --background-color-3: #141414;
+    --background-color-4: #1c1c1c;
+    --background-color-5: #242424;
+
+    --scrollbar-background-color: #242424;
+    --scrollbar-color: #606060;
+
+    --spotify-green: #1ed760;
+    --spotify-black: #121212;
+
+    --text-color: #ffffff;
+    --text-color-dimmed: #bdbdbd;
+
+    --primary-color-0: #f6e9ff;
+    --primary-color-1: #e6cfff;
+    --primary-color-2: #c99cfe;
+    --primary-color-3: #ab66fd;
+    --primary-color-4: #9139fb;
+    --primary-color-5: #811cfb;
+    --primary-color-6: #790dfc;
+    --primary-color-7: #6d02ee;
+    --primary-color-8: #5b00ca;
+    --primary-color-9: #4e00b1;
+
+    --secondary-color-0: #fff3e3;
+    --secondary-color-1: #ffe4cd;
+    --secondary-color-2: #fec89c;
+    --secondary-color-3: #fdaa67;
+    --secondary-color-4: #fc913a;
+    --secondary-color-5: #fc811e;
+    --secondary-color-6: #fc780f;
+    --secondary-color-7: #ee6c02;
+    --secondary-color-8: #c95a00;
+    --secondary-color-9: #af4c00;
+
+    /* SIZES */
+
+    --radius-xs: 0.25rem;
+    --radius-sm: 0.5rem;
+    --radius-md: 0.75rem;
+    --radius-lg: 1rem;
+    --radius-xl: 1.25rem;
+
+    --spacing-xs: 0.25rem;
+    --spacing-sm: 0.5rem;
+    --spacing-md: 0.75rem;
+    --spacing-lg: 1rem;
+    --spacing-xl: 1.25rem;
+    --spacing-xxl: 1.5rem;
+    --spacing-xxxl: 2rem;
+
+    --font-size-xs: 0.6rem;
+    --font-size-sm: 0.75rem;
+    --font-size-md: 1rem;
+    --font-size-lg: 1.25rem;
+    --font-size-xl: 1.5rem;
+    --font-size-xxl: 2rem;
+    --font-size-xxxl: 3rem;
+}

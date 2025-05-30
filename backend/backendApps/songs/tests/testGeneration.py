@@ -32,7 +32,6 @@ def factory():
 
 @pytest.fixture(autouse=True)
 def mock_dependencies(monkeypatch):
-    # Mock SpotifyAPI
     class MockSpotify:
         def search(self, query, type):
             return {
@@ -62,7 +61,6 @@ def mock_dependencies(monkeypatch):
         "playlistViews.SpotifyAPI", lambda *args, **kwargs: MockSpotify()
     )
 
-    # Mock OpenAI response
     monkeypatch.setattr(
         "generationViews.ask_openai",
         lambda *args, **kwargs: """
@@ -79,7 +77,7 @@ def mock_dependencies(monkeypatch):
 
 
 @pytest.mark.django_db
-def test_generate_from_artists_success(user, factory):
+def test_generate_from_artists_success(monkeypatch):
     view = GenerateFromArtistsView.as_view()
     request = factory.post(
         "/generate",
@@ -123,4 +121,4 @@ def test_generate_queue_from_prompt(client):
     )
     assert response.status_code == 200
     assert "added" in response.data
-    assert response.data["added"][0]["title"] == "Summer Hit"
+    assert len(response.data["added"]) == 2

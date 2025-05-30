@@ -69,9 +69,11 @@ class DiscoveryGenerateView(APIView):
                 status=500,
             )
 
-        discovered, errors = [], []
+        added, errors = [], []
         for song in songs:
             query = f"{song['title']} {song['artist']}"
+            search_result = spotify.search(query=query, type="track")
+
             try:
                 search_result = spotify.search(query=query, type="track")
                 matched = find_best_match(

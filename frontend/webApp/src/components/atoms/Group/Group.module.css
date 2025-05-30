@@ -1,0 +1,7 @@
+.group {
+    display: flex;
+    flex-direction: row;
+    gap: var(--spacing-md);
+    width: 100%;
+    flex-wrap: nowrap;
+}

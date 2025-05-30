@@ -2,7 +2,6 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 import json
-from users.models import UserFeedback
 from spotifyData.services.spotifyClient import SpotifyAPI
 from songs.utils import (
     ask_openai,
@@ -52,8 +51,10 @@ class GenerateQueueBase(APIView):
         prepared = []
         for song in songs:
             query = f"{song['title']} {song['artist']}"
+
             try:
-                tracks = spotify.search(query=query, type="track")["tracks"]["items"]
+                result = spotify.search(query=query, type="track")
+                tracks = result["tracks"]["items"]
                 best_match = find_best_match(tracks, song["title"], song["artist"])
                 if best_match:
                     prepared.append(
@@ -148,12 +149,6 @@ class GenerateQueueView(BaseGenerateView):
         Artysta: {artist}
         {filter_str}
 
-        Preferencje użytkownika:
-        Lubi gatunki: {", ".join(preferences["liked_genres"])}
-        Lubi artystów: {", ".join(preferences["liked_artists"])}
-        Nie lubi gatunków: {", ".join(preferences["disliked_genres"])}
-        Nie lubi artystów: {", ".join(preferences["disliked_artists"])}
-        Czy użytkownik może dostawać explicit content? - {", ".join(preferences["explicit_content"])}
         Tylko utwory i artyści, którzy rzeczywiście istnieją i są dostępni na Spotify.
 
         Format JSON:
@@ -182,10 +177,6 @@ class GenerateFromTopView(BaseGenerateView):
 
         if not top_tracks and not top_artists:
             return Response({"error": "No top tracks or artists available"}, status=400)
-        if not count:
-            return Response({"error": "count is required"}, status=400)
-
-        preferences = self.get_user_preferences(user)
 
         prompt = f"""
         Na podstawie ulubionych utworów:
@@ -195,14 +186,8 @@ class GenerateFromTopView(BaseGenerateView):
         {json.dumps(top_artists, indent=2)}
         {filter_str}
 
-        Preferencje użytkownika:
-        Lubi gatunki: {", ".join(preferences["liked_genres"])}
-        Lubi artystów: {", ".join(preferences["liked_artists"])}
-        Nie lubi gatunków: {", ".join(preferences["disliked_genres"])}
-        Nie lubi artystów: {", ".join(preferences["disliked_artists"])}
-        Czy użytkownik może dostawać explicit content? - {preferences["explicit_content"]}
-
         Podaj {count} nowych rekomendacji muzycznych.
+
         Tylko utwory i artyści, którzy rzeczywiście istnieją i są dostępni na Spotify.
 
         Format JSON:
@@ -216,12 +201,7 @@ class GenerateFromArtistsView(BaseGenerateView):
     def get_prompt(self, user, data):
         artists = data.get("artists", [])
         if not artists or not isinstance(artists, list):
-            raise ValueError("List of artists is required")
-        count = data.get("count")
-        filter_str = extract_filters(data)
-        preferences = self.get_user_preferences(user)
-        if not count:
-            return Response({"error": "count is required"}, status=400)
+            return Response({"error": "List of artists is required"}, status=400)
 
         spotify = SpotifyAPI(
             user.spotify_access_token,
@@ -232,13 +212,6 @@ class GenerateFromArtistsView(BaseGenerateView):
         prompt = f"""
         Podaj {count} utworów {filter_str}, inspirowanych twórczością artystów:
         {json.dumps(artists, indent=2)}
-
-        Preferencje użytkownika:
-        Lubi gatunki: {", ".join(preferences["liked_genres"])}
-        Lubi artystów: {", ".join(preferences["liked_artists"])}
-        Nie lubi gatunków: {", ".join(preferences["disliked_genres"])}
-        Nie lubi artystów: {", ".join(preferences["disliked_artists"])}
-        Czy użytkownik może dostawać explicit content? - {preferences["explicit_content"]}
 
         Tylko utwory i artyści, którzy rzeczywiście istnieją i są dostępni na Spotify.
 
