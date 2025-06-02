@@ -13,7 +13,10 @@ const DiscoveryPage = (): React.JSX.Element => {
         <Group>
             {data &&
                 data.items.map((item, i) => (
-                    <Stack style={{ height: "100px" }}>
+                    <Stack
+                        style={{ height: "100px" }}
+                        key={i}
+                    >
                         <img
                             src={item.images?.[2]?.url}
                             key={i}

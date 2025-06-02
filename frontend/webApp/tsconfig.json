@@ -25,5 +25,6 @@
         "forceConsistentCasingInFileNames": true
     },
     "include": ["vite.config.ts", "src"],
+    "typeRoots": ["node_modules/@types"],
     "exclude": ["node_modules"]
 }
