@@ -68,6 +68,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     is_staff = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
     password = models.CharField(max_length=128, null=True, blank=True)
+    explicit_content_enabled=models.BooleanField(default=False)
 
     objects = UserManager()
 
