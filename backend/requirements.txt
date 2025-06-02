@@ -10,3 +10,4 @@ qdrant-client
 openai
 python-decouple
 pytest
+rapidfuzz

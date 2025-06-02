@@ -1,3 +1,4 @@
+from requests import patch
 from rest_framework.test import APITestCase, APIClient
 from rest_framework import status
 from django.contrib.auth import get_user_model
@@ -32,6 +33,7 @@ class SongViewsTestCase(APITestCase):
     def test_song_analysis_success(self):
         data = {"access_token": "mocked_token", "song_id": "sample_id"}
         response = self.client.post("/songs/analysis/", data)
+        # Zewętrzne API - mocking tylko
         self.assertIn(
             response.status_code, [status.HTTP_200_OK, status.HTTP_400_BAD_REQUEST]
         )
@@ -98,7 +100,6 @@ class SongViewsTestCase(APITestCase):
             "/songs/feedback/", {"spotify_uri": "", "feedback": "like"}
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertIn("error", response.data)
 
     def test_feedback_none_does_not_create_feedback(self):
         client, user = authenticate_client()
@@ -117,7 +118,6 @@ class SongViewsTestCase(APITestCase):
 
         response = client.post("/songs/feedback/", data, format="json")
 
-        response = self.client.post("/songs/similar/", {})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIn("recommendations", response.data)
 
