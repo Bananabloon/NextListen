@@ -1,0 +1,17 @@
+.conveyor {
+    position: relative;
+    height: fit-content;
+}
+.cards {
+    align-items: center;
+    height: 100%;
+}
+.conveyorShadow {
+    width: 100%;
+    height: 150px;
+    background-color: var(--background-color-2);
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 0;
+}

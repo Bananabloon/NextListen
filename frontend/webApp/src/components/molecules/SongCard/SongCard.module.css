@@ -1,0 +1,41 @@
+.card {
+    height: 530px;
+    width: 350px;
+    background-color: var(--background-color-3);
+    color: var(--text-color);
+    border-radius: 10px;
+    padding: 12px;
+    padding-bottom: 0;
+    z-index: 2;
+}
+.cardBack {
+    opacity: 0.9;
+    height: calc(530 * 0.93px);
+    width: calc(350 * 0.93px);
+    background-color: var(--background-color-2);
+}
+.cardImage {
+    width: 518px;
+    border-radius: 4px;
+}
+
+.titleText {
+    font-size: var(--font-size-lg);
+    font-weight: 500;
+}
+.artistsText {
+    font-size: var(--font-size-md);
+    color: var(--text-color-dimmed);
+    font-weight: 400;
+}
+
+.controlGroup {
+    height: 50px;
+    gap: 0px;
+    font-weight: 600;
+    margin-top: auto;
+}
+.spotifyLogo {
+    margin-left: auto;
+    width: 30px;
+}

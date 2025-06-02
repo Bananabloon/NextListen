@@ -1,0 +1,77 @@
+import classes from "./SongCard.module.css";
+import cs from "classnames";
+import { IconThumbDown } from "@tabler/icons-react";
+import { IconThumbUp } from "@tabler/icons-react";
+import IconButton from "../../atoms/IconButton/IconButton";
+import Group from "../../atoms/Group/Group";
+import Stack from "../../atoms/Stack/Stack";
+interface SongCardProps extends React.HTMLAttributes<HTMLDivElement> {
+    song: Song;
+    front?: boolean;
+}
+type ImageObject = {
+    url: string;
+    height: number;
+    width: number;
+};
+export interface Song {
+    name: string;
+    artists: string;
+    duration_ms: number;
+    uri: string;
+    images: ImageObject[];
+}
+
+const SongCard = ({ song, children, className, ...props }: SongCardProps): React.JSX.Element => {
+    console.log(song.images);
+    let feedback = 0;
+    let image = song.images.filter((img) => img.width == 640)[0];
+    console.log(image);
+    let imageUrl = image.url;
+    return (
+        <Stack
+            className={props.front ? classes.card : cs(classes.card, classes.cardBack)}
+            {...props}
+        >
+            <img
+                className={classes.cardImage}
+                src={imageUrl}
+            />
+            <Stack style={{ gap: "0" }}>
+                <p className={classes.titleText}>{song.name}</p>
+                <p className={classes.artistsText}>{song.artists}</p>
+            </Stack>
+            <Group className={classes.controlGroup}>
+                {props.front ? (
+                    <a
+                        href={song.uri}
+                        style={{ alignSelf: "center" }}
+                    >
+                        OPEN ON SPOTIFY
+                    </a>
+                ) : (
+                    <>
+                        <IconButton
+                            variant="transparent"
+                            style={{ alignItems: "flex-end", alignSelf: "center", marginLeft: "-10px" }}
+                        >
+                            <IconThumbDown style={{ transform: "scaleX(-1)" }} />
+                        </IconButton>
+                        <IconButton
+                            variant="transparent"
+                            style={{ paddingLeft: "0" }}
+                        >
+                            <IconThumbUp />
+                        </IconButton>
+                    </>
+                )}
+                <img
+                    className={classes.spotifyLogo}
+                    src="/icons/spotify/logo_white.svg"
+                />
+            </Group>
+        </Stack>
+    );
+};
+
+export default SongCard;
