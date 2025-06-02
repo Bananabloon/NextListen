@@ -5,6 +5,8 @@ import { IconThumbUp } from "@tabler/icons-react";
 import IconButton from "../../atoms/IconButton/IconButton";
 import Group from "../../atoms/Group/Group";
 import Stack from "../../atoms/Stack/Stack";
+import { IconThumbDownFilled } from "@tabler/icons-react";
+import { IconThumbUpFilled } from "@tabler/icons-react";
 interface SongCardProps extends React.HTMLAttributes<HTMLDivElement> {
     song: Song;
     front?: boolean;
@@ -25,8 +27,7 @@ export interface Song {
 const SongCard = ({ song, children, className, ...props }: SongCardProps): React.JSX.Element => {
     console.log(song.images);
     let feedback = 0;
-    let image = song.images.filter((img) => img.width == 640)[0];
-    console.log(image);
+    let image = song.images[0];
     let imageUrl = image.url;
     return (
         <Stack
@@ -55,13 +56,17 @@ const SongCard = ({ song, children, className, ...props }: SongCardProps): React
                             variant="transparent"
                             style={{ alignItems: "flex-end", alignSelf: "center", marginLeft: "-10px" }}
                         >
-                            <IconThumbDown style={{ transform: "scaleX(-1)" }} />
+                            {feedback === -1 ? (
+                                <IconThumbDownFilled style={{ transform: "scaleX(-1)" }} />
+                            ) : (
+                                <IconThumbDown style={{ transform: "scaleX(-1)" }} />
+                            )}
                         </IconButton>
                         <IconButton
                             variant="transparent"
                             style={{ paddingLeft: "0" }}
                         >
-                            <IconThumbUp />
+                            {feedback === 1 ? <IconThumbUpFilled /> : <IconThumbUp />}
                         </IconButton>
                     </>
                 )}
