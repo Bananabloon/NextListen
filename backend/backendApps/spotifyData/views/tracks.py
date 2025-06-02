@@ -8,7 +8,7 @@ from .profile import get_spotify_instance
 
 import sys
 sys.path.append("..")
-from constants import SPOTYFY_SEARCH_URL
+from constants import SPOTIFY_SEARCH_URL
 
 class TopTracksView(APIView):
     permission_classes = [IsAuthenticated]
@@ -57,7 +57,7 @@ class SpotifySearchView(APIView):
             return Response({"error": "Invalid query or type"}, status=400)
 
         token = request.user.spotify_access_token
-        url = SPOTYFY_SEARCH_URL
+        url = SPOTIFY_SEARCH_URL
         params = {"q": query, "type": search_type, "limit": 10}
         headers = {"Authorization": f"Bearer {token}"}
         response = requests.get(url, headers=headers, params=params)
