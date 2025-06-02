@@ -51,7 +51,9 @@
     border-radius: 0 50% 50% 0;
     background-color: var(--progress-color);
     /*  slider progress trick  */
-    box-shadow: -403px 0 0 400px var(--progress-color);
+    /* ! temporary */
+    /* it doesnt work when its zoomed out */
+    box-shadow: -603px 0 0 600px var(--progress-color);
 }
 
 /* Thumb: Firefox */
@@ -61,5 +63,7 @@
     border-radius: 50%;
     background-color: var(--progress-color);
     /*  slider progress trick  */
-    box-shadow: -403px 0 0 400px var(--progress-color);
+    /* ! temporary */
+    /* it doesnt work when its zoomed out */
+    box-shadow: -603px 0 0 600px var(--progress-color);
 }

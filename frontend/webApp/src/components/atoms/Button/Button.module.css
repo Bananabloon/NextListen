@@ -11,6 +11,19 @@
     color: inherit;
 }
 
+.button:hover:not(:disabled) {
+    background-color: var(--background-color-5);
+}
+
+.button:disabled {
+    color: var(--text-color-disabled);
+    cursor: not-allowed;
+}
+
+.button:active:not(:disabled) {
+    translate: 1px 1px !important;
+}
+
 .button[data-size="xs"] {
     font-size: var(--font-size-xs);
 }
@@ -43,19 +56,8 @@
 }
 
 .button[data-variant="spotify"]:hover {
+    background-color: var(--spotify-green);
     filter: brightness(110%);
-}
-.button:disabled {
-    color: var(--text-color-disabled);
-    cursor: not-allowed;
-}
-
-.button:hover:not(:disabled) {
-    background-color: var(--background-color-5);
-}
-
-.button:active:not(:disabled) {
-    translate: 1px 1px !important;
 }
 
 .content {
