@@ -1,16 +1,23 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { formatTime } from "../../../utils/datetime";
 import Group from "../Group/Group";
 import Stack from "../Stack/Stack";
 import classes from "./PlayerSeekBar.module.css";
 import cs from "classnames";
+import { usePlayback } from "../../../contexts/PlaybackContext";
+import { isNull } from "lodash";
 
 interface PlayerSeekBarProps extends React.HTMLAttributes<HTMLDivElement> {}
 
 const PlayerSeekBar = ({ className, ...props }: PlayerSeekBarProps): React.JSX.Element => {
-    const [currentPosition, setCurrentPosition] = useState(123);
-    let maxPosition = 384;
-    let color = "";
+    const { currentState, player } = usePlayback();
+    const [position, setPosition] = useState(0);
+
+    useEffect(() => {
+        setPosition(currentState?.position ?? 0);
+    }, [currentState?.position]);
+
+    const maxPosition = (currentState?.track_window?.current_track?.duration_ms ?? 0) || null;
 
     return (
         <Stack
@@ -18,19 +25,24 @@ const PlayerSeekBar = ({ className, ...props }: PlayerSeekBarProps): React.JSX.E
             {...props}
         >
             <Group className={classes.upper}>
-                <span>{formatTime(currentPosition)}</span>
-                <span>{formatTime(maxPosition)}</span>
+                <span>{formatTime(position)}</span>
+                <span>{isNull(maxPosition) ? "--:--" : formatTime(maxPosition)}</span>
             </Group>
             <input
                 type="range"
                 className={classes.range}
+                value={position}
                 min="0"
-                max={maxPosition}
-                value={currentPosition}
-                onChange={(e) => setCurrentPosition(parseInt(e.currentTarget.value))}
+                max={maxPosition || 180000}
+                disabled={isNull(maxPosition)}
+                onChange={(e) => {
+                    const newPosition = parseInt(e.currentTarget.value);
+                    player.seek(newPosition);
+                    setPosition(newPosition);
+                }}
                 style={
                     {
-                        "--progress-color": color,
+                        // "--progress-color": color,
                     } as React.CSSProperties
                 }
             />

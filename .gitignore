@@ -209,6 +209,7 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
 #SSL certs
 certs/
 
