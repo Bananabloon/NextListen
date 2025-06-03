@@ -4,12 +4,13 @@
     min-width: 0;
     width: 100%;
 }
-.conveyor > * {
-    flex: 0;
-}
 .cards {
     align-items: center;
     height: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scroll-snap-type: x mandatory;
+    width: 100%;
 }
 .conveyorShadow {
     width: 100%;

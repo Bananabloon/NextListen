@@ -1,0 +1,21 @@
+.container {
+    width: 100%;
+    height: 100%;
+    background-color: var(--background-color-2);
+}
+.header {
+    width: 100%;
+    height: 125px;
+    padding: var(--spacing-xxl) var(--spacing-xxxl);
+}
+.title {
+    font-size: var(--font-size-xxl);
+}
+.returnButton {
+    margin-left: auto;
+    margin-right: var(--spacing-xxl);
+    align-self: flex-start;
+}
+.content {
+    padding-left: 30px;
+}

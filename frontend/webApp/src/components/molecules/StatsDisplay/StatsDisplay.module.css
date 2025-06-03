@@ -1,0 +1,21 @@
+.statsContainer {
+    width: 500px;
+    height: 250px;
+    border-radius: 16px;
+    background-color: var(--background-color-3);
+    margin-left: var(--spacing-xxxl);
+    padding-left: var(--spacing-xl);
+    padding-top: var(--spacing-xl);
+}
+.title {
+    font-size: var(--font-size-xxl);
+}
+.categoryName {
+    font-size: var(--font-size-xl);
+}
+.statText {
+    font-weight: 200;
+}
+.statIcon {
+    margin-right: var(--spacing-xxxl);
+}

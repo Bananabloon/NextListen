@@ -16,6 +16,7 @@ type ImageObject = {
     width: number;
 };
 export interface Song {
+    curveball?: boolean;
     name: string;
     artists: string;
     duration_ms: number;
@@ -30,7 +31,15 @@ const SongCard = ({ song, children, className, ...props }: SongCardProps): React
 
     return (
         <Stack
-            className={props.front ? classes.card : cs(classes.card, classes.cardBack)}
+            className={
+                props.front
+                    ? song.curveball
+                        ? cs(classes.card, classes.cardCurveball)
+                        : classes.card
+                    : song.curveball
+                      ? cs(classes.card, classes.cardBack, classes.cardCurveball)
+                      : cs(classes.card, classes.cardBack)
+            }
             {...props}
         >
             <img
@@ -38,6 +47,7 @@ const SongCard = ({ song, children, className, ...props }: SongCardProps): React
                 src={imageUrl}
             />
             <Stack className={classes.metadata}>
+                {song.curveball && <p className={classes.curveballText}>Curveball</p>}
                 <ScrollingText speed={60}>
                     <p className={classes.titleText}>{song.name}</p>
                 </ScrollingText>

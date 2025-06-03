@@ -20,6 +20,9 @@ const ProfileControls = ({ className, ...props }: ProfileControlsProps): React.J
         await sendRequest("POST", "/auth/spotify/delete-tokens");
         navigate("/");
     };
+    const enterSettings = () => {
+        navigate("/settings");
+    };
 
     return (
         <Menu {...props}>
@@ -39,6 +42,7 @@ const ProfileControls = ({ className, ...props }: ProfileControlsProps): React.J
             <Menu.Dropdown className={classes.dropdown}>
                 <Button
                     variant="menu"
+                    onClick={enterSettings}
                     leftSection={<IconSettings size={20} />}
                 >
                     Settings
