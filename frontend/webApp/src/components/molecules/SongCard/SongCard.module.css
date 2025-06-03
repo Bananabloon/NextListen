@@ -10,13 +10,16 @@
 }
 .cardBack {
     opacity: 0.9;
-    height: calc(530 * 0.93px);
-    width: calc(350 * 0.93px);
+    scale: 0.93;
     background-color: var(--background-color-2);
 }
 .cardImage {
-    width: 518px;
+    width: 100%;
     border-radius: 4px;
+}
+
+.metadata {
+    gap: 0;
 }
 
 .titleText {

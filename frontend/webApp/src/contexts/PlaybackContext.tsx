@@ -4,8 +4,15 @@ import useRequests from "../hooks/useRequests";
 interface ContextType {
     loading: boolean;
     currentState: Spotify.PlaybackState | null;
-    player: Spotify.Player;
     updateState: () => Promise<void>;
+    nextTrack: () => Promise<void>;
+    previousTrack: () => Promise<void>;
+    pause: () => Promise<void>;
+    togglePlay: () => Promise<void>;
+    resume: () => Promise<void>;
+    setVolume: (volume: number) => Promise<void>;
+    getVolume: () => Promise<number>;
+    seek: (ms: number) => Promise<void>;
 }
 
 const PlaybackContext = createContext<ContextType | undefined>(undefined);
@@ -100,11 +107,26 @@ export const PlaybackProvider = ({ children }: { children: ReactNode }) => {
         return null;
     }
 
+    const { nextTrack, previousTrack, pause, togglePlay, resume, setVolume, getVolume, seek } = player;
+
+    const addToQueue = (uri: string) => {};
+
+    const setQueue = (uris: string[]) => {};
+
+    const playTrack = (uri: string) => {};
+
     const value = {
         loading,
         currentState,
-        player,
         updateState,
+        nextTrack,
+        previousTrack,
+        pause,
+        togglePlay,
+        resume,
+        setVolume,
+        getVolume,
+        seek,
     };
 
     return <PlaybackContext.Provider value={value}>{children}</PlaybackContext.Provider>;
