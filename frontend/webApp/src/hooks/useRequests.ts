@@ -1,5 +1,6 @@
 import { API_URL } from "../config/url.config.ts";
 import { normalizePath } from "../utils/api.ts";
+import { AppError } from "../utils/errors.ts";
 
 type Method = "GET" | "HEAD" | "POST" | "PUT" | "DELETE" | "CONNECT" | "OPTIONS" | "TRACE" | "PATCH";
 
@@ -21,8 +22,7 @@ export const useRequests = (): useRequestsReturn => {
     };
 
     const handleRequestError = async (response: Response) => {
-        let errorBody = await response.text().catch(() => "Unable to read error body");
-        console.error(`Request failed [${response.status}]`, errorBody);
+        console.error(new AppError(response));
     };
 
     const sendRequest = async (

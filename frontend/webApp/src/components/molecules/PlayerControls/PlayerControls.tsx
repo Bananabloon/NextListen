@@ -31,7 +31,16 @@ const PlayerControls = ({ ...props }): React.JSX.Element => {
 
     const updateFeedback = (value: Feedback) => {
         setFeedback(value);
-        sendRequest("POST", "");
+        sendRequest(
+            "POST",
+            "songs/song-feedback",
+            JSON.stringify({
+                body: {
+                    spotify_uri: currentState?.track_window.current_track.uri,
+                    feedback: value,
+                },
+            }) as RequestInit
+        );
     };
 
     return (
@@ -39,6 +48,7 @@ const PlayerControls = ({ ...props }): React.JSX.Element => {
             <IconButton
                 size="md"
                 variant="transparent"
+                onClick={() => updateFeedback(feedback === -1 ? 0 : -1)}
             >
                 {feedback === -1 ? (
                     <IconThumbDownFilled style={{ transform: "scaleX(-1) translateY(2px)" }} />
@@ -49,6 +59,7 @@ const PlayerControls = ({ ...props }): React.JSX.Element => {
             <IconButton
                 size="md"
                 variant="transparent"
+                onClick={() => updateFeedback(feedback === 1 ? 0 : 1)}
             >
                 {feedback === 1 ? (
                     <IconThumbUpFilled

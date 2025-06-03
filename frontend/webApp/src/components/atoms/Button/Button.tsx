@@ -7,8 +7,9 @@ interface ButtonProps extends React.HTMLAttributes<HTMLButtonElement> {
     size?: Size;
     leftSection?: React.ReactNode;
     rightSection?: React.ReactNode;
-    variant?: "default" | "spotify" | "menu";
+    variant?: "default" | "transparent" | "subtle" | "spotify" | "menu";
     disabled?: boolean;
+    background?: string;
 }
 
 const Button = ({
@@ -19,6 +20,8 @@ const Button = ({
     leftSection,
     rightSection,
     disabled = false,
+    background,
+    style,
     ...props
 }: ButtonProps): React.JSX.Element => {
     return (
@@ -27,6 +30,7 @@ const Button = ({
             data-size={size}
             data-variant={variant}
             disabled={disabled}
+            style={{ "--background": background, ...style } as React.CSSProperties}
             {...props}
         >
             <Group className={classes.content}>

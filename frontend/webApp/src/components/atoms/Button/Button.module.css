@@ -1,7 +1,9 @@
 .button {
+    --background: var(--background-color-4);
+
     width: fit-content;
     height: fit-content;
-    background-color: var(--background-color-4);
+    background-color: var(--background);
     border-radius: var(--radius-md);
     padding: var(--spacing-md) var(--spacing-lg);
     font-weight: 600;
@@ -9,10 +11,6 @@
 
 .button * {
     color: inherit;
-}
-
-.button:hover:not(:disabled) {
-    background-color: var(--background-color-5);
 }
 
 .button:disabled {
@@ -44,20 +42,37 @@
     font-size: var(--font-size-xl);
 }
 
+.button[data-variant="default"] {
+    &:hover:not(:disabled) {
+        --background: var(--background-color-5);
+    }
+}
+
+.button[data-variant="transparent"] {
+    --background: transparent;
+
+    &:hover:not(:disabled) {
+        --background: transparent;
+    }
+}
+
+.button[data-variant="subtle"] {
+    opacity: 0.75;
+}
+
 .button[data-variant="menu"] {
     width: 100%;
     border-radius: 0;
 }
 
 .button[data-variant="spotify"] {
-    background-color: var(--spotify-green);
+    --background: var(--spotify-green);
     color: var(--spotify-black) !important;
     font-weight: 700;
-}
 
-.button[data-variant="spotify"]:hover {
-    background-color: var(--spotify-green);
-    filter: brightness(110%);
+    &:hover:not(:disabled) {
+        filter: brightness(110%);
+    }
 }
 
 .content {

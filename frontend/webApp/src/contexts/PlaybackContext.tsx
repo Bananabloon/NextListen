@@ -1,5 +1,7 @@
 import { createContext, useContext, ReactNode, useState, useEffect } from "react";
 import useRequests from "../hooks/useRequests";
+import { AppError } from "../utils/errors";
+import ERRORS from "../config/errors.config";
 
 interface ContextType {
     loading: boolean;
@@ -22,6 +24,7 @@ export const PlaybackProvider = ({ children }: { children: ReactNode }) => {
     const [player, setPlayer] = useState<Spotify.Player | null>(null);
     const [currentState, setCurrentState] = useState<Spotify.PlaybackState | null>(null);
     const [loading, setLoading] = useState<boolean>(true);
+    const [error, setError] = useState<null | AppError>(null);
 
     const initiateScript = () => {
         const script = document.createElement("script");
@@ -68,7 +71,7 @@ export const PlaybackProvider = ({ children }: { children: ReactNode }) => {
         });
 
         newPlayer.addListener("account_error", ({ message }) => {
-            console.error(message);
+            setError(new AppError(ERRORS._403_PREMIUM_REQUIRED));
         });
 
         setPlayer(newPlayer);
@@ -105,6 +108,10 @@ export const PlaybackProvider = ({ children }: { children: ReactNode }) => {
 
     if (loading || !player) {
         return null;
+    }
+
+    if (error) {
+        throw error;
     }
 
     const { nextTrack, previousTrack, pause, togglePlay, resume, setVolume, getVolume, seek } = player;
