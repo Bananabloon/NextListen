@@ -2,6 +2,9 @@ from users.models import User
 from openai import OpenAI
 from django.conf import settings
 from rapidfuzz import fuzz
+import requests
+from spotifyData.services.spotifyClient import SpotifyAPI
+from constants import SPOTIFY_PLAYLIST_TRACKS_URL, SPOTIFY_PLAYLIST_URL, SPOTIFY_PLAYLIST_ID_URL
 
 GPT_MODEL = "gpt-4o"
 GPT_TEMPERATURE = 0.7
@@ -94,3 +97,32 @@ def find_best_match(
                 best_match = track
 
     return best_match
+
+def create_playlist_with_uris(user, spotify, name, description, uris):
+    user_id = spotify.get_user_profile().get("id")
+    playlist_payload = {
+        "name": name,
+        "description": description,
+        "public": False
+    }
+
+    create_response = requests.post(
+        SPOTIFY_PLAYLIST_URL.format(user_id=user_id),
+        headers=spotify.headers,
+        json=playlist_payload
+    )
+    if create_response.status_code != 201:
+        raise Exception(f"Failed to create playlist: {create_response.status_code} - {create_response.text}")
+
+    playlist_id = create_response.json().get("id")
+    for i in range(0, len(uris), 100):
+        chunk = uris[i:i + 100]
+        add_response = requests.post(
+            SPOTIFY_PLAYLIST_TRACKS_URL.format(playlist_id=playlist_id),
+            headers=spotify.headers,
+            json={"uris": chunk}
+        )
+        if add_response.status_code != 201:
+            raise Exception(f"Failed to add tracks: {add_response.status_code} - {add_response.text}")
+
+    return create_response.json().get("external_urls", {}).get("spotify") or SPOTIFY_PLAYLIST_ID_URL

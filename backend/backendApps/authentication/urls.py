@@ -1,15 +1,11 @@
 from django.urls import path
-from .views import (
-    SpotifyOAuthRedirectView,
-    SpotifyCallbackView,
-    RefreshAccessToken,
-    DeleteTokens,
-)
-
+from .views import SpotifyOAuthRedirectView, SpotifyCallbackView, ProtectedView, DeleteAccountView
+from .GET_views import get_top_artists
 
 urlpatterns = [
     path("spotify/login/", SpotifyOAuthRedirectView.as_view(), name="spotify-login"),
     path("spotify/callback/", SpotifyCallbackView.as_view(), name="spotify-callback"),
-    path("spotify/refresh-token/", RefreshAccessToken.as_view(), name="refresh-token"),
-    path("spotify/delete-tokens/", DeleteTokens.as_view(), name="delete-tokens"),
+    path("spotify/ProtectedView/", ProtectedView.as_view(), name="spotify-me-view"),
+    path('spotify/get-top-artists/', get_top_artists, name='get-top-artists'),
+    path("delete_account/", DeleteAccountView.as_view(), name="delete-account"),
 ]

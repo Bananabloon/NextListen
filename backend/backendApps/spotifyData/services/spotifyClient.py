@@ -88,9 +88,12 @@ class SpotifyAPI:
 
     def get_artist(self, artist_id: str):
         return self._get(f"/artists/{artist_id}")
-
-    def get_audio_features(self, track_id: str):
-        return self._get(f"/audio-features/{track_id}")
+    
+    def get_track(self, track_id):
+        response = requests.get(f"https://api.spotify.com/v1/tracks/{track_id}", headers=self.headers)
+        if response.status_code != 200:
+            raise Exception(f"Failed to get track info: {response.status_code} - {response.text}")
+        return response.json()
 
     def search(self, query, type="track", limit=1):
         url = f"{self.BASE_URL}/search"
@@ -114,3 +117,21 @@ class SpotifyAPI:
             raise Exception("Brak access tokena.")
 
         return self.access_token
+    
+    def transfer_playback(self, device_id: str, play: bool = True):
+        url = "https://api.spotify.com/v1/me/player"
+        headers = {"Authorization": f"Bearer {self.access_token}"}
+        data = {"device_ids": [device_id], "play": play}
+        response = requests.put(url, headers=headers, json=data)
+        return response.status_code == 204, response.text
+    
+    def start_playback(self, device_id: str, track_uri: str):
+        url = "https://api.spotify.com/v1/me/player/play"
+        headers = {"Authorization": f"Bearer {self.access_token}"}
+        data = {
+            "uris": [track_uri],
+            "offset": {"position": 0}
+        }
+        params = {"device_id": device_id}
+        response = requests.put(url, headers=headers, params=params, json=data)
+        return response.status_code in [204, 202], response.text

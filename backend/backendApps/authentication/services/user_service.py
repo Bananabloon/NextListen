@@ -1,4 +1,6 @@
-from users.models import User
+from datetime import timedelta
+from django.utils import timezone
+from users.models import User, Media, UserFeedback
 import logging
 
 logger = logging.getLogger(__name__)
@@ -20,3 +22,13 @@ class UserService:
 
         user.save()
         return user
+    
+    @staticmethod
+    def delete_user_and_related_data(user):
+        logger.info(f"Deleting user {user.id} and related data")
+
+        Media.objects.filter(userfeedback__user=user).delete()
+
+        UserFeedback.objects.filter(user=user).delete()
+
+        user.delete()

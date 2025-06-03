@@ -1,7 +1,6 @@
 from urllib.parse import urlencode
 from django.conf import settings
 from django.shortcuts import redirect
-
 from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response

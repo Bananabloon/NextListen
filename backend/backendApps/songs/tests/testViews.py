@@ -26,26 +26,24 @@ class SongViewsTestCase(APITestCase):
         self.client.force_authenticate(user=self.user)
 
     def test_song_analysis_missing_data(self):
-        response = self.client.post("/songs/analysis/", {})
+        response = self.client.post("/api/songs/analysis/", {})
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn("error", response.data)
 
     def test_song_analysis_success(self):
-        data = {"access_token": "mocked_token", "song_id": "sample_id"}
-        response = self.client.post("/songs/analysis/", data)
-        # Zewętrzne API - mocking tylko
-        self.assertIn(
-            response.status_code, [status.HTTP_200_OK, status.HTTP_400_BAD_REQUEST]
-        )
+        data = {
+            "access_token": "mocked_token",  
+            "song_id": "sample_id"
+        }
+        response = self.client.post("/api/songs/analysis/", data)
+        self.assertIn(response.status_code, [status.HTTP_200_OK, status.HTTP_400_BAD_REQUEST])
 
     def test_similar_songs_missing_data(self):
-        response = self.client.post("/songs/similar/", {})
+        response = self.client.post("/api/songs/similar/", {})
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_feedback_invalid_input(self):
-        response = self.client.post(
-            "/songs/feedback/", {"spotify_uri": "xyz", "feedback": "meh"}
-        )
+        response = self.client.post("/api/songs/feedback/", {"spotify_uri": "xyz", "feedback": "meh"})
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_feedback_success_existing_media(self):
@@ -63,7 +61,7 @@ class SongViewsTestCase(APITestCase):
 
         data = {"spotify_uri": media.spotify_uri, "feedback": "like"}
 
-        response = client.post("/songs/feedback/", data, format="json")
+        response = client.post("/api/songs/feedback/", data, format="json")
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data["status"], "ok")
@@ -83,7 +81,7 @@ class SongViewsTestCase(APITestCase):
 
         data = {"spotify_uri": spotify_uri, "feedback": "dislike"}
 
-        response = client.post("/songs/feedback/", data, format="json")
+        response = client.post("/api/songs/feedback/", data, format="json")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data["track_title"], "New Track")
         self.assertEqual(response.data["artist"], "New Artist")
@@ -96,9 +94,10 @@ class SongViewsTestCase(APITestCase):
         )
 
     def test_feedback_invalid_uri_format(self):
-        response = self.client.post(
-            "/songs/feedback/", {"spotify_uri": "", "feedback": "like"}
-        )
+        response = self.client.post("/api/songs/feedback/", {
+            "spotify_uri": "",
+            "feedback": "like"
+        })
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_feedback_none_does_not_create_feedback(self):
@@ -116,7 +115,7 @@ class SongViewsTestCase(APITestCase):
 
         data = {"spotify_uri": media.spotify_uri, "feedback": "none"}
 
-        response = client.post("/songs/feedback/", data, format="json")
+        response = client.post("/api/songs/feedback/", data, format="json")
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIn("recommendations", response.data)
