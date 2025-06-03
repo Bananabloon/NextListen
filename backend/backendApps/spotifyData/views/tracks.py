@@ -66,3 +66,34 @@ class SpotifySearchView(APIView):
             return Response({"error": "Spotify API error"}, status=response.status_code)
 
         return Response(response.json())
+
+class TransferPlaybackView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        device_id = request.data.get("device_id")
+        if not device_id:
+            return Response({"error": "Missing device_id"}, status=400)
+
+        spotify = get_spotify_instance(request.user)
+        success, error = spotify.transfer_playback(device_id)
+        if success:
+            return Response({"message": "Playback transferred successfully"})
+        return Response({"error": "Failed to transfer playback", "details": error}, status=400)
+
+
+class StartPlaybackView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        device_id = request.data.get("device_id")
+        track_uri = request.data.get("track_uri")
+
+        if not device_id or not track_uri:
+            return Response({"error": "Missing device_id or track_uri"}, status=400)
+
+        spotify = get_spotify_instance(request.user)
+        success, error = spotify.start_playback(device_id, track_uri)
+        if success:
+            return Response({"message": "Playback started"})
+        return Response({"error": "Failed to start playback", "details": error}, status=400)

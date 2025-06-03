@@ -100,3 +100,44 @@ class SpotifyDataViewsTest(APITestCase):
 
         response = self.client.get("/api/spotify/search/?q=test&type=track")
         self.assertEqual(response.status_code, 200)
+
+    @patch("spotifyData.services.spotifyClient.SpotifyAPI.transfer_playback")
+    def test_transfer_playback_success(self, mock_transfer):
+        mock_transfer.return_value = (True, None)
+        response = self.client.post("/api/spotify/playback/transfer/", {"device_id": "device123"})
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data["message"], "Playback transferred successfully")
+
+    def test_transfer_playback_missing_device_id(self):
+        response = self.client.post("/api/spotify/playback/transfer/", {})
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("error", response.data)
+
+    @patch("spotifyData.services.spotifyClient.SpotifyAPI.start_playback")
+    def test_start_playback_success(self, mock_start):
+        mock_start.return_value = (True, None)
+        response = self.client.post("/api/spotify/playback/start/", {
+            "device_id": "device123",
+            "track_uri": "spotify:track:xyz"
+        })
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data["message"], "Playback started")
+
+    def test_start_playback_missing_fields(self):
+        response = self.client.post("/api/spotify/playback/start/", {})
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("error", response.data)
+
+        response = self.client.post("/api/spotify/playback/start/", {"track_uri": "spotify:track:xyz"})
+        self.assertEqual(response.status_code, 400)
+
+        response = self.client.post("/api/spotify/playback/start/", {"device_id": "device123"})
+        self.assertEqual(response.status_code, 400)
+
+    @patch("requests.get")
+    def test_spotify_search_artist_type(self, mock_get):
+        mock_get.return_value.status_code = 200
+        mock_get.return_value.json.return_value = {"artists": {"items": []}}
+
+        response = self.client.get("/api/spotify/search/?q=test&type=artist")
+        self.assertEqual(response.status_code, 200)

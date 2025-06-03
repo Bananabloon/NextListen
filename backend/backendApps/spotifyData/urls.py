@@ -8,6 +8,8 @@ from .views.tracks import (TopTracksView,
                            CurrentlyPlayingView, 
                            SpotifySearchView,
                            AddTrackToQueueView,
+                           TransferPlaybackView,
+                           StartPlaybackView
                            )
 
 
@@ -22,4 +24,6 @@ urlpatterns = [
     path('discover/', DiscoveryGenresView.as_view()),
     path('discover/generate/', DiscoveryGenerateView.as_view()),
     path('user-stats/', UserStatsView.as_view()),
+    path('playback/transfer/', TransferPlaybackView.as_view()),
+    path('playback/start/', StartPlaybackView.as_view()),
 ]
