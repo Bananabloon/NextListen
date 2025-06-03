@@ -174,12 +174,12 @@ class AllUserFeedbacksView(APIView):
 
     def get(self, request):
         feedbacks = UserFeedback.objects.filter(user=request.user).select_related('media')
-        track_ids = [fb.media.spotify_uri.split(":")[-1] for fb in feedbacks]
-        
-        if not track_ids:
+        spotify_uris = [fb.media.spotify_uri for fb in feedbacks]
+
+        if not spotify_uris:
             return Response({"feedbacks": []})
 
-        # Podzial paczki po max 50 ID (limit Spotify)
+        # Podział paczek po max 50 URI (limit Spotify)
         def chunks(lst, n):
             for i in range(0, len(lst), n):
                 yield lst[i:i + n]
@@ -188,8 +188,8 @@ class AllUserFeedbacksView(APIView):
         headers = {"Authorization": f"Bearer {token}"}
 
         all_track_info = {}
-        for chunk_ids in chunks(track_ids, 50):
-            ids_param = ",".join(chunk_ids)
+        for chunk_uris in chunks(spotify_uris, 50):
+            ids_param = ",".join(chunk_uris)
             url = f"https://api.spotify.com/v1/tracks?ids={ids_param}"
             resp = requests.get(url, headers=headers)
 
@@ -198,7 +198,7 @@ class AllUserFeedbacksView(APIView):
 
             data = resp.json().get("tracks", [])
             for track in data:
-                all_track_info[track["id"]] = {
+                all_track_info[track["uri"]] = {
                     "title": track["name"],
                     "artist": ", ".join([a["name"] for a in track["artists"]]),
                     "album": track["album"]["name"],
@@ -210,11 +210,11 @@ class AllUserFeedbacksView(APIView):
 
         feedback_list = []
         for fb in feedbacks:
-            track_id = fb.media.spotify_uri.split(":")[-1]
-            track_info = all_track_info.get(track_id, {})
+            spotify_uri = fb.media.spotify_uri
+            track_info = all_track_info.get(spotify_uri, {})
 
             feedback_list.append({
-                "spotify_uri": fb.media.spotify_uri,
+                "spotify_uri": spotify_uri,
                 "is_liked": fb.is_liked,
                 "source": fb.source,
                 "feedback_at": fb.feedback_at,
@@ -227,7 +227,7 @@ class SingleSongFeedbackView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        spotify_uri = spotify_uri = request.data.get("spotify_uri")
+        spotify_uri = request.data.get("spotify_uri")
 
         if not spotify_uri:
             return Response({
