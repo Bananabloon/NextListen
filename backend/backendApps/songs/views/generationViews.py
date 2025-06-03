@@ -4,7 +4,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 import json
-from users.models import UserFeedback
+from users.models import UserFeedback, Media
 from spotifyData.services.spotifyClient import SpotifyAPI
 from songs.utils import should_send_curveball, extract_filters, find_best_match
 from songs.services.songGeneration import build_preferences_prompt, generate_songs_with_buffer
@@ -55,12 +55,13 @@ class GenerateQueueBase(APIView):
                 continue
         return prepared, []
 
+
     def generate_valid_songs(self, prompt, user, count):
         spotify = SpotifyAPI(user.spotify_access_token, refresh_token=user.spotify_refresh_token, user=user)
         base_prompt = "Jesteś ekspertem muzycznym."
-
+        
         multiplier = GENERATION_BUFFER_MULTIPLIER
-        requested_total_count = int(count * multiplier)  
+        requested_total_count = int(count * multiplier)
 
         try:
             all_songs, _ = generate_songs_with_buffer(prompt, base_prompt, requested_total_count)
@@ -78,22 +79,52 @@ class GenerateQueueBase(APIView):
                 tracks = spotify.search(query=query, type="track")["tracks"]["items"]
                 if not tracks:
                     logger.warning(f"[{i}] Brak wyników z Spotify dla: {query}")
+                    continue
+
+                best_match = find_best_match(tracks, song["title"], song["artist"])
+                if best_match:
+                    logger.info(f"[{i}] Znaleziono dopasowanie: {best_match['name']} by {best_match['artists'][0]['name']}")
+                    track_id = best_match["id"]
+                    track_info = spotify.get_track(track_id)
+
+                    uri = best_match["uri"]
+
+                    try:
+                        media = Media.objects.get(spotify_uri=uri)
+                        feedback_obj = UserFeedback.objects.filter(user=user, media=media).first()
+                        if feedback_obj is None or feedback_obj.is_liked is None:
+                            feedback_value = 0
+                        else:
+                            feedback_value = 1 if feedback_obj.is_liked else -1
+                    except Media.DoesNotExist:
+                        feedback_value = 0
+
+                    prepared.append({
+                        "title": song["title"],
+                        "artist": song["artist"],
+                        "uri": uri,
+                        "explicit": best_match["explicit"],
+                        "curveball": should_send_curveball(user, len(prepared) + 1),
+                        "feedback_value": feedback_value,
+                        "track_details": {
+                            "id": track_info.get("id"),
+                            "name": track_info.get("name"),
+                            "artists": [artist["name"] for artist in track_info.get("artists", [])],
+                            "album": track_info.get("album", {}).get("name"),
+                            "album_type": track_info.get("album", {}).get("album_type"),
+                            "markets": track_info.get("album", {}).get("available_markets"),
+                            "album_cover": track_info.get("album", {}).get("images", [{}])[0].get("url"),
+                            "release_date": track_info.get("album", {}).get("release_date"),
+                            "duration_ms": track_info.get("duration_ms"),
+                            "popularity": track_info.get("popularity"),
+                            "preview_url": track_info.get("preview_url"),
+                            "external_url": track_info.get("external_urls", {}).get("spotify"),
+                        }
+                    })
                 else:
-                    best_match = find_best_match(tracks, song["title"], song["artist"])
-                    if best_match:
-                        logger.info(f"[{i}] Znaleziono dopasowanie: {best_match['name']} by {best_match['artists'][0]['name']}")
-                        prepared.append({
-                            "title": song["title"],
-                            "artist": song["artist"],
-                            "uri": best_match["uri"],
-                            "explicit": best_match["explicit"],
-                            "curveball": should_send_curveball(user, len(prepared) + 1)
-                        })
-                    else:
-                        logger.warning(f"[{i}] Nie znaleziono dopasowania wśród {len(tracks)} wyników dla: {query}")
+                    logger.warning(f"[{i}] Nie znaleziono dopasowania wśród {len(tracks)} wyników dla: {query}")
             except Exception as e:
                 logger.error(f"[{i}] Błąd podczas wyszukiwania dla '{query}': {e}")
-
 
         return prepared[:count]
 
