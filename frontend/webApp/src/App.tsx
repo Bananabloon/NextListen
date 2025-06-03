@@ -6,6 +6,7 @@ import DiscoveryPage from "./pages/DiscoveryPage/DiscoveryPage";
 import AuthenticationWrapper from "./components/wrappers/AuthenticationWrapper";
 import LoginPage from "./pages/LoginPage/LoginPage";
 import BaseTemplate from "./components/templates/BaseTemplate/BaseTemplate";
+import SettingsPage from "./pages/SettingsPage/SettingsPage";
 
 const router = createBrowserRouter(
     createRoutesFromElements(
@@ -21,6 +22,10 @@ const router = createBrowserRouter(
                         element={<></>}
                     />
                 </Route>
+                <Route
+                    path="/settings"
+                    element={<SettingsPage />}
+                />
             </Route>
             <Route element={<HomeTemplate />}>
                 <Route

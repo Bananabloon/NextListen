@@ -1,0 +1,24 @@
+.accountContainer {
+    width: 800px;
+    height: 250px;
+    border-radius: 16px;
+    background-color: var(--background-color-3);
+    padding-left: var(--spacing-xl);
+    padding-top: var(--spacing-xl);
+}
+
+.userTextContainer {
+    gap: 0;
+}
+.usernameText {
+    font-size: var(--font-size-xxl);
+}
+.emailText {
+    font-size: var(--font-size-lg);
+    color: var(--text-color-dimmed);
+    margin-left: 1px;
+}
+.profilePicture {
+    margin-left: auto;
+    margin-right: 17px;
+}

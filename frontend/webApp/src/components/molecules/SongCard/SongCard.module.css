@@ -7,6 +7,9 @@
     padding: 12px;
     padding-bottom: 0;
     z-index: 2;
+    flex: 0 0 auto;
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
 }
 .cardBack {
     opacity: 0.9;
@@ -14,8 +17,26 @@
     width: calc(350 * 0.93px);
     background-color: var(--background-color-2);
 }
+.cardCurveball {
+    border: 1px solid var(--primary-color-7);
+    box-shadow: 0 0 3px var(--primary-color-7);
+    animation: curveball 5s linear infinite;
+}
+
+@keyframes curveball {
+    0% {
+        border: 1px solid var(--background-color-3);
+    }
+    50% {
+        border: 1px solid var(--primary-color-7);
+    }
+    100% {
+        border: 1px solid var(--background-color-3);
+    }
+}
+
 .cardImage {
-    width: 518px;
+    width: 100%;
     border-radius: 4px;
 }
 
@@ -27,6 +48,10 @@
     font-size: var(--font-size-md);
     color: var(--text-color-dimmed);
     font-weight: 400;
+}
+.curveballText {
+    font-size: var(--font-size-sm);
+    color: var(--primary-color-3);
 }
 
 .controlGroup {

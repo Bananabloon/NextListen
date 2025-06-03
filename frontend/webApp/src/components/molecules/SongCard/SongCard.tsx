@@ -17,6 +17,7 @@ type ImageObject = {
     width: number;
 };
 export interface Song {
+    curveball?: boolean;
     name: string;
     artists: string;
     duration_ms: number;
@@ -25,13 +26,20 @@ export interface Song {
 }
 
 const SongCard = ({ song, children, className, ...props }: SongCardProps): React.JSX.Element => {
-    console.log(song.images);
     let feedback = 0;
     let image = song.images[0];
     let imageUrl = image.url;
     return (
         <Stack
-            className={props.front ? classes.card : cs(classes.card, classes.cardBack)}
+            className={
+                props.front
+                    ? song.curveball
+                        ? cs(classes.card, classes.cardCurveball)
+                        : classes.card
+                    : song.curveball
+                      ? cs(classes.card, classes.cardBack, classes.cardCurveball)
+                      : cs(classes.card, classes.cardBack)
+            }
             {...props}
         >
             <img
@@ -39,6 +47,7 @@ const SongCard = ({ song, children, className, ...props }: SongCardProps): React
                 src={imageUrl}
             />
             <Stack style={{ gap: "0" }}>
+                {song.curveball && <p className={classes.curveballText}>Curveball</p>}
                 <p className={classes.titleText}>{song.name}</p>
                 <p className={classes.artistsText}>{song.artists}</p>
             </Stack>
