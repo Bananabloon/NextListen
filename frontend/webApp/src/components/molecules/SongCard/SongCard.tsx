@@ -1,12 +1,11 @@
-import classes from "./SongCard.module.css";
+import { IconThumbDown, IconThumbDownFilled, IconThumbUp, IconThumbUpFilled } from "@tabler/icons-react";
 import cs from "classnames";
-import { IconThumbDown } from "@tabler/icons-react";
-import { IconThumbUp } from "@tabler/icons-react";
-import IconButton from "../../atoms/IconButton/IconButton";
 import Group from "../../atoms/Group/Group";
+import IconButton from "../../atoms/IconButton/IconButton";
 import Stack from "../../atoms/Stack/Stack";
-import { IconThumbDownFilled } from "@tabler/icons-react";
-import { IconThumbUpFilled } from "@tabler/icons-react";
+import classes from "./SongCard.module.css";
+import ScrollingText from "../../atoms/ScrollingText/ScrollingText";
+
 interface SongCardProps extends React.HTMLAttributes<HTMLDivElement> {
     song: Song;
     front?: boolean;
@@ -29,6 +28,7 @@ const SongCard = ({ song, children, className, ...props }: SongCardProps): React
     let feedback = 0;
     let image = song.images[0];
     let imageUrl = image.url;
+
     return (
         <Stack
             className={
@@ -46,9 +46,11 @@ const SongCard = ({ song, children, className, ...props }: SongCardProps): React
                 className={classes.cardImage}
                 src={imageUrl}
             />
-            <Stack style={{ gap: "0" }}>
+            <Stack className={classes.metadata}>
                 {song.curveball && <p className={classes.curveballText}>Curveball</p>}
-                <p className={classes.titleText}>{song.name}</p>
+                <ScrollingText speed={60}>
+                    <p className={classes.titleText}>{song.name}</p>
+                </ScrollingText>
                 <p className={classes.artistsText}>{song.artists}</p>
             </Stack>
             <Group className={classes.controlGroup}>
