@@ -6,7 +6,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework_simplejwt.exceptions import TokenError
 from rest_framework.permissions import IsAuthenticated, AllowAny
-
+from users.models import Media, UserFeedback  
 
 from .services.spotify_service import SpotifyService
 from .services.spotify_auth_service import SpotifyAuthService
@@ -97,3 +97,36 @@ class DeleteTokens(APIView):
         TokenService.delete_cookie_refresh_token(response)
 
         return response
+
+class DeleteAccountView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def delete(self, request):
+        user = request.user
+
+        media_ids = UserFeedback.objects.filter(user=user).values_list('media_id', flat=True)
+        Media.objects.filter(id__in=media_ids).delete()
+        UserFeedback.objects.filter(user=user).delete()
+        
+        user.delete()
+
+        response = Response(
+            {"detail": "Account and related data deleted."}, status=status.HTTP_204_NO_CONTENT
+        )
+        TokenService.delete_cookie_access_token(response)
+        TokenService.delete_cookie_refresh_token(response)
+
+        return response
+
+
+class DeleteUserDataView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def delete(self, request):
+        user = request.user
+
+        media_ids = UserFeedback.objects.filter(user=user).values_list('media_id', flat=True)
+        Media.objects.filter(id__in=media_ids).delete()
+        UserFeedback.objects.filter(user=user).delete()
+
+        return Response({"detail": "User data deleted."}, status=status.HTTP_200_OK)

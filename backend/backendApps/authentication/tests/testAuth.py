@@ -1,8 +1,9 @@
 from rest_framework.test import APITestCase
 from ..services.user_service import UserService
 from users.models import User, Media, UserFeedback
-from ..services.spotify_auth_service import CustomRefreshToken
+from ..services.token_service import CustomRefreshToken
 from unittest.mock import patch
+from rest_framework import status
 
 class SpotifyOAuthTests(APITestCase):
     def test_login_without_token(self):
@@ -76,4 +77,61 @@ class DeleteAccountTests(APITestCase):
     def test_unauthenticated_delete_returns_401(self):
         self.client.credentials()
         response = self.client.delete("/api/auth/delete_account/")
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+class DeleteAccountViewTests(APITestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(
+            spotify_user_id="spotify123",
+            display_name="UserToDelete"
+        )
+        self.token = CustomRefreshToken.for_user(self.user).access_token
+        self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {self.token}")
+
+        self.media = Media.objects.create(
+            spotify_uri="spotify:track:123",
+            title="test media",
+            artist_name="Test Artist",
+            media_type="song"
+        )
+        UserFeedback.objects.create(user=self.user, media=self.media, is_liked=True)
+
+    def test_delete_account_successfully(self):
+        response = self.client.delete("/api/auth/delete_account/")
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertFalse(User.objects.filter(id=self.user.id).exists())
+        self.assertEqual(UserFeedback.objects.filter(user=self.user).count(), 0)
+        self.assertEqual(Media.objects.filter(id=self.media.id).count(), 0)
+
+    def test_delete_account_unauthenticated(self):
+        self.client.credentials()
+        response = self.client.delete("/api/auth/delete_account/")
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+class DeleteUserDataViewTests(APITestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(
+            spotify_user_id="spotify456",
+            display_name="UserToClean"
+        )
+        self.token = CustomRefreshToken.for_user(self.user).access_token
+        self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {self.token}")
+
+        self.media = Media.objects.create(
+            spotify_uri="spotify:track:456",
+            title="test media",
+            artist_name="Test Artist",
+            media_type="song"
+        )
+        UserFeedback.objects.create(user=self.user, media=self.media, is_liked=False)
+
+    def test_delete_user_data_successfully(self):
+        response = self.client.delete("/api/auth/delete_user_data/")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(UserFeedback.objects.filter(user=self.user).count(), 0)
+        self.assertEqual(Media.objects.filter(id=self.media.id).count(), 0)
+
+    def test_delete_user_data_unauthenticated(self):
+        self.client.credentials()
+        response = self.client.delete("/api/auth/delete_user_data/")
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
