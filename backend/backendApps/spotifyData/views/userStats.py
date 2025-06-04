@@ -52,3 +52,4 @@ class UserStatsView(APIView):
             "most_common_media_type": most_common_type[0][0] if most_common_type else None,
             "recent_top_genres": recent_top_genres,
         })
+

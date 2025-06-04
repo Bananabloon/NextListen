@@ -12,6 +12,7 @@ from constants import GENERATION_BUFFER_MULTIPLIER
 logger = logging.getLogger(__name__)
 from constants import GENERATION_BUFFER_MULTIPLIER
 
+
 class GenerateQueueBase(APIView):
     permission_classes = [IsAuthenticated]
 

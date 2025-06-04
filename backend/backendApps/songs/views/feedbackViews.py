@@ -9,7 +9,6 @@ import requests
 
 from constants import SPOTIFY_TRACK_URL
 
-
 class UserFeedbackView(APIView):
     permission_classes = [IsAuthenticated]
 
