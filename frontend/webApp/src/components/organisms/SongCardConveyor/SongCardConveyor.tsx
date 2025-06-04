@@ -4,8 +4,6 @@ import Group from "../../atoms/Group/Group";
 import SongCard from "../../molecules/SongCard/SongCard";
 import type { Song } from "../../molecules/SongCard/SongCard";
 import { useState } from "react";
-// import { motion } from "motion/react";
-// import { useAnimate } from "motion/react";
 let emptySong = {
     name: "None",
     artists: "None",

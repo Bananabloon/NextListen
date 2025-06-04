@@ -17,8 +17,7 @@ const StatsDisplay = ({ children, className, ...props }: StatsDisplayProps): Rea
                 <Group>
                     <Stack>
                         <h1 className={classes.title}>User Stats</h1>
-                        <h2 className={classes.categoryName}>Swipes</h2>
-                        <p className={classes.statText}>Songs swiped: </p>
+                        <h2 className={classes.categoryName}>Reactions</h2>
                         <Group>
                             <p className={classes.statText}>Songs liked: </p>
                             <IconThumbUpFilled color="#1ED760" />

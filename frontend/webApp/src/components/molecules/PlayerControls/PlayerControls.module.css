@@ -1,0 +1,7 @@
+.generateQueueButton {
+    position: absolute;
+    margin-right: auto;
+    height: 60px;
+    align-self: center;
+    margin: 15px;
+}

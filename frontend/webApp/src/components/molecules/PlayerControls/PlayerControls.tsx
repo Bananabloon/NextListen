@@ -15,7 +15,10 @@ import { usePlayback } from "../../../contexts/PlaybackContext";
 import { useEffect, useState } from "react";
 import useRequests from "../../../hooks/useRequests";
 import { Feedback } from "../../../types/api.types";
-
+import VolumeSeekBar from "../../atoms/VolumeSeekBar/VolumeSeekBar";
+import Button from "../../atoms/Button/Button";
+import classes from "./PlayerControls.module.css";
+import Portal from "../../atoms/Portal/Portal";
 const PlayerControls = ({ ...props }): React.JSX.Element => {
     const { currentState, previousTrack, nextTrack, togglePlay } = usePlayback();
     const [feedback, setFeedback] = useState<Feedback>(0);
@@ -35,77 +38,68 @@ const PlayerControls = ({ ...props }): React.JSX.Element => {
     };
 
     return (
-        <Group {...props}>
-            <IconButton
-                size="md"
-                variant="transparent"
-            >
-                {feedback === -1 ? (
-                    <IconThumbDownFilled style={{ transform: "scaleX(-1) translateY(2px)" }} />
-                ) : (
-                    <IconThumbDown style={{ transform: "scaleX(-1) translateY(2px)" }} />
-                )}
-            </IconButton>
-            <IconButton
-                size="md"
-                variant="transparent"
-            >
-                {feedback === 1 ? (
-                    <IconThumbUpFilled
-                        style={{
-                            transform: "translateY(-2px)",
-                        }}
-                    />
-                ) : (
-                    <IconThumbUp
-                        style={{
-                            transform: "translateY(-2px)",
-                        }}
-                    />
-                )}
-            </IconButton>
-            <IconButton
-                size="md"
-                variant="transparent"
-                onClick={() => previousTrack()}
-            >
-                <IconPlayerTrackPrevFilled />
-            </IconButton>
-            <IconButton
-                size="sm"
-                variant="filled"
-                style={{ borderRadius: "50%" }}
-                onClick={() => togglePlay()}
-            >
-                {currentState?.paused ? <IconPlayerPlayFilled /> : <IconPlayerPauseFilled />}
-            </IconButton>
-            <IconButton
-                size="md"
-                variant="transparent"
-                onClick={() => nextTrack()}
-            >
-                <IconPlayerTrackNextFilled />
-            </IconButton>
-            <IconButton
-                size="md"
-                variant="transparent"
-            >
-                <img src={`/icons/spotify/like-icon-like${false ? "d" : ""}.svg`} />
-            </IconButton>
-            <IconButton
-                size="md"
-                variant="transparent"
-            >
-                {false ? (
-                    <IconRocket />
-                ) : (
-                    <img
-                        src={`/icons/tabler/rocket-x.svg`}
-                        style={{ filter: "invert(100%)" }}
-                    />
-                )}
-            </IconButton>
-        </Group>
+        <>
+            <Group {...props}>
+                <div style={{ width: "80px" }}></div>
+                <IconButton
+                    size="md"
+                    variant="transparent"
+                >
+                    {feedback === -1 ? (
+                        <IconThumbDownFilled style={{ transform: "scaleX(-1) translateY(2px)" }} />
+                    ) : (
+                        <IconThumbDown style={{ transform: "scaleX(-1) translateY(2px)" }} />
+                    )}
+                </IconButton>
+                <IconButton
+                    size="md"
+                    variant="transparent"
+                >
+                    {feedback === 1 ? (
+                        <IconThumbUpFilled
+                            style={{
+                                transform: "translateY(-2px)",
+                            }}
+                        />
+                    ) : (
+                        <IconThumbUp
+                            style={{
+                                transform: "translateY(-2px)",
+                            }}
+                        />
+                    )}
+                </IconButton>
+                <IconButton
+                    size="md"
+                    variant="transparent"
+                    onClick={() => previousTrack()}
+                >
+                    <IconPlayerTrackPrevFilled />
+                </IconButton>
+                <IconButton
+                    size="sm"
+                    variant="filled"
+                    style={{ borderRadius: "50%" }}
+                    onClick={() => togglePlay()}
+                >
+                    {currentState?.paused ? <IconPlayerPlayFilled /> : <IconPlayerPauseFilled />}
+                </IconButton>
+                <IconButton
+                    size="md"
+                    variant="transparent"
+                    onClick={() => nextTrack()}
+                >
+                    <IconPlayerTrackNextFilled />
+                </IconButton>
+                <IconButton
+                    size="md"
+                    variant="transparent"
+                >
+                    <img src={`/icons/spotify/like-icon-like${false ? "d" : ""}.svg`} />
+                </IconButton>
+                <VolumeSeekBar />
+            </Group>
+        </>
     );
 };
 

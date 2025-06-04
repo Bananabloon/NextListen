@@ -1,5 +1,4 @@
 import Group from "../../atoms/Group/Group";
-import IconButton from "../../atoms/IconButton/IconButton";
 import classes from "./Footer.module.css";
 import PlayerSeekBar from "../../atoms/PlayerSeekBar/PlayerSeekBar";
 import PlayerControls from "../../molecules/PlayerControls/PlayerControls";

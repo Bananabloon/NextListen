@@ -1,7 +1,45 @@
-.container {
+.backgroundIcon {
+    position: absolute;
+    opacity: 0.3;
+    align-self: center;
     justify-content: center;
+    width: 100%;
+    height: 800px;
+    margin-top: 20px;
+}
+@keyframes pulse {
+    0% {
+        box-shadow: 0 0 5px white;
+    }
+    50% {
+        box-shadow: 0 0 10px var(--spotify-green);
+    }
+    100% {
+        box-shadow: none;
+    }
+}
+.loginButton {
+    animation: pulse 4s infinite linear;
+}
+.title {
+    padding: var(--spacing-xxxl) var(--spacing-xxxl);
+    font-size: var(--font-size-xxl);
+}
+.introText {
+    text-align: center;
+    font-size: var(--font-size-xxl);
+    font-weight: 600;
+}
+.descriptionText {
+    font-size: var(--font-size-lg);
+    font-weight: 300;
+    padding-bottom: 10px;
+}
+
+.container {
+    margin-top: 220px;
+    justify-content: flex-start;
     align-items: center;
-    height: 100%;
 }
 
 .container > * {
