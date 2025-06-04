@@ -10,8 +10,8 @@ urlpatterns = [
     path('generate-from-top/', GenerateFromTopView.as_view()),
     path('generate-from-artist/', GenerateFromArtistsView.as_view()),
     path('create-liked-playlist/', CreateLikedPlaylistsView.as_view()),
-    path('feedback/', SongFeedbackView.as_view(), name="make-feedback"),
+    path('feedback/update', SongFeedbackView.as_view(), name="make-feedback"),
     path("generate-queue-from-prompt/", GenerateQueueFromPromptView.as_view(), name="queue-from-prompt"),
     path("generate-playlist-from-prompt/", CreatePlaylistFromPromptView.as_view(), name="playlist-from-prompt"),
-    path("song-feedback/", SingleSongFeedbackView.as_view(), name="get-feedback")
+    path("feedback/", SingleSongFeedbackView.as_view(), name="get-feedback")
 ]

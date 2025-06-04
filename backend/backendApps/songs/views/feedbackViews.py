@@ -9,7 +9,6 @@ import requests
 
 from constants import SPOTIFY_TRACK_URL
 
-
 class UserFeedbackView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -230,7 +229,7 @@ class SingleSongFeedbackView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        spotify_uri = request.data.get("spotify_uri")
+        spotify_uri = request.query_params.get("spotify_uri")
 
         if not spotify_uri:
             return Response({
