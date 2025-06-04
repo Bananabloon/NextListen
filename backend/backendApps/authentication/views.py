@@ -6,12 +6,14 @@ from rest_framework_simplejwt.exceptions import TokenError, InvalidToken
 from django.shortcuts import redirect
 from urllib.parse import urlencode
 from drf_spectacular.utils import extend_schema, OpenApiResponse
+from users.models import Media, UserFeedback
 
 from .services.spotify_service import SpotifyService
 from .services.spotify_auth_service import SpotifyAuthService
 from .services.token_service import TokenService, CustomRefreshToken
 from constants import SPOTIFY_AUTHORIZE_URL
 from django.conf import settings
+
 
 from .serializers import (
     TokenRefreshResponseSerializer,
@@ -133,3 +135,42 @@ class DeleteTokens(APIView):
         TokenService.delete_cookie_access_token(response)
         TokenService.delete_cookie_refresh_token(response)
         return response
+
+
+class DeleteAccountView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def delete(self, request):
+        user = request.user
+
+        media_ids = UserFeedback.objects.filter(user=user).values_list(
+            "media_id", flat=True
+        )
+        Media.objects.filter(id__in=media_ids).delete()
+        UserFeedback.objects.filter(user=user).delete()
+
+        user.delete()
+
+        response = Response(
+            {"detail": "Account and related data deleted."},
+            status=status.HTTP_204_NO_CONTENT,
+        )
+        TokenService.delete_cookie_access_token(response)
+        TokenService.delete_cookie_refresh_token(response)
+
+        return response
+
+
+class DeleteUserDataView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def delete(self, request):
+        user = request.user
+
+        media_ids = UserFeedback.objects.filter(user=user).values_list(
+            "media_id", flat=True
+        )
+        Media.objects.filter(id__in=media_ids).delete()
+        UserFeedback.objects.filter(user=user).delete()
+
+        return Response({"detail": "User data deleted."}, status=status.HTTP_200_OK)
