@@ -2,6 +2,7 @@ import { createContext, useContext, ReactNode, useState, useEffect } from "react
 import useRequests from "../hooks/useRequests";
 import { AppError } from "../utils/errors";
 import ERRORS from "../config/errors.config";
+import { isNull } from "lodash";
 
 interface ContextType {
     loading: boolean;
@@ -25,6 +26,7 @@ export const PlaybackProvider = ({ children }: { children: ReactNode }) => {
     const [currentState, setCurrentState] = useState<Spotify.PlaybackState | null>(null);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<null | AppError>(null);
+    const [deviceId, setDeviceId] = useState<string | null>(null);
 
     const initiateScript = () => {
         const script = document.createElement("script");
@@ -56,10 +58,12 @@ export const PlaybackProvider = ({ children }: { children: ReactNode }) => {
 
         newPlayer.addListener("ready", ({ device_id }) => {
             console.log("Ready with Device ID", device_id);
+            setDeviceId(device_id);
         });
 
         newPlayer.addListener("not_ready", ({ device_id }) => {
             console.log("Device ID has gone offline", device_id);
+            setDeviceId(null);
         });
 
         newPlayer.addListener("initialization_error", ({ message }) => {
@@ -114,7 +118,25 @@ export const PlaybackProvider = ({ children }: { children: ReactNode }) => {
         throw error;
     }
 
-    const { nextTrack, previousTrack, pause, togglePlay, resume, setVolume, getVolume, seek } = player;
+    const { nextTrack, previousTrack, pause, setVolume, getVolume, seek } = player;
+
+    const transferPlayback = async () =>
+        await sendRequest("POST", "spotify/playback/transfer/", { body: JSON.stringify({ device_id: deviceId }) });
+
+    const togglePlay = async () => {
+        console.log(deviceId);
+        if (isNull(currentState)) {
+            await transferPlayback();
+        }
+        return await player.togglePlay();
+    };
+
+    const resume = async () => {
+        if (isNull(currentState)) {
+            await transferPlayback();
+        }
+        return await player.resume();
+    };
 
     const addToQueue = (uri: string) => {};
 

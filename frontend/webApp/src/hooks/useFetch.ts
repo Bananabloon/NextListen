@@ -35,7 +35,7 @@ const useFetch = (path: string, options: object | undefined = undefined, cleanBe
             setLoading(false);
         };
         fetchData();
-    }, [path, options, refreshValue]);
+    }, [path, JSON.stringify(options), refreshValue]);
 
     return { loading, error, data, refresh };
 };

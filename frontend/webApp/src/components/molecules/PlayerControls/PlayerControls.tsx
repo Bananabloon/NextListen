@@ -22,25 +22,19 @@ const PlayerControls = ({ ...props }): React.JSX.Element => {
     const { sendRequest } = useRequests();
 
     useEffect(() => {
-        sendRequest(
-            "GET",
-            "songs/song-feedback",
-            JSON.stringify({ body: { spotify_uri: currentState?.track_window.current_track.uri } }) as RequestInit
-        ).then((data) => setFeedback(data?.feedback_value ?? 0));
+        sendRequest("GET", "songs/song-feedback", {
+            body: JSON.stringify({ spotify_uri: currentState?.track_window.current_track.uri }),
+        } as RequestInit).then((data) => {
+            console.log(data);
+            setFeedback(data?.feedback_value ?? 0);
+        });
     }, [currentState?.track_window.current_track.uri]);
 
     const updateFeedback = (value: Feedback) => {
         setFeedback(value);
-        sendRequest(
-            "POST",
-            "songs/song-feedback",
-            JSON.stringify({
-                body: {
-                    spotify_uri: currentState?.track_window.current_track.uri,
-                    feedback: value,
-                },
-            }) as RequestInit
-        );
+        sendRequest("POST", "songs/song-feedback", {
+            body: JSON.stringify({ spotify_uri: currentState?.track_window.current_track.uri }),
+        } as RequestInit);
     };
 
     return (

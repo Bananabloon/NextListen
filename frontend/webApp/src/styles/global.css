@@ -5,7 +5,10 @@
 
 :root {
     background-color: var(--background-color-1);
+    height: 100vh;
 }
+
+/* SCROLLBARS */
 
 /* Webkit */
 ::-webkit-scrollbar {
@@ -26,4 +29,17 @@
 * {
     scrollbar-width: thin;
     scrollbar-color: var(--scrollbar-color) var(--scrollbar-background-color);
+}
+
+/* TESTS */
+
+#test-y {
+    position: fixed;
+    left: 50%;
+    top: 0;
+    z-index: 100;
+    height: 100vh;
+    width: 5px;
+    background-color: red;
+    transform: translateX(-50%);
 }

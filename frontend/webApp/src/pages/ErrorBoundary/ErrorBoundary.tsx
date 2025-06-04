@@ -15,8 +15,8 @@ const ErrorBoundary = (): React.JSX.Element => {
     const status = error?.status || 600;
     const variant = error?.variant;
     const errorConfig: ErrorConfig = getError(status, variant);
-    const message = error?.overrideMessage ? error.message : errorConfig.message || error.message || "";
-    const title = error?.overrideTitle ? error.title : errorConfig.title || error.title || "";
+    const message = error?.overrideMessage ? error?.message : errorConfig?.message || error?.message || "";
+    const title = error?.overrideTitle ? error?.title : errorConfig?.title || error?.title || "";
 
     const logout = async () => {
         await sendRequest("POST", "/auth/spotify/delete-tokens");

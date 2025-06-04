@@ -1,166 +1,133 @@
 import classes from "./SongCardConveyor.module.css";
 import cs from "classnames";
-import Group from "../../atoms/Group/Group";
 import SongCard from "../../molecules/SongCard/SongCard";
-import type { Song } from "../../molecules/SongCard/SongCard";
-import { useState } from "react";
-// import { motion } from "motion/react";
-// import { useAnimate } from "motion/react";
-let emptySong = {
-    name: "None",
-    artists: "None",
-    duration_ms: 0,
-    uri: "",
-    images: [
-        {
-            url: "https://encycolorpedia.pl/000000.png",
-            height: 640,
-            width: 640,
-        },
-    ],
-};
+import React, { useEffect, useState } from "react";
+import useRequests from "../../../hooks/useRequests";
+import { GeneratedSong } from "../../../types/api.types";
+import { remToPx } from "css-unit-converter-js";
+import ScrollContainer from "react-indiana-drag-scroll";
+import { useElementSize } from "@mantine/hooks";
+import { isEmpty } from "lodash";
+import { SyncLoader } from "react-spinners";
 
-let songs: Song[] = [
-    {
-        name: "NASAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
-        artists: "Ariana Grande",
-        duration_ms: 3000,
-        uri: "spotify:track:4uTvPEr01pjTbZgl7jcKBD",
-        images: [
-            {
-                url: "https://i.scdn.co/image/ab67616d0000b27356ac7b86e090f307e218e9c8",
-                height: 640,
-                width: 640,
-            },
-        ],
-    },
-    {
-        name: "break up with your girlfriend, i'm bored",
-        artists: "Ariana Grande",
-        duration_ms: 3000,
-        uri: "spotify:track:4kV4N9D1iKVxx1KLvtTpjS?si=c006601dda004822",
-        images: [
-            {
-                url: "https://i.scdn.co/image/ab67616d0000b27356ac7b86e090f307e218e9c8",
-                height: 640,
-                width: 640,
-            },
-        ],
-    },
-    {
-        curveball: true,
-        name: "thank u, next",
-        artists: "Ariana Grande",
-        duration_ms: 3000,
-        uri: "spotify:track:3e9HZxeyfWwjeyPAMmWSSQ?si=9e111d14c16b4503",
-        images: [
-            {
-                url: "https://i.scdn.co/image/ab67616d0000b27356ac7b86e090f307e218e9c8",
-                height: 640,
-                width: 640,
-            },
-        ],
-    },
-    {
-        name: "imagine",
-        artists: "Ariana Grande",
-        duration_ms: 3000,
-        uri: "spotify:track:39LmTF9RgyakzSYX8txrow?si=76a085f58b1442f4",
-        images: [
-            {
-                url: "https://i.scdn.co/image/ab67616d0000b27356ac7b86e090f307e218e9c8",
-                height: 640,
-                width: 640,
-            },
-        ],
-    },
-    {
-        name: "7 rings",
-        artists: "Ariana Grande",
-        duration_ms: 3000,
-        uri: "spotify:track:6ocbgoVGwYJhOv1GgI9NsF?si=9783d66855814298",
-        images: [
-            {
-                url: "https://i.scdn.co/image/ab67616d0000b27356ac7b86e090f307e218e9c8",
-                height: 640,
-                width: 640,
-            },
-        ],
-    },
-    {
-        name: "breathin",
-        artists: "Ariana Grande",
-        duration_ms: 3000,
-        uri: "spotify:track:4OafepJy2teCjYJbvFE60J?si=997caa5ef7c345a0",
-        images: [
-            {
-                url: "https://cdn-images.dzcdn.net/images/cover/8a5d4fa5c1b97100bf128909d766f06f/0x1900-000000-80-0-0.jpg",
-                height: 640,
-                width: 640,
-            },
-        ],
-    },
-    {
-        name: "R.E.M",
-        artists: "Ariana Grande",
-        duration_ms: 3000,
-        uri: "spotify:track:1xWH8zYtDeS9mW1JJG23VZ?si=6faa8f8c0eab4208",
-        images: [
-            {
-                url: "https://cdn-images.dzcdn.net/images/cover/8a5d4fa5c1b97100bf128909d766f06f/0x1900-000000-80-0-0.jpg",
-                height: 640,
-                width: 640,
-            },
-        ],
-    },
-    {
-        name: "God is a woman",
-        artists: "Ariana Grande",
-        duration_ms: 3000,
-        uri: "spotify:track:5OCJzvD7sykQEKHH7qAC3C?si=d9e4b5f23b27421c",
-        images: [
-            {
-                url: "https://cdn-images.dzcdn.net/images/cover/8a5d4fa5c1b97100bf128909d766f06f/0x1900-000000-80-0-0.jpg",
-                height: 640,
-                width: 640,
-            },
-        ],
-    },
-];
 interface SongCardConveyorProps extends React.HTMLAttributes<HTMLDivElement> {}
-const getSongs = async () => {
-    //
-};
+
 const SongCardConveyor = ({ children, className, ...props }: SongCardConveyorProps): React.JSX.Element => {
-    const [currentCardUri, setCurrentCardUri] = useState(songs[2].uri);
-    // const [scope, animate] = useAnimate();
-    const songCards = songs.map((song) => (
+    const [songs, setSongs] = useState<GeneratedSong[]>([]);
+    const [loading, setLoading] = useState<boolean>(false);
+    const [selectedIndex, setSelectedIndex] = useState<number>(0);
+    const { width, ref } = useElementSize();
+    const { sendRequest } = useRequests();
+
+    const getDimensions = () => {
+        const container = ref.current!;
+        const styles = getComputedStyle(container);
+
+        return {
+            cardWidth: container.querySelector('*[data-selected="false"]')?.getBoundingClientRect().width ?? 0,
+            selectedCardWidth: container.querySelector('*[data-selected="true"]')?.getBoundingClientRect().width ?? 0,
+            containerGap: remToPx(parseFloat(styles.getPropertyValue("--conveyor-gap"))),
+            scrollCenter: container.scrollLeft + container.clientWidth / 2,
+            containerWidth: container.clientWidth,
+        };
+    };
+
+    // sets currently focused
+    const updateFocus = () => {
+        const { cardWidth, selectedCardWidth, containerGap, scrollCenter } = getDimensions();
+        const currentSnap = Math.floor(
+            (scrollCenter - cardWidth - selectedCardWidth - 2.5 * containerGap) / (containerGap + cardWidth)
+        );
+        setSelectedIndex(currentSnap);
+    };
+
+    // manual snap implementation due to using grabbable scroll
+    const snap = (toIndex: number) => {
+        const { cardWidth, selectedCardWidth, containerGap, containerWidth } = getDimensions();
+        const snapPoint =
+            (toIndex + 2) * (cardWidth + containerGap) + containerGap + selectedCardWidth / 2 - containerWidth / 2;
+        ref.current.scrollTo({ left: snapPoint, behavior: "smooth" });
+    };
+
+    const onScroll = () => {
+        if (ref.current) updateFocus();
+    };
+
+    const onEndScroll = () => {
+        if (ref.current) snap(selectedIndex);
+    };
+
+    const playSong = () => {};
+
+    useEffect(() => {
+        if (ref.current) snap(selectedIndex);
+    }, [width]);
+
+    useEffect(() => {
+        if (isEmpty(songs)) {
+            setLoading(true);
+            sendRequest("POST", "/songs/generate-from-top/", { body: JSON.stringify({ count: 10 }) }).then((data) => {
+                setSongs(data?.songs ?? []);
+                setLoading(false);
+            });
+        }
+    }, []);
+
+    useEffect(() => {}, [selectedIndex]);
+
+    const emptySongCard = (
         <SongCard
-            key={song.uri}
-            className={classes.card}
+            song={{} as GeneratedSong}
+            style={{ visibility: "hidden" }}
+        />
+    );
+
+    const songCards = songs.map((song, i) => (
+        <SongCard
+            key={i}
             song={song}
-            front={song.uri === currentCardUri}
+            onClick={() => snap(i)}
+            isSelected={i === selectedIndex}
             style={{
                 marginLeft: song.uri === songs[0].uri ? "auto" : "0",
                 marginRight: song.uri === songs[songs.length - 1].uri ? "auto" : "0",
             }}
         />
     ));
+
     return (
         <div
             className={cs(classes.conveyor, className)}
             {...props}
+            draggable="false"
         >
-            <div className={classes.conveyorShadow}></div>
-            <Group
-                className={classes.cards}
-                style={{
-                    gap: "40px",
-                    marginBottom: "150px",
-                }}
+            {loading && (
+                <SyncLoader
+                    style={{
+                        position: "absolute",
+                        top: "50%",
+                        left: "50%",
+                        transform: "translate(-50%, -50%)",
+                        zIndex: 100,
+                    }}
+                    color="white"
+                />
+            )}
+            <ScrollContainer
+                horizontal
+                vertical={false}
+                onScroll={onScroll}
+                onEndScroll={onEndScroll}
+                className={cs(classes.cards, "scroll-container")}
+                innerRef={ref}
             >
+                {emptySongCard}
+                {emptySongCard}
                 {songCards}
-            </Group>
+                {emptySongCard}
+                {emptySongCard}
+            </ScrollContainer>
+            <div className={classes.conveyorShadow} />
         </div>
     );
 };

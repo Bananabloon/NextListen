@@ -1,4 +1,4 @@
-import { BounceLoader, RiseLoader, SyncLoader } from "react-spinners";
+import { SyncLoader } from "react-spinners";
 import classes from "./LoadingOverlay.module.css";
 import cs from "classnames";
 

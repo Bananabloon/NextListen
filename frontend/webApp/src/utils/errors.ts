@@ -25,7 +25,7 @@ export class AppError extends Error {
 
             const errorConfig: ErrorConfig = ERRORS[getErrorKey(response.status, variant)];
 
-            this.status = errorConfig.code || response.status;
+            this.status = errorConfig?.code || response.status;
             this.message = errorConfig.message;
             this.title = errorConfig.title;
             this.variant = variant || DEFAULT_VARIANTS[response.status];

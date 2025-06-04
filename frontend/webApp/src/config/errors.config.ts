@@ -59,6 +59,7 @@ export const DEFAULT_VARIANTS: Record<number, string> = {
     404: "NOT_FOUND",
     429: "RATE_LIMITED",
     500: "INTERNAL_ERROR",
+    600: "CLIENT_RENDER_ERROR",
 };
 
 export const getErrorKey = (code: number, variant?: string) => {
