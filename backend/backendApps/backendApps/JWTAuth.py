@@ -1,8 +1,9 @@
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
+
 class CookieJWTAuthentication(JWTAuthentication):
     def authenticate(self, request):
-        access_token = request.COOKIES.get('NextListen_access_token')
+        access_token = request.COOKIES.get("NextListen_access_token")
 
         if access_token is None:
             return None

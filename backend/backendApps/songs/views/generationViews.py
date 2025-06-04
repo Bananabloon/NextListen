@@ -1,5 +1,3 @@
-from django.conf import settings
-from django.shortcuts import render
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
@@ -9,6 +7,8 @@ from spotifyData.services.spotifyClient import SpotifyAPI
 from songs.utils import should_send_curveball, extract_filters, find_best_match
 from songs.services.songGeneration import build_preferences_prompt, generate_songs_with_buffer
 import logging
+from constants import GENERATION_BUFFER_MULTIPLIER
+
 logger = logging.getLogger(__name__)
 from constants import GENERATION_BUFFER_MULTIPLIER
 
@@ -45,12 +45,14 @@ class GenerateQueueBase(APIView):
                 tracks = spotify.search(query=query, type="track")["tracks"]["items"]
                 best_match = find_best_match(tracks, song["title"], song["artist"])
                 if best_match:
-                    prepared.append({
-                        "title": song["title"],
-                        "artist": song["artist"],
-                        "uri": best_match["uri"],
-                        "explicit": best_match["explicit"]
-                    })
+                    prepared.append(
+                        {
+                            "title": song["title"],
+                            "artist": song["artist"],
+                            "uri": best_match["uri"],
+                            "explicit": best_match["explicit"],
+                        }
+                    )
             except Exception:
                 continue
         return prepared, []
@@ -64,7 +66,9 @@ class GenerateQueueBase(APIView):
         requested_total_count = int(count * multiplier)
 
         try:
-            all_songs, _ = generate_songs_with_buffer(prompt, base_prompt, requested_total_count)
+            all_songs, _ = generate_songs_with_buffer(
+                prompt, base_prompt, requested_total_count
+            )
         except Exception as e:
             raise ValueError("Nie udało się pobrać odpowiedzi z OpenAI") from e
 
@@ -139,7 +143,9 @@ class BaseGenerateView(GenerateQueueBase):
         user = request.user
         count = int(request.data.get("count", 0))
         if count <= 0:
-            return Response({"error": "count is required and must be positive"}, status=400)
+            return Response(
+                {"error": "count is required and must be positive"}, status=400
+            )
 
         try:
             prompt = self.get_prompt(user, request.data)
@@ -174,18 +180,26 @@ class GenerateQueueView(BaseGenerateView):
           {{"title": "tytuł", "artist": "artysta"}}
         ]
         """
-        return prompt 
-    
+        return prompt
+
+
 class GenerateFromTopView(BaseGenerateView):
     def get_prompt(self, user, data):
         count = data.get("count")
         filter_str = extract_filters(data)
         preferences = self.get_user_preferences(user)
-        spotify = SpotifyAPI(user.spotify_access_token, refresh_token=user.spotify_refresh_token, user=user)
+        spotify = SpotifyAPI(
+            user.spotify_access_token,
+            refresh_token=user.spotify_refresh_token,
+            user=user,
+        )
 
-        top_tracks = [f"{t['name']} by {t['artists'][0]['name']}" for t in spotify.get_top_tracks().get("items", [])]
+        top_tracks = [
+            f"{t['name']} by {t['artists'][0]['name']}"
+            for t in spotify.get_top_tracks().get("items", [])
+        ]
         top_artists = [a["name"] for a in spotify.get_top_artists().get("items", [])]
-        
+
         if not top_tracks and not top_artists:
             raise ValueError("Brak danych o ulubionych utworach lub artystach")
         if not count:
@@ -210,7 +224,8 @@ class GenerateFromTopView(BaseGenerateView):
           {{"title": "tytuł", "artist": "artysta"}}
         ]
         """
-        return prompt 
+        return prompt
+
 
 class GenerateFromArtistsView(BaseGenerateView):
     def get_prompt(self, user, data):
@@ -236,7 +251,8 @@ class GenerateFromArtistsView(BaseGenerateView):
           {{"title": "tytuł", "artist": "artysta"}}
         ]
         """
-        return prompt 
+        return prompt
+
 
 class GenerateQueueFromPromptView(BaseGenerateView):
     def get_prompt(self, user, data):
@@ -247,7 +263,7 @@ class GenerateQueueFromPromptView(BaseGenerateView):
         preferences = self.get_user_preferences(user)
         if not count:
             return Response({"error": "count is required"}, status=400)
-        
+
         prompt = f"""
         Podaj {count*GENERATION_BUFFER_MULTIPLIER} utworów pasujących do opisu:
         "{prompt_input}"
@@ -259,4 +275,4 @@ class GenerateQueueFromPromptView(BaseGenerateView):
           {{"title": "tytuł", "artist": "artysta"}}
         ]
         """
-        return prompt 
+        return prompt

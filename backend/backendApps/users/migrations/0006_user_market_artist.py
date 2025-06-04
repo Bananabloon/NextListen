@@ -6,28 +6,38 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('users', '0005_rename_genrename_genre_name_and_more'),
+        ("users", "0005_rename_genrename_genre_name_and_more"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='user',
-            name='market',
+            model_name="user",
+            name="market",
             field=models.CharField(blank=True, max_length=2, null=True),
         ),
         migrations.CreateModel(
-            name='Artist',
+            name="Artist",
             fields=[
-                ('id', models.AutoField(primary_key=True, serialize=False)),
-                ('spotify_uri', models.CharField(db_column='SpotifyURI', max_length=100)),
-                ('name', models.CharField(db_column='Name', max_length=255)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('user', models.ForeignKey(db_column='userId', on_delete=django.db.models.deletion.CASCADE, related_name='top_artists', to=settings.AUTH_USER_MODEL)),
+                ("id", models.AutoField(primary_key=True, serialize=False)),
+                (
+                    "spotify_uri",
+                    models.CharField(db_column="SpotifyURI", max_length=100),
+                ),
+                ("name", models.CharField(db_column="Name", max_length=255)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                (
+                    "user",
+                    models.ForeignKey(
+                        db_column="userId",
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="top_artists",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
             options={
-                'unique_together': {('user', 'spotify_uri')},
+                "unique_together": {("user", "spotify_uri")},
             },
         ),
     ]

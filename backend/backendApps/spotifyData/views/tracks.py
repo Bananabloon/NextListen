@@ -1,14 +1,14 @@
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from ..services.spotifyClient import SpotifyAPI
 import requests
-from django.conf import settings
 from .profile import get_spotify_instance
-
 import sys
 sys.path.append("..")
 from constants import SPOTIFY_SEARCH_URL
+
+sys.path.append("..")
+
 
 class TopTracksView(APIView):
     permission_classes = [IsAuthenticated]
@@ -17,6 +17,7 @@ class TopTracksView(APIView):
         spotify = get_spotify_instance(request.user)
         return Response(spotify.get_top_tracks())
 
+
 class TopArtistsView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -24,12 +25,14 @@ class TopArtistsView(APIView):
         spotify = get_spotify_instance(request.user)
         return Response(spotify.get_top_artists())
 
+
 class CurrentlyPlayingView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
         spotify = get_spotify_instance(request.user)
         return Response(spotify.get_current_playing())
+
 
 class AddTrackToQueueView(APIView):
     permission_classes = [IsAuthenticated]
@@ -44,7 +47,10 @@ class AddTrackToQueueView(APIView):
 
         if success:
             return Response({"message": "Track added to queue"}, status=200)
-        return Response({"error": "Failed to add track to queue", "details": error}, status=400)
+        return Response(
+            {"error": "Failed to add track to queue", "details": error}, status=400
+        )
+
 
 class SpotifySearchView(APIView):
     permission_classes = [IsAuthenticated]

@@ -11,3 +11,4 @@ openai
 python-decouple
 pytest
 rapidfuzz
+drf-spectacular

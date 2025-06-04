@@ -1,12 +1,15 @@
 from rest_framework.test import APITestCase
-from django.urls import reverse
-from rest_framework import status
 from ..services.user_service import UserService
 from users.models import User, Media, UserFeedback
 from ..services.spotify_auth_service import CustomRefreshToken
 from unittest.mock import patch
 
 class SpotifyOAuthTests(APITestCase):
+    def test_login_without_token(self):
+        response = self.client.post("/auth/spotify/token-login/", {})
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.data["error"], "access_token required")
+
     def test_oauth_redirect_url(self):
         response = self.client.get("/api/auth/spotify/login/")  
         self.assertEqual(response.status_code, 302)
@@ -20,11 +23,7 @@ class SpotifyOAuthTests(APITestCase):
         self.assertIn("error", response.data)
 
     def test_create_user_success(self):
-        user_info = {
-            "id": "spotify123",
-            "displayname": "Test User",
-            "country": "PL"
-        }
+        user_info = {"id": "spotify123", "displayname": "Test User", "country": "PL"}
         user = UserService.create_or_update_user(user_info, access_token="abc123")
 
         self.assertEqual(user.spotify_user_id, "spotify123")

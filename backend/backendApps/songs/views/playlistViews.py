@@ -1,5 +1,3 @@
-from django.conf import settings
-from django.shortcuts import render
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
@@ -10,6 +8,7 @@ from songs.services.songGeneration import build_preferences_prompt, generate_son
 import logging
 logger = logging.getLogger(__name__)
 from constants import GENERATION_BUFFER_MULTIPLIER
+
 
 class CreateLikedPlaylistsView(APIView):
     permission_classes = [IsAuthenticated]
@@ -41,7 +40,6 @@ class CreateLikedPlaylistsView(APIView):
         except Exception as e:
             return Response({"error": str(e)}, status=500)
 
-    
 class CreatePlaylistFromPromptView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -76,7 +74,7 @@ class CreatePlaylistFromPromptView(APIView):
             songs, _ = generate_songs_with_buffer(
                 prompt=full_prompt,
                 base_prompt="Jesteś ekspertem muzycznym i tworzysz playlistę do opisu.",
-                count=count
+                count=count,
             )
 
             uris = []
@@ -92,14 +90,16 @@ class CreatePlaylistFromPromptView(APIView):
                     continue
 
             if not uris:
-                return Response({"error": "No tracks found to create playlist"}, status=400)
+                return Response(
+                    {"error": "No tracks found to create playlist"}, status=400
+                )
 
             playlist_url = create_playlist_with_uris(
                 user=user,
                 spotify=spotify,
                 name=playlist_name,
                 description=f"Generated playlist for: {prompt_input}",
-                uris=uris
+                uris=uris,
             )
             return Response({"message": "Playlist created", "url": playlist_url})
 

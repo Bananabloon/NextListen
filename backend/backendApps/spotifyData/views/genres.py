@@ -9,13 +9,18 @@ from django.conf import settings
 
 GENRE_FILE_PATH = os.path.join(settings.BASE_DIR, "genres.json")
 
+
 class DiscoveryGenresView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
         user = request.user
         count = int(request.query_params.get("count", 5))
-        spotify = SpotifyAPI(user.spotify_access_token, refresh_token=user.spotify_refresh_token, user=user)
+        spotify = SpotifyAPI(
+            user.spotify_access_token,
+            refresh_token=user.spotify_refresh_token,
+            user=user,
+        )
 
         top_artists = spotify.get_top_artists(limit=20)
         user_genres = set()
@@ -25,14 +30,17 @@ class DiscoveryGenresView(APIView):
         with open(GENRE_FILE_PATH, "r", encoding="utf-8") as f:
             all_genres = json.load(f)
 
-        available_genres = [g["category"] for g in all_genres if g["category"] not in user_genres]
+        available_genres = [
+            g["category"] for g in all_genres if g["category"] not in user_genres
+        ]
 
         if not available_genres:
             return Response({"message": "No new genres to discover"}, status=200)
 
         weighted_genres = sorted(
             [g for g in all_genres if g["category"] in available_genres],
-            key=lambda x: x["popularity"], reverse=True
+            key=lambda x: x["popularity"],
+            reverse=True,
         )
 
         random_genres = random.sample(weighted_genres, min(count, len(weighted_genres)))

@@ -1,0 +1,68 @@
+.button {
+    width: fit-content;
+    height: fit-content;
+    background-color: var(--background-color-4);
+    border-radius: var(--radius-md);
+    padding: var(--spacing-md) var(--spacing-lg);
+    font-weight: 600;
+}
+
+.button:hover {
+    background-color: var(--background-color-5);
+}
+
+.button * {
+    color: inherit;
+}
+
+.button[data-size="xs"] {
+    font-size: var(--font-size-xs);
+}
+
+.button[data-size="sm"] {
+    font-size: var(--font-size-sm);
+}
+
+.button[data-size="md"] {
+    font-size: var(--font-size-md);
+}
+
+.button[data-size="lg"] {
+    font-size: var(--font-size-lg);
+}
+
+.button[data-size="xl"] {
+    font-size: var(--font-size-xl);
+}
+
+.button[data-variant="menu"] {
+    width: 100%;
+    border-radius: 0;
+}
+
+.button[data-variant="spotify"] {
+    background-color: var(--spotify-green);
+    color: var(--spotify-black) !important;
+    font-weight: 700;
+}
+
+.button[data-variant="spotify"]:hover {
+    filter: brightness(110%);
+}
+
+.button:active {
+    translate: 2px 2px !important;
+}
+
+.content {
+    align-items: center;
+}
+
+.section {
+    height: 100%;
+    width: 20px;
+}
+
+.section:last-of-type {
+    margin-left: auto;
+}
