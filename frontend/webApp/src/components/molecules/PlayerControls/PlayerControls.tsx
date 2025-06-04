@@ -3,7 +3,6 @@ import {
     IconPlayerPlayFilled,
     IconPlayerTrackNextFilled,
     IconPlayerTrackPrevFilled,
-    IconRocket,
     IconThumbDown,
     IconThumbDownFilled,
     IconThumbUp,
@@ -16,25 +15,26 @@ import { useEffect, useState } from "react";
 import useRequests from "../../../hooks/useRequests";
 import { Feedback } from "../../../types/api.types";
 import VolumeSeekBar from "../../atoms/VolumeSeekBar/VolumeSeekBar";
-import Button from "../../atoms/Button/Button";
-import classes from "./PlayerControls.module.css";
-import Portal from "../../atoms/Portal/Portal";
+import { isNull } from "lodash";
+
 const PlayerControls = ({ ...props }): React.JSX.Element => {
     const { currentState, previousTrack, nextTrack, togglePlay } = usePlayback();
     const [feedback, setFeedback] = useState<Feedback>(0);
     const { sendRequest } = useRequests();
 
     useEffect(() => {
-        sendRequest(
-            "GET",
-            "songs/song-feedback",
-            JSON.stringify({ body: { spotify_uri: currentState?.track_window.current_track.uri } }) as RequestInit
-        ).then((data) => setFeedback(data?.feedback_value ?? 0));
+        sendRequest("GET", `songs/feedback/?spotify_uri=${currentState?.track_window.current_track.uri}`).then(
+            (data) => {
+                setFeedback(data?.feedback_value ?? 0);
+            }
+        );
     }, [currentState?.track_window.current_track.uri]);
 
     const updateFeedback = (value: Feedback) => {
         setFeedback(value);
-        sendRequest("POST", "");
+        sendRequest("POST", "songs/feedback/update", {
+            body: JSON.stringify({ spotify_uri: currentState?.track_window.current_track.uri }),
+        } as RequestInit);
     };
 
     return (
@@ -44,6 +44,7 @@ const PlayerControls = ({ ...props }): React.JSX.Element => {
                 <IconButton
                     size="md"
                     variant="transparent"
+                    onClick={() => updateFeedback(feedback === -1 ? 0 : -1)}
                 >
                     {feedback === -1 ? (
                         <IconThumbDownFilled style={{ transform: "scaleX(-1) translateY(2px)" }} />
@@ -54,6 +55,7 @@ const PlayerControls = ({ ...props }): React.JSX.Element => {
                 <IconButton
                     size="md"
                     variant="transparent"
+                    onClick={() => updateFeedback(feedback === 1 ? 0 : 1)}
                 >
                     {feedback === 1 ? (
                         <IconThumbUpFilled
@@ -82,7 +84,7 @@ const PlayerControls = ({ ...props }): React.JSX.Element => {
                     style={{ borderRadius: "50%" }}
                     onClick={() => togglePlay()}
                 >
-                    {currentState?.paused ? <IconPlayerPlayFilled /> : <IconPlayerPauseFilled />}
+                    {isNull(currentState) || currentState.paused ? <IconPlayerPlayFilled /> : <IconPlayerPauseFilled />}
                 </IconButton>
                 <IconButton
                     size="md"

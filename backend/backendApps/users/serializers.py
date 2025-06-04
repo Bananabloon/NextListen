@@ -23,6 +23,7 @@ class UserFeedbackSerializer(serializers.ModelSerializer):
         fields = ["id", "user", "media", "is_liked", "source", "feedback_at"]
 
 
+
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User

@@ -1,5 +1,8 @@
 import { createContext, useContext, ReactNode, useState, useEffect } from "react";
 import useRequests from "../hooks/useRequests";
+import { AppError } from "../utils/errors";
+import ERRORS from "../config/errors.config";
+import { isNull } from "lodash";
 
 interface ContextType {
     loading: boolean;
@@ -13,6 +16,7 @@ interface ContextType {
     setVolume: (volume: number) => Promise<void>;
     getVolume: () => Promise<number>;
     seek: (ms: number) => Promise<void>;
+    playTrack: (uri: string) => Promise<any>;
 }
 
 const PlaybackContext = createContext<ContextType | undefined>(undefined);
@@ -22,6 +26,9 @@ export const PlaybackProvider = ({ children }: { children: ReactNode }) => {
     const [player, setPlayer] = useState<Spotify.Player | null>(null);
     const [currentState, setCurrentState] = useState<Spotify.PlaybackState | null>(null);
     const [loading, setLoading] = useState<boolean>(true);
+    const [error, setError] = useState<null | AppError>(null);
+    const [deviceId, setDeviceId] = useState<string | null>(null);
+    const iframe = document.querySelector("iframe");
 
     const initiateScript = () => {
         const script = document.createElement("script");
@@ -42,6 +49,9 @@ export const PlaybackProvider = ({ children }: { children: ReactNode }) => {
 
     const updateState = async () => await player?.getCurrentState?.()?.then?.((newState) => setCurrentState(newState));
 
+    const transferPlayback = async () =>
+        await sendRequest("POST", "spotify/playback/transfer/", { body: JSON.stringify({ device_id: deviceId }) });
+
     const initiatePlayer = () => {
         if (player) return;
 
@@ -53,10 +63,12 @@ export const PlaybackProvider = ({ children }: { children: ReactNode }) => {
 
         newPlayer.addListener("ready", ({ device_id }) => {
             console.log("Ready with Device ID", device_id);
+            setDeviceId(device_id);
         });
 
         newPlayer.addListener("not_ready", ({ device_id }) => {
             console.log("Device ID has gone offline", device_id);
+            setDeviceId(null);
         });
 
         newPlayer.addListener("initialization_error", ({ message }) => {
@@ -68,7 +80,7 @@ export const PlaybackProvider = ({ children }: { children: ReactNode }) => {
         });
 
         newPlayer.addListener("account_error", ({ message }) => {
-            console.error(message);
+            setError(new AppError(ERRORS._403_PREMIUM_REQUIRED));
         });
 
         setPlayer(newPlayer);
@@ -76,7 +88,7 @@ export const PlaybackProvider = ({ children }: { children: ReactNode }) => {
 
     useEffect(() => {
         setLoading(true);
-        if (!player) {
+        if (!player && !iframe) {
             const script = initiateScript();
 
             window.onSpotifyWebPlaybackSDKReady = initiatePlayer;
@@ -107,13 +119,36 @@ export const PlaybackProvider = ({ children }: { children: ReactNode }) => {
         return null;
     }
 
-    const { nextTrack, previousTrack, pause, togglePlay, resume, setVolume, getVolume, seek } = player;
+    if (error) {
+        throw error;
+    }
+
+    const { nextTrack, previousTrack, pause, setVolume, getVolume, seek } = player;
+
+    const togglePlay = async () => {
+        console.log(deviceId);
+        if (isNull(currentState)) {
+            await transferPlayback();
+        }
+        return await player.togglePlay();
+    };
+
+    const resume = async () => {
+        if (isNull(currentState)) {
+            await transferPlayback();
+        }
+        return await player.resume();
+    };
 
     const addToQueue = (uri: string) => {};
 
     const setQueue = (uris: string[]) => {};
 
-    const playTrack = (uri: string) => {};
+    const playTrack = async (uri: string) => {
+        return await sendRequest("POST", "/spotify/playback/start", {
+            body: JSON.stringify({ device_id: deviceId, track_uri: uri }),
+        });
+    };
 
     const value = {
         loading,
@@ -127,6 +162,7 @@ export const PlaybackProvider = ({ children }: { children: ReactNode }) => {
         setVolume,
         getVolume,
         seek,
+        playTrack,
     };
 
     return <PlaybackContext.Provider value={value}>{children}</PlaybackContext.Provider>;

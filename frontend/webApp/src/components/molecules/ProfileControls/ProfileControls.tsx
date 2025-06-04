@@ -16,8 +16,8 @@ const ProfileControls = ({ className, ...props }: ProfileControlsProps): React.J
     const { sendRequest } = useRequests();
     const navigate = useNavigate();
 
-    const logout = () => {
-        sendRequest("POST", "/auth/spotify/delete-tokens");
+    const logout = async () => {
+        await sendRequest("POST", "/auth/spotify/delete-tokens");
         navigate("/");
     };
     const enterSettings = () => {

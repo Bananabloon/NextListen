@@ -6,11 +6,15 @@ import DiscoveryPage from "./pages/DiscoveryPage/DiscoveryPage";
 import AuthenticationWrapper from "./components/wrappers/AuthenticationWrapper";
 import LoginPage from "./pages/LoginPage/LoginPage";
 import BaseTemplate from "./components/templates/BaseTemplate/BaseTemplate";
+import ErrorBoundary from "./pages/ErrorBoundary/ErrorBoundary";
 import SettingsPage from "./pages/SettingsPage/SettingsPage";
 
 const router = createBrowserRouter(
     createRoutesFromElements(
-        <Route element={<BaseTemplate />}>
+        <Route
+            element={<BaseTemplate />}
+            errorElement={<ErrorBoundary />}
+        >
             <Route element={<AuthenticationWrapper />}>
                 <Route element={<ApplicationTemplate />}>
                     <Route

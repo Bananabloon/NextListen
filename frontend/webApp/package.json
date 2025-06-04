@@ -15,10 +15,12 @@
         "@mantine/hooks": "^8.0.2",
         "@tabler/icons-react": "3.17.0",
         "classnames": "^2.5.1",
+        "css-unit-converter-js": "^1.0.2",
         "lodash": "^4.17.21",
         "react": "^19.1.0",
         "react-cookie": "^8.0.1",
         "react-dom": "^19.1.0",
+        "react-indiana-drag-scroll": "^2.2.1",
         "react-router-dom": "^7.6.1",
         "react-spinners": "^0.17.0"
     },

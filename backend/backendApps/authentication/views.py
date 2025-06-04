@@ -1,7 +1,6 @@
 from urllib.parse import urlencode
 from django.conf import settings
 from django.shortcuts import redirect
-
 from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -54,6 +53,19 @@ class SpotifyCallbackView(APIView):
         TokenService.set_cookie_refresh_token(response, data["refresh"])
         return response
 
+class ProtectedView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        return Response({"message": "You are authenticated!", "user": request.user.username})
+
+class DeleteAccountView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def delete(self, request):
+        user = request.user
+        UserService.delete_user_and_related_data(user)
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 class RefreshAccessToken(APIView):
     permission_classes = [IsAuthenticated]

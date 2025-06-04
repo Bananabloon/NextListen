@@ -4,8 +4,8 @@ from rest_framework.response import Response
 import requests
 from .profile import get_spotify_instance
 import sys
-
-from constants import SPOTYFY_SEARCH_URL
+sys.path.append("..")
+from constants import SPOTIFY_SEARCH_URL
 
 sys.path.append("..")
 
@@ -63,7 +63,7 @@ class SpotifySearchView(APIView):
             return Response({"error": "Invalid query or type"}, status=400)
 
         token = request.user.spotify_access_token
-        url = SPOTYFY_SEARCH_URL
+        url = SPOTIFY_SEARCH_URL
         params = {"q": query, "type": search_type, "limit": 10}
         headers = {"Authorization": f"Bearer {token}"}
         response = requests.get(url, headers=headers, params=params)
@@ -72,3 +72,35 @@ class SpotifySearchView(APIView):
             return Response({"error": "Spotify API error"}, status=response.status_code)
 
         return Response(response.json())
+
+class TransferPlaybackView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        device_id = request.data.get("device_id")
+        if not device_id:
+            return Response({"error": "Missing device_id"}, status=400)
+
+        spotify = get_spotify_instance(request.user)
+        success, error = spotify.transfer_playback(device_id)
+        if success:
+            return Response({"message": "Playback transferred successfully"})
+        return Response({"error": "Failed to transfer playback", "details": error}, status=400)
+
+
+class StartPlaybackView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        device_id = request.data.get("device_id")
+        track_uri = request.data.get("track_uri")
+
+        if not device_id or not track_uri:
+            return Response({"error": "Missing device_id or track_uri"}, status=400)
+
+        spotify = get_spotify_instance(request.user)
+        success, error = spotify.start_playback(device_id, track_uri)
+        if success:
+            return Response({"message": "Playback started"})
+        return Response({"error": "Failed to start playback", "details": error}, status=400)
+

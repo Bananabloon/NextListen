@@ -1,74 +1,13 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
-import requests
 from spotifyData.services.spotifyClient import SpotifyAPI
 from users.models import Media, UserFeedback
-from songs.utils import find_best_match
-from songs.services.songGeneration import (
-    build_preferences_prompt,
-    generate_songs_with_buffer,
-)
-import pprint
-import sys
-from constants import SPOTIFY_PLAYLIST_TRACKS_URL, SPOTIFY_PLAYLIST_URL
-
-pp = pprint.PrettyPrinter(indent=2)
-
-sys.path.append("..")
-
-
-def create_playlist_with_uris(user, spotify, name, description, uris):
-    spotify = SpotifyAPI(
-        user.spotify_access_token, refresh_token=user.spotify_refresh_token, user=user
-    )
-    playlist_payload = {"name": name, "description": description, "public": False}
-
-    user_id = spotify.get_user_profile().get("id")
-    create_response = requests.post(
-        SPOTIFY_PLAYLIST_URL.format(user_id=user_id),
-        headers=spotify.headers,
-        json=playlist_payload,
-    )
-
-    if create_response.status_code != 201:
-        print(
-            "Failed to create playlist:",
-            create_response.status_code,
-            create_response.text,
-        )
-        return None
-
-    response_data = create_response.json()
-    pp.pprint(response_data)
-
-    playlist_id = response_data.get("id")
-    if not playlist_id:
-        print(" No playlist ID found in response!")
-    else:
-        print(" Playlist ID:", playlist_id)
-
-    external_urls = response_data.get("external_urls", {})
-    print(" External URLs:", external_urls)
-
-    for i in range(0, len(uris), 100):
-        chunk = uris[i : i + 100]
-        add_response = requests.post(
-            SPOTIFY_PLAYLIST_TRACKS_URL.format(playlist_id=playlist_id),
-            headers=spotify.headers,
-            json={"uris": chunk},
-        )
-        if add_response.status_code != 201:
-            print("Failed to add tracks:", add_response.status_code, add_response.text)
-            return None
-
-    # Fallback jeśli external_urls brak
-    playlist_url = response_data.get("external_urls", {}).get("spotify")
-    if not playlist_url and playlist_id:
-        playlist_url = f"https://open.spotify.com/playlist/{playlist_id}"
-        print("Fallback playlist URL:", playlist_url)
-
-    return playlist_url
+from songs.utils import find_best_match, create_playlist_with_uris
+from songs.services.songGeneration import build_preferences_prompt, generate_songs_with_buffer
+import logging
+logger = logging.getLogger(__name__)
+from constants import GENERATION_BUFFER_MULTIPLIER
 
 
 class CreateLikedPlaylistsView(APIView):
@@ -76,57 +15,30 @@ class CreateLikedPlaylistsView(APIView):
 
     def post(self, request):
         user = request.user
-        spotify = SpotifyAPI(
-            user.spotify_access_token,
-            refresh_token=user.spotify_refresh_token,
-            user=user,
-        )
+        spotify = SpotifyAPI(user.spotify_access_token, refresh_token=user.spotify_refresh_token, user=user)
+        
+        liked = Media.objects.filter(user=user, feedback="like").exclude(spotify_uri=None)
+        curveballs = liked.filter(is_curveball=True)
 
-        all_liked_songs = Media.objects.filter(user=user, feedback="like").exclude(
-            spotify_uri=None
-        )
-        liked_curveballs = all_liked_songs.filter(is_curveball=True)
+        if not liked.exists():
+            return Response({"error": "No liked songs"}, status=400)
 
-        all_liked_uris = [song.spotify_uri for song in all_liked_songs]
-        curveball_uris = [song.spotify_uri for song in liked_curveballs]
+        all_uris = [m.spotify_uri for m in liked]
+        curveball_uris = [m.spotify_uri for m in curveballs]
 
-        if not all_liked_uris:
-            return Response({"error": "No liked songs to add"}, status=400)
+        playlists = []
 
-        user_id = spotify.get_user_profile().get("id")
-        if not user_id:
-            return Response({"error": "Failed to get Spotify user ID"}, status=500)
+        try:
+            url = create_playlist_with_uris(user, spotify, "Liked Songs from App", "All liked songs", all_uris)
+            playlists.append({"type": "all", "url": url})
 
-        created_playlists = []
+            if curveball_uris:
+                url = create_playlist_with_uris(user, spotify, "Liked Curveballs from App", "Curveballs you liked", curveball_uris)
+                playlists.append({"type": "curveballs", "url": url})
 
-        liked_playlist_url = self._create_playlist_with_uris(
-            spotify,
-            name="Liked Songs from App",
-            description="All songs you've liked in the app",
-            uris=all_liked_uris,
-        )
-        if liked_playlist_url:
-            created_playlists.append({"type": "all", "url": liked_playlist_url})
-
-        if curveball_uris:
-            curveball_playlist_url = self._create_playlist_with_uris(
-                spotify,
-                name="Liked Curveballs from App",
-                description="Only curveballs you've liked in the app",
-                uris=curveball_uris,
-            )
-            if curveball_playlist_url:
-                created_playlists.append(
-                    {"type": "curveballs", "url": curveball_playlist_url}
-                )
-
-        return Response(
-            {
-                "message": "Playlists created successfully",
-                "playlists": created_playlists,
-            }
-        )
-
+            return Response({"message": "Playlists created", "playlists": playlists})
+        except Exception as e:
+            return Response({"error": str(e)}, status=500)
 
 class CreatePlaylistFromPromptView(APIView):
     permission_classes = [IsAuthenticated]
@@ -135,23 +47,17 @@ class CreatePlaylistFromPromptView(APIView):
         user = request.user
         prompt_input = request.data.get("prompt")
         playlist_name = request.data.get("name")
-        count = int(request.data.get("count", 15))
+        count = int(request.data.get("count", 0))
 
-        if not prompt_input:
-            return Response({"error": "Prompt is required"}, status=400)
-        if not playlist_name:
-            return Response({"error": "Playlist name is required"}, status=400)
+        if not prompt_input or not playlist_name or count <= 0:
+            return Response({"error": "prompt, name and positive count are required"}, status=400)
 
-        preferences = self.get_user_preferences(user)
-        spotify = SpotifyAPI(
-            user.spotify_access_token,
-            refresh_token=user.spotify_refresh_token,
-            user=user,
-        )
+        preferences = self._get_user_preferences(user)
+        spotify = SpotifyAPI(user.spotify_access_token, refresh_token=user.spotify_refresh_token, user=user)
 
         preferences_prompt = build_preferences_prompt(preferences)
         full_prompt = f"""
-        Podaj {count} utworów pasujących do opisu:
+        Podaj {count*GENERATION_BUFFER_MULTIPLIER} utworów pasujących do opisu:
         "{prompt_input}"
 
         {preferences_prompt}
@@ -165,25 +71,23 @@ class CreatePlaylistFromPromptView(APIView):
         """
 
         try:
-            songs, buffer = generate_songs_with_buffer(
+            songs, _ = generate_songs_with_buffer(
                 prompt=full_prompt,
                 base_prompt="Jesteś ekspertem muzycznym i tworzysz playlistę do opisu.",
                 count=count,
             )
 
-            if not songs:
-                return Response(
-                    {"error": "No valid songs returned from AI"}, status=500
-                )
-
             uris = []
             for song in songs:
                 query = f"{song['title']} {song['artist']}"
-                result = spotify.search(query=query, type="track")
-                tracks = result["tracks"]["items"]
-                best_match = find_best_match(tracks, song["title"], song["artist"])
-                if best_match:
-                    uris.append(best_match["uri"])
+                try:
+                    result = spotify.search(query=query, type="track")
+                    best_match = find_best_match(result["tracks"]["items"], song["title"], song["artist"])
+                    if best_match:
+                        uris.append(best_match["uri"])
+                except Exception as e:
+                    logger.warning(f"Search failed for {query}: {str(e)}")
+                    continue
 
             if not uris:
                 return Response(
@@ -191,35 +95,35 @@ class CreatePlaylistFromPromptView(APIView):
                 )
 
             playlist_url = create_playlist_with_uris(
-                user,
-                spotify,
+                user=user,
+                spotify=spotify,
                 name=playlist_name,
                 description=f"Generated playlist for: {prompt_input}",
                 uris=uris,
             )
             return Response({"message": "Playlist created", "url": playlist_url})
+
         except Exception as e:
+            logger.exception("Playlist generation failed")
             return Response({"error": str(e)}, status=500)
 
-    def get_user_preferences(self, user):
+    def _get_user_preferences(self, user):
         feedbacks = UserFeedback.objects.select_related("media").filter(user=user)
 
-        liked_genres, liked_artists, disliked_genres, disliked_artists = [], [], [], []
+        liked_genres, liked_artists, disliked_genres, disliked_artists = set(), set(), set(), set()
 
         for fb in feedbacks:
             if fb.is_liked:
-                liked_genres.extend(fb.media.genre)
-                liked_artists.append(fb.media.artist_name)
+                liked_genres.update(fb.media.genre)
+                liked_artists.add(fb.media.artist_name)
             else:
-                disliked_genres.extend(fb.media.genre)
-                disliked_artists.append(fb.media.artist_name)
+                disliked_genres.update(fb.media.genre)
+                disliked_artists.add(fb.media.artist_name)
 
         return {
-            "liked_genres": list(set(liked_genres)),
-            "liked_artists": list(set(liked_artists)),
-            "disliked_genres": list(set(disliked_genres)),
-            "disliked_artists": list(set(disliked_artists)),
-            "explicit_content": user.allow_explicit
-            if hasattr(user, "allow_explicit")
-            else True,
+            "liked_genres": list(liked_genres),
+            "liked_artists": list(liked_artists),
+            "disliked_genres": list(disliked_genres),
+            "disliked_artists": list(disliked_artists),
+            "explicit_content": getattr(user, "allow_explicit", True)
         }

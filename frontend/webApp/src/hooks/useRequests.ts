@@ -1,5 +1,6 @@
 import { API_URL } from "../config/url.config.ts";
 import { normalizePath } from "../utils/api.ts";
+import { AppError } from "../utils/errors.ts";
 
 type Method = "GET" | "HEAD" | "POST" | "PUT" | "DELETE" | "CONNECT" | "OPTIONS" | "TRACE" | "PATCH";
 
@@ -21,8 +22,7 @@ export const useRequests = (): useRequestsReturn => {
     };
 
     const handleRequestError = async (response: Response) => {
-        let errorBody = await response.text().catch(() => "Unable to read error body");
-        console.error(`Request failed [${response.status}]`, errorBody);
+        console.error(response, await response.json());
     };
 
     const sendRequest = async (
@@ -34,11 +34,14 @@ export const useRequests = (): useRequestsReturn => {
     ) => {
         const url = getPath(path);
 
-        const fetchOptions = {
-            Accept: "application/json",
-            "Content-Type": "application/json",
-            Credentials: "include",
-            "Access-Control-Allow-Origin": "*",
+        const fetchOptions: RequestInit = {
+            headers: {
+                Accept: "application/json",
+                "Content-Type": "application/json",
+                "Access-Control-Allow-Origin": "*",
+                ...(options.headers || {}),
+            },
+            credentials: "include",
             ...options,
             method,
         };
@@ -49,7 +52,11 @@ export const useRequests = (): useRequestsReturn => {
                 headers: { "Content-Type": "application/json" },
             });
 
-        const fetchData = () => fetch(url, fetchOptions).catch(getServiceUnavailableResponse);
+        const fetchData = () =>
+            fetch(url, fetchOptions).catch((err) => {
+                console.error(err);
+                return getServiceUnavailableResponse();
+            });
 
         let response = await fetchData();
         if (response.status == 401 && allowRefresh) {

@@ -9,3 +9,10 @@ export interface PageData {
 export interface PageConfig {
     [path: string]: PageData;
 }
+
+export interface ErrorConfig {
+    code: number;
+    variant: string;
+    title: string;
+    message: string;
+}
