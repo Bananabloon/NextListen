@@ -1,23 +1,38 @@
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from drf_spectacular.utils import extend_schema
 from ..services.spotifyClient import SpotifyAPI
 from openai import OpenAI
 from django.conf import settings
 import json
 from songs.utils import find_best_match
+from .serializers import (
+    DiscoveryGenerateRequestSerializer,
+    DiscoveryGenerateResponseSerializer,
+)
 
 
 class DiscoveryGenerateView(APIView):
     permission_classes = [IsAuthenticated]
 
+    @extend_schema(
+        summary="Generate music discovery recommendations",
+        description=(
+            "Generates a list of music recommendations in a selected genre, tailored to the user's listening history. "
+            "Uses OpenAI to suggest new tracks and attempts to match them with Spotify tracks. "
+            "Returns a list of discovered songs and any errors encountered during the process."
+        ),
+        request=DiscoveryGenerateRequestSerializer,
+        responses=DiscoveryGenerateResponseSerializer,
+    )
     def post(self, request):
-        user = request.user
-        genre = request.data.get("genre")
-        count = int(request.data.get("count", 10))
+        serializer = DiscoveryGenerateRequestSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        genre = serializer.validated_data["genre"]
+        count = serializer.validated_data.get("count", 10)
 
-        if not genre:
-            return Response({"error": "Missing 'genre' parameter"}, status=400)
+        user = request.user
 
         spotify = SpotifyAPI(
             user.spotify_access_token,
@@ -37,8 +52,8 @@ class DiscoveryGenerateView(APIView):
 
         prompt = f"""
         Użytkownik zwykle słucha:
-        Artyści: {json.dumps(top_artists, indent=2)}
-        Utwory: {json.dumps(top_tracks, indent=2)}
+        Artyści: {json.dumps(top_artists, indent=2, ensure_ascii=False)}
+        Utwory: {json.dumps(top_tracks, indent=2, ensure_ascii=False)}
 
         Teraz chce poznać nową muzykę z gatunku: {genre}
 
@@ -100,11 +115,12 @@ class DiscoveryGenerateView(APIView):
             except Exception as e:
                 errors.append({"song": song, "error": str(e)})
 
-        return Response(
-            {
-                "message": f"Discovery songs generated for genre: {genre}",
-                "genre": genre,
-                "songs": discovered,
-                "errors": errors,
-            }
-        )
+        response_data = {
+            "message": f"Discovery songs generated for genre: {genre}",
+            "genre": genre,
+            "songs": discovered,
+            "errors": errors,
+        }
+
+        response_serializer = DiscoveryGenerateResponseSerializer(response_data)
+        return Response(response_serializer.data)
