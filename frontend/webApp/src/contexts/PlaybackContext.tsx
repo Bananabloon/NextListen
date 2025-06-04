@@ -16,6 +16,7 @@ interface ContextType {
     setVolume: (volume: number) => Promise<void>;
     getVolume: () => Promise<number>;
     seek: (ms: number) => Promise<void>;
+    playTrack: (uri: string) => Promise<any>;
 }
 
 const PlaybackContext = createContext<ContextType | undefined>(undefined);
@@ -27,6 +28,7 @@ export const PlaybackProvider = ({ children }: { children: ReactNode }) => {
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<null | AppError>(null);
     const [deviceId, setDeviceId] = useState<string | null>(null);
+    const iframe = document.querySelector("iframe");
 
     const initiateScript = () => {
         const script = document.createElement("script");
@@ -46,6 +48,9 @@ export const PlaybackProvider = ({ children }: { children: ReactNode }) => {
     };
 
     const updateState = async () => await player?.getCurrentState?.()?.then?.((newState) => setCurrentState(newState));
+
+    const transferPlayback = async () =>
+        await sendRequest("POST", "spotify/playback/transfer/", { body: JSON.stringify({ device_id: deviceId }) });
 
     const initiatePlayer = () => {
         if (player) return;
@@ -83,7 +88,7 @@ export const PlaybackProvider = ({ children }: { children: ReactNode }) => {
 
     useEffect(() => {
         setLoading(true);
-        if (!player) {
+        if (!player && !iframe) {
             const script = initiateScript();
 
             window.onSpotifyWebPlaybackSDKReady = initiatePlayer;
@@ -120,9 +125,6 @@ export const PlaybackProvider = ({ children }: { children: ReactNode }) => {
 
     const { nextTrack, previousTrack, pause, setVolume, getVolume, seek } = player;
 
-    const transferPlayback = async () =>
-        await sendRequest("POST", "spotify/playback/transfer/", { body: JSON.stringify({ device_id: deviceId }) });
-
     const togglePlay = async () => {
         console.log(deviceId);
         if (isNull(currentState)) {
@@ -142,7 +144,11 @@ export const PlaybackProvider = ({ children }: { children: ReactNode }) => {
 
     const setQueue = (uris: string[]) => {};
 
-    const playTrack = (uri: string) => {};
+    const playTrack = async (uri: string) => {
+        return await sendRequest("POST", "/spotify/playback/start", {
+            body: JSON.stringify({ device_id: deviceId, track_uri: uri }),
+        });
+    };
 
     const value = {
         loading,
@@ -156,6 +162,7 @@ export const PlaybackProvider = ({ children }: { children: ReactNode }) => {
         setVolume,
         getVolume,
         seek,
+        playTrack,
     };
 
     return <PlaybackContext.Provider value={value}>{children}</PlaybackContext.Provider>;

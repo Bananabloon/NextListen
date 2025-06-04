@@ -9,6 +9,7 @@ import ScrollContainer from "react-indiana-drag-scroll";
 import { useElementSize } from "@mantine/hooks";
 import { isEmpty } from "lodash";
 import { SyncLoader } from "react-spinners";
+import { usePlayback } from "../../../contexts/PlaybackContext";
 
 interface SongCardConveyorProps extends React.HTMLAttributes<HTMLDivElement> {}
 
@@ -18,6 +19,7 @@ const SongCardConveyor = ({ children, className, ...props }: SongCardConveyorPro
     const [selectedIndex, setSelectedIndex] = useState<number>(0);
     const { width, ref } = useElementSize();
     const { sendRequest } = useRequests();
+    const { playTrack, currentState } = usePlayback();
 
     const getDimensions = () => {
         const container = ref.current!;
@@ -57,8 +59,6 @@ const SongCardConveyor = ({ children, className, ...props }: SongCardConveyorPro
         if (ref.current) snap(selectedIndex);
     };
 
-    const playSong = () => {};
-
     useEffect(() => {
         if (ref.current) snap(selectedIndex);
     }, [width]);
@@ -73,7 +73,11 @@ const SongCardConveyor = ({ children, className, ...props }: SongCardConveyorPro
         }
     }, []);
 
-    useEffect(() => {}, [selectedIndex]);
+    useEffect(() => {
+        if (!isEmpty(songs) && currentState?.track_window.current_track.uri !== songs[selectedIndex].uri) {
+            playTrack(songs[selectedIndex].uri);
+        }
+    }, [selectedIndex]);
 
     const emptySongCard = (
         <SongCard
@@ -86,7 +90,10 @@ const SongCardConveyor = ({ children, className, ...props }: SongCardConveyorPro
         <SongCard
             key={i}
             song={song}
-            onClick={() => snap(i)}
+            onClick={() => {
+                playTrack(song.uri);
+                snap(i);
+            }}
             isSelected={i === selectedIndex}
             style={{
                 marginLeft: song.uri === songs[0].uri ? "auto" : "0",

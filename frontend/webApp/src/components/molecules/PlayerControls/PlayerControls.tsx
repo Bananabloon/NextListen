@@ -15,6 +15,7 @@ import { usePlayback } from "../../../contexts/PlaybackContext";
 import { useEffect, useState } from "react";
 import useRequests from "../../../hooks/useRequests";
 import { Feedback } from "../../../types/api.types";
+import { isNull } from "lodash";
 
 const PlayerControls = ({ ...props }): React.JSX.Element => {
     const { currentState, previousTrack, nextTrack, togglePlay } = usePlayback();
@@ -22,17 +23,16 @@ const PlayerControls = ({ ...props }): React.JSX.Element => {
     const { sendRequest } = useRequests();
 
     useEffect(() => {
-        sendRequest("GET", "songs/song-feedback", {
-            body: JSON.stringify({ spotify_uri: currentState?.track_window.current_track.uri }),
-        } as RequestInit).then((data) => {
-            console.log(data);
-            setFeedback(data?.feedback_value ?? 0);
-        });
+        sendRequest("GET", `songs/feedback/?spotify_uri=${currentState?.track_window.current_track.uri}`).then(
+            (data) => {
+                setFeedback(data?.feedback_value ?? 0);
+            }
+        );
     }, [currentState?.track_window.current_track.uri]);
 
     const updateFeedback = (value: Feedback) => {
         setFeedback(value);
-        sendRequest("POST", "songs/song-feedback", {
+        sendRequest("POST", "songs/feedback/update", {
             body: JSON.stringify({ spotify_uri: currentState?.track_window.current_track.uri }),
         } as RequestInit);
     };
@@ -82,7 +82,7 @@ const PlayerControls = ({ ...props }): React.JSX.Element => {
                 style={{ borderRadius: "50%" }}
                 onClick={() => togglePlay()}
             >
-                {currentState?.paused ? <IconPlayerPlayFilled /> : <IconPlayerPauseFilled />}
+                {isNull(currentState) || currentState.paused ? <IconPlayerPlayFilled /> : <IconPlayerPauseFilled />}
             </IconButton>
             <IconButton
                 size="md"
