@@ -1,23 +1,16 @@
-from rest_framework.views import APIView
-from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from drf_spectacular.utils import extend_schema, OpenApiParameter
-
-from ..services.spotifyClient import SpotifyAPI
 from django.conf import settings
 import os
 import json
 import random
-
+from .views_helpers import SpotifyBaseView
 from .serializers import DiscoveryGenresResponseSerializer
-
 
 GENRE_FILE_PATH = os.path.join(settings.BASE_DIR, "genres.json")
 
 
-class DiscoveryGenresView(APIView):
-    permission_classes = [IsAuthenticated]
-
+class DiscoveryGenresView(SpotifyBaseView):
     @extend_schema(
         summary="Get discovery genres",
         description=(
@@ -35,37 +28,39 @@ class DiscoveryGenresView(APIView):
         responses=DiscoveryGenresResponseSerializer,
     )
     def get(self, request):
-        user = request.user
-        count = int(request.query_params.get("count", 5))
+        count = self.get_count_param(request)
+        user_genres = self.get_user_genres(self.spotify)
+        all_genres = self.load_all_genres()
 
-        spotify = SpotifyAPI(
-            user.spotify_access_token,
-            refresh_token=user.spotify_refresh_token,
-            user=user,
-        )
-
-        top_artists = spotify.get_top_artists(limit=20)
-        user_genres = set()
-        for artist in top_artists.get("items", []):
-            user_genres.update(artist.get("genres", []))
-
-        with open(GENRE_FILE_PATH, "r", encoding="utf-8") as f:
-            all_genres = json.load(f)
-
-        available_genres = [
-            g["category"] for g in all_genres if g["category"] not in user_genres
-        ]
-
+        available_genres = self.filter_genres(all_genres, user_genres)
         if not available_genres:
-            return Response({"genres": []}, status=200)
+            return Response({"genres": []})
 
-        weighted_genres = sorted(
-            [g for g in all_genres if g["category"] in available_genres],
-            key=lambda x: x["popularity"],
-            reverse=True,
-        )
+        selected_genres = self.select_genres_by_popularity(available_genres, count)
+        return Response({"genres": selected_genres})
 
-        random_genres = random.sample(weighted_genres, min(count, len(weighted_genres)))
-        result = [g["category"] for g in random_genres]
+    def get_count_param(self, request):
+        try:
+            count = int(request.query_params.get("count", 5))
+            return max(1, count)
+        except (ValueError, TypeError):
+            return 5
 
-        return Response({"genres": result})
+    def get_user_genres(self, spotify):
+        top_artists = spotify.get_top_artists(limit=20)
+        genres = set()
+        for artist in top_artists.get("items", []):
+            genres.update(artist.get("genres", []))
+        return genres
+
+    def load_all_genres(self):
+        with open(GENRE_FILE_PATH, "r", encoding="utf-8") as f:
+            return json.load(f)
+
+    def filter_genres(self, all_genres, user_genres):
+        return [g for g in all_genres if g["category"] not in user_genres]
+
+    def select_genres_by_popularity(self, genres, count):
+        sorted_genres = sorted(genres, key=lambda g: g["popularity"], reverse=True)
+        chosen = random.sample(sorted_genres, min(count, len(sorted_genres)))
+        return [g["category"] for g in chosen]

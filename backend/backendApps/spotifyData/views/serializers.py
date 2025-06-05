@@ -1,6 +1,9 @@
 from rest_framework import serializers
 
 
+# === Spotify Playback / Control ===
+
+
 class AddTrackToQueueSerializer(serializers.Serializer):
     track_uri = serializers.CharField(help_text="URI of the track to add to the queue")
 
@@ -16,38 +19,12 @@ class TransferPlaybackSerializer(serializers.Serializer):
     )
 
 
+# === Spotify API Integration ===
+
+
 class SpotifySearchSerializer(serializers.Serializer):
     q = serializers.CharField(help_text="Search query")
     type = serializers.ChoiceField(choices=["track", "artist"], help_text="Search type")
-
-
-class GenreStatSerializer(serializers.Serializer):
-    genre = serializers.CharField()
-    count = serializers.IntegerField()
-
-
-class ArtistStatSerializer(serializers.Serializer):
-    artist = serializers.CharField()
-    count = serializers.IntegerField()
-
-
-class UserStatsResponseSerializer(serializers.Serializer):
-    total_feedbacks = serializers.IntegerField()
-    liked = serializers.IntegerField()
-    disliked = serializers.IntegerField()
-    curveball_enjoyment = serializers.FloatField()
-    curveballs_total = serializers.IntegerField()
-    curveballs_liked = serializers.IntegerField()
-    top_genres = serializers.ListField(
-        child=serializers.ListField(child=serializers.CharField())
-    )
-    top_artists = serializers.ListField(
-        child=serializers.ListField(child=serializers.CharField())
-    )
-    most_common_media_type = serializers.CharField(allow_null=True)
-    recent_top_genres = serializers.ListField(
-        child=serializers.ListField(child=serializers.CharField())
-    )
 
 
 class SpotifyProfileSerializer(serializers.Serializer):
@@ -68,6 +45,30 @@ class SpotifyTokenSerializer(serializers.Serializer):
     access_token = serializers.CharField()
 
 
+# === User Stats ===
+
+
+class StatItemSerializer(serializers.Serializer):
+    label = serializers.CharField()
+    count = serializers.IntegerField()
+
+
+class UserStatsResponseSerializer(serializers.Serializer):
+    total_feedbacks = serializers.IntegerField()
+    liked = serializers.IntegerField()
+    disliked = serializers.IntegerField()
+    curveball_enjoyment = serializers.FloatField()
+    curveballs_total = serializers.IntegerField()
+    curveballs_liked = serializers.IntegerField()
+    top_genres = StatItemSerializer(many=True)
+    top_artists = StatItemSerializer(many=True)
+    most_common_media_type = serializers.CharField(allow_null=True)
+    recent_top_genres = StatItemSerializer(many=True)
+
+
+# === Discovery / Recommendations ===
+
+
 class DiscoveryGenresResponseSerializer(serializers.Serializer):
     genres = serializers.ListField(
         child=serializers.CharField(), help_text="List of genres to discover"
@@ -81,7 +82,7 @@ class DiscoveryGenerateRequestSerializer(serializers.Serializer):
     )
 
 
-class DiscoveredSongSerializer(serializers.Serializer):
+class SongSerializer(serializers.Serializer):
     title = serializers.CharField()
     artist = serializers.CharField()
     uri = serializers.CharField()
@@ -91,5 +92,5 @@ class DiscoveredSongSerializer(serializers.Serializer):
 class DiscoveryGenerateResponseSerializer(serializers.Serializer):
     message = serializers.CharField()
     genre = serializers.CharField()
-    songs = DiscoveredSongSerializer(many=True)
+    songs = SongSerializer(many=True)
     errors = serializers.ListField(child=serializers.DictField())
