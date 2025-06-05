@@ -16,6 +16,6 @@ urlpatterns = [
     path("generate-queue-from-prompt/", GenerateQueueFromPromptView.as_view(), name="queue-from-prompt"),
     path("generate-playlist-from-prompt/", CreatePlaylistFromPromptView.as_view(), name="playlist-from-prompt"),
     path("feedback/", SingleSongFeedbackView.as_view(), name="get-feedback"),
-    path('feedback/update', SongFeedbackView.as_view(), name="make-feedback"),
-    path("feedback/all-feedbacks", AllUserFeedbacksView.as_view(), name="get-feedback")
+    path('feedback/update/', SongFeedbackView.as_view(), name="make-feedback"),
+    path("feedback/all-feedbacks/", AllUserFeedbacksView.as_view(), name="get-feedback")
 ]
