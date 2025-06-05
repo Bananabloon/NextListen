@@ -4,20 +4,40 @@ from rest_framework.permissions import IsAuthenticated
 from spotifyData.services.spotifyClient import SpotifyAPI
 from users.models import Media, UserFeedback
 from songs.utils import find_best_match, create_playlist_with_uris
-from songs.services.songGeneration import build_preferences_prompt, generate_songs_with_buffer
+from songs.services.songGeneration import (
+    build_preferences_prompt,
+    generate_songs_with_buffer,
+)
+from drf_spectacular.utils import extend_schema
+from .serializers import (
+    CreateLikedPlaylistsResponseSerializer,
+    PromptPlaylistRequestSerializer,
+    PromptPlaylistResponseSerializer,
+)
 import logging
-logger = logging.getLogger(__name__)
 from constants import GENERATION_BUFFER_MULTIPLIER
+
+logger = logging.getLogger(__name__)
 
 
 class CreateLikedPlaylistsView(APIView):
     permission_classes = [IsAuthenticated]
 
+    @extend_schema(
+        responses={200: CreateLikedPlaylistsResponseSerializer},
+        summary="Creates Spotify playlists with all liked songs and curveballs, if available.",
+    )
     def post(self, request):
         user = request.user
-        spotify = SpotifyAPI(user.spotify_access_token, refresh_token=user.spotify_refresh_token, user=user)
-        
-        liked = Media.objects.filter(user=user, feedback="like").exclude(spotify_uri=None)
+        spotify = SpotifyAPI(
+            user.spotify_access_token,
+            refresh_token=user.spotify_refresh_token,
+            user=user,
+        )
+
+        liked = Media.objects.filter(user=user, feedback="like").exclude(
+            spotify_uri=None
+        )
         curveballs = liked.filter(is_curveball=True)
 
         if not liked.exists():
@@ -29,20 +49,34 @@ class CreateLikedPlaylistsView(APIView):
         playlists = []
 
         try:
-            url = create_playlist_with_uris(user, spotify, "Liked Songs from App", "All liked songs", all_uris)
+            url = create_playlist_with_uris(
+                user, spotify, "Liked Songs from App", "All liked songs", all_uris
+            )
             playlists.append({"type": "all", "url": url})
 
             if curveball_uris:
-                url = create_playlist_with_uris(user, spotify, "Liked Curveballs from App", "Curveballs you liked", curveball_uris)
+                url = create_playlist_with_uris(
+                    user,
+                    spotify,
+                    "Liked Curveballs from App",
+                    "Curveballs you liked",
+                    curveball_uris,
+                )
                 playlists.append({"type": "curveballs", "url": url})
 
             return Response({"message": "Playlists created", "playlists": playlists})
         except Exception as e:
             return Response({"error": str(e)}, status=500)
 
+
 class CreatePlaylistFromPromptView(APIView):
     permission_classes = [IsAuthenticated]
 
+    @extend_schema(
+        request=PromptPlaylistRequestSerializer,
+        responses={200: PromptPlaylistResponseSerializer},
+        summary="Generates a Spotify playlist based on a user-defined prompt and preferences.",
+    )
     def post(self, request):
         user = request.user
         prompt_input = request.data.get("prompt")
@@ -50,14 +84,20 @@ class CreatePlaylistFromPromptView(APIView):
         count = int(request.data.get("count", 0))
 
         if not prompt_input or not playlist_name or count <= 0:
-            return Response({"error": "prompt, name and positive count are required"}, status=400)
+            return Response(
+                {"error": "prompt, name and positive count are required"}, status=400
+            )
 
         preferences = self._get_user_preferences(user)
-        spotify = SpotifyAPI(user.spotify_access_token, refresh_token=user.spotify_refresh_token, user=user)
+        spotify = SpotifyAPI(
+            user.spotify_access_token,
+            refresh_token=user.spotify_refresh_token,
+            user=user,
+        )
 
         preferences_prompt = build_preferences_prompt(preferences)
         full_prompt = f"""
-        Podaj {count*GENERATION_BUFFER_MULTIPLIER} utworów pasujących do opisu:
+        Podaj {count * GENERATION_BUFFER_MULTIPLIER} utworów pasujących do opisu:
         "{prompt_input}"
 
         {preferences_prompt}
@@ -82,7 +122,9 @@ class CreatePlaylistFromPromptView(APIView):
                 query = f"{song['title']} {song['artist']}"
                 try:
                     result = spotify.search(query=query, type="track")
-                    best_match = find_best_match(result["tracks"]["items"], song["title"], song["artist"])
+                    best_match = find_best_match(
+                        result["tracks"]["items"], song["title"], song["artist"]
+                    )
                     if best_match:
                         uris.append(best_match["uri"])
                 except Exception as e:
@@ -110,7 +152,12 @@ class CreatePlaylistFromPromptView(APIView):
     def _get_user_preferences(self, user):
         feedbacks = UserFeedback.objects.select_related("media").filter(user=user)
 
-        liked_genres, liked_artists, disliked_genres, disliked_artists = set(), set(), set(), set()
+        liked_genres, liked_artists, disliked_genres, disliked_artists = (
+            set(),
+            set(),
+            set(),
+            set(),
+        )
 
         for fb in feedbacks:
             if fb.is_liked:
@@ -125,5 +172,5 @@ class CreatePlaylistFromPromptView(APIView):
             "liked_artists": list(liked_artists),
             "disliked_genres": list(disliked_genres),
             "disliked_artists": list(disliked_artists),
-            "explicit_content": getattr(user, "allow_explicit", True)
+            "explicit_content": getattr(user, "allow_explicit", True),
         }

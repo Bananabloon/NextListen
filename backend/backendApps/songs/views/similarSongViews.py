@@ -1,4 +1,3 @@
-
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
@@ -6,15 +5,28 @@ from rest_framework import status
 from users.models import Media, UserFeedback
 from songs.utils import ask_openai
 from django.utils import timezone
+from drf_spectacular.utils import extend_schema
+
+from .serializers import (
+    UserFeedbackSerializer,
+    SimilarSongsRequestSerializer,
+    SimilarSongsResponseSerializer,
+)
+
 
 class UserFeedbackView(APIView):
     permission_classes = [IsAuthenticated]
 
+    @extend_schema(
+        request=UserFeedbackSerializer,
+        responses={200: None},
+        description="Stores user feedback (like or dislike) on a media item.",
+    )
     def post(self, request):
-        media_data = request.data.get('media')
-        is_liked = request.data.get('is_liked')
-        source = request.data.get('source')
-        
+        media_data = request.data.get("media")
+        is_liked = request.data.get("is_liked")
+        source = request.data.get("source")
+
         if not media_data or is_liked is None:
             return Response(
                 {"error": "Incomplete data."}, status=status.HTTP_400_BAD_REQUEST
@@ -49,9 +61,15 @@ class UserFeedbackView(APIView):
 
         return Response({"message": "Feedback saved."}, status=status.HTTP_200_OK)
 
+
 class SimilarSongsView(APIView):
     permission_classes = [IsAuthenticated]
 
+    @extend_schema(
+        request=SimilarSongsRequestSerializer,
+        responses={200: SimilarSongsResponseSerializer},
+        summary="Returns a list of AI-recommended songs similar to the given title and artist.",
+    )
     def post(self, request):
         title = request.data.get("title")
         artist = request.data.get("artist")

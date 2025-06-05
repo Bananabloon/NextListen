@@ -6,12 +6,26 @@ from users.models import Media, UserFeedback
 from songs.utils import update_curveball_enjoyment
 from django.utils import timezone
 import requests
+from drf_spectacular.utils import extend_schema
 
 from constants import SPOTIFY_TRACK_URL
+from .serializers import SongFeedbackSerializer, SongFeedbackResponseSerializer
+
 
 class SongFeedbackView(APIView):
     permission_classes = [IsAuthenticated]
 
+    @extend_schema(
+        request=SongFeedbackSerializer,
+        responses={200: SongFeedbackResponseSerializer},
+        summary="Save user feedback for a song by Spotify URI",
+        description=(
+            "Saves user feedback (like, dislike, or none) for a song identified by its Spotify URI. "
+            "If the song does not exist in the database, its metadata is fetched from Spotify and saved. "
+            "Updates curveball enjoyment if applicable. "
+            "Returns the status, track title, artist, and updated curveball enjoyment."
+        ),
+    )
     def post(self, request):
         spotify_uri = request.data.get("spotify_uri")
         feedback = request.data.get("feedback")
@@ -34,7 +48,9 @@ class SongFeedbackView(APIView):
 
             if resp.status_code != 200:
                 print("Spotify API error:", resp.status_code, resp.text)
-                return Response({"error": "Could not fetch song data from Spotify"}, status=400)
+                return Response(
+                    {"error": "Could not fetch song data from Spotify"}, status=400
+                )
 
             data = resp.json()
             media = Media.objects.create(
@@ -43,7 +59,7 @@ class SongFeedbackView(APIView):
                 artist_name=data["artists"][0]["name"],
                 album_name=data["album"]["name"],
                 media_type=Media.SONG,
-                genre=[],  # brak w track API
+                genre=[],  # Not available via Spotify track API
                 saved_at=timezone.now(),
             )
 
@@ -63,9 +79,11 @@ class SongFeedbackView(APIView):
         if getattr(media, "is_curveball", False):
             update_curveball_enjoyment(request.user, liked)
 
-        return Response({
-            "status": "ok",
-            "track_title": media.title,
-            "artist": media.artist_name,
-            "curveball_enjoyment": request.user.curveball_enjoyment,
-        })
+        return Response(
+            {
+                "status": "ok",
+                "track_title": media.title,
+                "artist": media.artist_name,
+                "curveball_enjoyment": request.user.curveball_enjoyment,
+            }
+        )

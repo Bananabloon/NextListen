@@ -1,20 +1,39 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
-import json
+from rest_framework import status
+from drf_spectacular.utils import extend_schema
+
 from users.models import UserFeedback, Media
 from spotifyData.services.spotifyClient import SpotifyAPI
 from songs.utils import should_send_curveball, extract_filters, find_best_match
-from songs.services.songGeneration import build_preferences_prompt, generate_songs_with_buffer, get_user_preferences
-import logging
-logger = logging.getLogger(__name__)
+from songs.services.songGeneration import (
+    build_preferences_prompt,
+    generate_songs_with_buffer,
+    get_user_preferences,
+)
 from constants import GENERATION_BUFFER_MULTIPLIER
+from .serializers import (
+    GenerateQueueSerializer,
+    GenerateFromArtistsSerializer,
+    GenerateFromPromptSerializer,
+    BaseGenerateSerializer,
+)
+
+import json
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class GenerateQueueBase(APIView):
     permission_classes = [IsAuthenticated]
 
     def prepare_song_list_only(self, user, songs, spotify):
+        """
+        Matches a list of song dicts (with title and artist) to Spotify tracks and returns a prepared list
+        with Spotify metadata (uri, explicit flag).
+        """
         prepared = []
         for song in songs:
             query = f"{song['title']} {song['artist']}"
@@ -34,11 +53,17 @@ class GenerateQueueBase(APIView):
                 continue
         return prepared, []
 
-
     def generate_valid_songs(self, prompt, user, count):
-        spotify = SpotifyAPI(user.spotify_access_token, refresh_token=user.spotify_refresh_token, user=user)
+        """
+        Generates a list of valid songs using OpenAI and matches them to Spotify tracks.
+        Returns a list of prepared songs with Spotify metadata and user feedback if available.
+        """
+        spotify = SpotifyAPI(
+            user.spotify_access_token,
+            refresh_token=user.spotify_refresh_token,
+            user=user,
+        )
         base_prompt = "Jesteś ekspertem muzycznym."
-        
         multiplier = GENERATION_BUFFER_MULTIPLIER
         requested_total_count = int(count * multiplier)
 
@@ -64,46 +89,69 @@ class GenerateQueueBase(APIView):
 
                 best_match = find_best_match(tracks, song["title"], song["artist"])
                 if best_match:
-                    logger.info(f"[{i}] Znaleziono dopasowanie: {best_match['name']} by {best_match['artists'][0]['name']}")
+                    logger.info(
+                        f"[{i}] Znaleziono dopasowanie: {best_match['name']} by {best_match['artists'][0]['name']}"
+                    )
                     track_id = best_match["id"]
                     track_info = spotify.get_track(track_id)
-
                     uri = best_match["uri"]
 
                     try:
                         media = Media.objects.get(spotify_uri=uri)
-                        feedback_obj = UserFeedback.objects.filter(user=user, media=media).first()
-                        if feedback_obj is None or feedback_obj.is_liked is None:
-                            feedback_value = 0
-                        else:
-                            feedback_value = 1 if feedback_obj.is_liked else -1
+                        feedback_obj = UserFeedback.objects.filter(
+                            user=user, media=media
+                        ).first()
+                        feedback_value = (
+                            1
+                            if feedback_obj.is_liked
+                            else -1
+                            if feedback_obj and feedback_obj.is_liked is not None
+                            else 0
+                        )
                     except Media.DoesNotExist:
                         feedback_value = 0
 
-                    prepared.append({
-                        "title": song["title"],
-                        "artist": song["artist"],
-                        "uri": uri,
-                        "explicit": best_match["explicit"],
-                        "curveball": should_send_curveball(user, len(prepared) + 1),
-                        "feedback_value": feedback_value,
-                        "track_details": {
-                            "id": track_info.get("id"),
-                            "name": track_info.get("name"),
-                            "artists": [artist["name"] for artist in track_info.get("artists", [])],
-                            "album": track_info.get("album", {}).get("name"),
-                            "album_type": track_info.get("album", {}).get("album_type"),
-                            "markets": track_info.get("album", {}).get("available_markets"),
-                            "album_cover": track_info.get("album", {}).get("images", [{}])[0].get("url"),
-                            "release_date": track_info.get("album", {}).get("release_date"),
-                            "duration_ms": track_info.get("duration_ms"),
-                            "popularity": track_info.get("popularity"),
-                            "preview_url": track_info.get("preview_url"),
-                            "external_url": track_info.get("external_urls", {}).get("spotify"),
+                    prepared.append(
+                        {
+                            "title": song["title"],
+                            "artist": song["artist"],
+                            "uri": uri,
+                            "explicit": best_match["explicit"],
+                            "curveball": should_send_curveball(user, len(prepared) + 1),
+                            "feedback_value": feedback_value,
+                            "track_details": {
+                                "id": track_info.get("id"),
+                                "name": track_info.get("name"),
+                                "artists": [
+                                    artist["name"]
+                                    for artist in track_info.get("artists", [])
+                                ],
+                                "album": track_info.get("album", {}).get("name"),
+                                "album_type": track_info.get("album", {}).get(
+                                    "album_type"
+                                ),
+                                "markets": track_info.get("album", {}).get(
+                                    "available_markets"
+                                ),
+                                "album_cover": track_info.get("album", {})
+                                .get("images", [{}])[0]
+                                .get("url"),
+                                "release_date": track_info.get("album", {}).get(
+                                    "release_date"
+                                ),
+                                "duration_ms": track_info.get("duration_ms"),
+                                "popularity": track_info.get("popularity"),
+                                "preview_url": track_info.get("preview_url"),
+                                "external_url": track_info.get("external_urls", {}).get(
+                                    "spotify"
+                                ),
+                            },
                         }
-                    })
+                    )
                 else:
-                    logger.warning(f"[{i}] Nie znaleziono dopasowania wśród {len(tracks)} wyników dla: {query}")
+                    logger.warning(
+                        f"[{i}] Nie znaleziono dopasowania wśród {len(tracks)} wyników dla: {query}"
+                    )
             except Exception as e:
                 logger.error(f"[{i}] Błąd podczas wyszukiwania dla '{query}': {e}")
 
@@ -114,15 +162,25 @@ class BaseGenerateView(GenerateQueueBase):
     prompt_type = ""
 
     def get_prompt(self, user, data):
+        """
+        Should be implemented by subclasses to return a prompt string for song generation.
+        """
         raise NotImplementedError
 
+    @extend_schema(
+        summary="Generate recommendations (base endpoint)",
+        description="Base endpoint for generating song recommendations. Should not be used directly.",
+        request=BaseGenerateSerializer,
+        responses=None,
+    )
     def post(self, request):
+        """
+        Handles POST requests for generating recommendations using the implemented prompt.
+        """
         user = request.user
-        count = int(request.data.get("count", 0))
-        if count <= 0:
-            return Response(
-                {"error": "count is required and must be positive"}, status=400
-            )
+        serializer = BaseGenerateSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        count = serializer.validated_data["count"]
 
         try:
             prompt = self.get_prompt(user, request.data)
@@ -130,40 +188,78 @@ class BaseGenerateView(GenerateQueueBase):
             return Response({"message": "Generated", "songs": songs})
         except Exception as e:
             logger.exception("Unhandled exception occurred in generate endpoint")
-            return Response({"error": str(e)}, status=500)
+            return Response(
+                {"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
 
 class GenerateQueueView(BaseGenerateView):
+    @extend_schema(
+        summary="Generate queue based on a song",
+        description=(
+            "Generates a list of recommended songs similar to a given title and artist. "
+            "You can provide additional filters (e.g., genre, year). "
+            "Returns a list of songs with Spotify metadata and user feedback if available."
+        ),
+        request=GenerateQueueSerializer,
+        responses=None,
+    )
+    def post(self, request):
+        serializer = GenerateQueueSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.validated_data = serializer.validated_data
+        return super().post(request)
+
     def get_prompt(self, user, data):
-        title = data.get("title")
-        artist = data.get("artist")
-        if not title or not artist:
-            raise ValueError("title and artist are required")
-        count = data.get("count")
+        """
+        Builds a prompt for generating songs similar to a given title and artist.
+        """
+        title = data["title"]
+        artist = data["artist"]
+        count = data["count"]
         filter_str = extract_filters(data)
         preferences = get_user_preferences(user)
 
-        prompt = f"""
-        Podaj {count*GENERATION_BUFFER_MULTIPLIER} utworów podobnych do:
+        return f"""
+        Podaj {count * GENERATION_BUFFER_MULTIPLIER} utworów podobnych do:
         Tytuł: {title}
         Artysta: {artist}
         {filter_str}
 
         {build_preferences_prompt(preferences)}
         Tylko utwory i artyści, którzy rzeczywiście istnieją i są dostępni na Spotify.
-        Upewnij się, że wygenerowane propozycje zachowują różnorodność – unikaj powtarzania tego samego artysty w zbyt wielu utworach.
+        Upewnij się, że wygenerowane propozycje zachowują różnorodność –
+        unikaj powtarzania tego samego artysty w zbyt wielu utworach.
 
         Format JSON:
         [
           {{"title": "tytuł", "artist": "artysta"}}
         ]
         """
-        return prompt
 
 
 class GenerateFromTopView(BaseGenerateView):
+    @extend_schema(
+        summary="Generate recommendations from user's top tracks and artists",
+        description=(
+            "Generates music recommendations based on the user's top tracks and artists on Spotify. "
+            "You can provide additional filters (e.g., genre, year). "
+            "Returns a list of recommended songs with Spotify metadata."
+        ),
+        request=BaseGenerateSerializer,
+        responses=None,
+    )
+    def post(self, request):
+        serializer = BaseGenerateSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.validated_data = serializer.validated_data
+        return super().post(request)
+
     def get_prompt(self, user, data):
-        count = data.get("count")
+        """
+        Builds a prompt for generating songs based on user's top tracks and artists.
+        """
+        count = data["count"]
         filter_str = extract_filters(data)
         preferences = get_user_preferences(user)
         spotify = SpotifyAPI(
@@ -179,13 +275,9 @@ class GenerateFromTopView(BaseGenerateView):
         top_artists = [a["name"] for a in spotify.get_top_artists().get("items", [])]
 
         if not top_tracks and not top_artists:
-            raise ValueError("Brak danych o ulubionych utworach lub artystach")
-        if not count:
-            raise ValueError("count is required")
+            raise ValueError("No data about favorite tracks or artists")
 
-        preferences = get_user_preferences(user)
-
-        prompt = f"""
+        return f"""
         Na podstawie ulubionych utworów:
         {json.dumps(top_tracks, indent=2)}
 
@@ -194,7 +286,7 @@ class GenerateFromTopView(BaseGenerateView):
         {filter_str}
 
         {build_preferences_prompt(preferences)}
-        Podaj {count*GENERATION_BUFFER_MULTIPLIER} nowych rekomendacji muzycznych.
+        Podaj {count * GENERATION_BUFFER_MULTIPLIER} nowych rekomendacji muzycznych.
         Tylko utwory i artyści, którzy rzeczywiście istnieją i są dostępni na Spotify.
 
         Format JSON:
@@ -202,22 +294,36 @@ class GenerateFromTopView(BaseGenerateView):
           {{"title": "tytuł", "artist": "artysta"}}
         ]
         """
-        return prompt
 
 
 class GenerateFromArtistsView(BaseGenerateView):
+    @extend_schema(
+        summary="Generate recommendations from selected artists",
+        description=(
+            "Generates a list of recommended songs inspired by a list of selected artists. "
+            "You can provide additional filters (e.g., genre, year). "
+            "Returns a list of recommended songs with Spotify metadata."
+        ),
+        request=GenerateFromArtistsSerializer,
+        responses=None,
+    )
+    def post(self, request):
+        serializer = GenerateFromArtistsSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.validated_data = serializer.validated_data
+        return super().post(request)
+
     def get_prompt(self, user, data):
-        artists = data.get("artists", [])
-        if not artists or not isinstance(artists, list):
-            raise ValueError("List of artists is required")
-        count = data.get("count")
+        """
+        Builds a prompt for generating songs inspired by selected artists.
+        """
+        artists = data["artists"]
+        count = data["count"]
         filter_str = extract_filters(data)
         preferences = get_user_preferences(user)
-        if not count:
-            return Response({"error": "count is required"}, status=400)
 
-        prompt = f"""
-        Podaj {count*GENERATION_BUFFER_MULTIPLIER} utworów {filter_str}, inspirowanych twórczością artystów:
+        return f"""
+        Podaj {count * GENERATION_BUFFER_MULTIPLIER} utworów {filter_str}, inspirowanych twórczością artystów:
         {json.dumps(artists, indent=2)}
 
         {build_preferences_prompt(preferences)}
@@ -229,21 +335,35 @@ class GenerateFromArtistsView(BaseGenerateView):
           {{"title": "tytuł", "artist": "artysta"}}
         ]
         """
-        return prompt
 
 
 class GenerateQueueFromPromptView(BaseGenerateView):
-    def get_prompt(self, user, data):
-        prompt_input = data.get("prompt")
-        if not prompt_input:
-            raise ValueError("Prompt is required")
-        count = data.get("count")
-        preferences = get_user_preferences(user)
-        if not count:
-            return Response({"error": "count is required"}, status=400)
+    @extend_schema(
+        summary="Generate recommendations from a text prompt",
+        description=(
+            "Generates a list of recommended songs based on a free-form text prompt describing the desired mood"
+            ", style, or theme. "
+            "Returns a list of recommended songs with Spotify metadata."
+        ),
+        request=GenerateFromPromptSerializer,
+        responses=None,
+    )
+    def post(self, request):
+        serializer = GenerateFromPromptSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.validated_data = serializer.validated_data
+        return super().post(request)
 
-        prompt = f"""
-        Podaj {count*GENERATION_BUFFER_MULTIPLIER} utworów pasujących do opisu:
+    def get_prompt(self, user, data):
+        """
+        Builds a prompt for generating songs based on a free-form text prompt.
+        """
+        prompt_input = data["prompt"]
+        count = data["count"]
+        preferences = get_user_preferences(user)
+
+        return f"""
+        Podaj {count * GENERATION_BUFFER_MULTIPLIER} utworów pasujących do opisu:
         "{prompt_input}"
 
         {build_preferences_prompt(preferences)}
@@ -253,4 +373,3 @@ class GenerateQueueFromPromptView(BaseGenerateView):
           {{"title": "tytuł", "artist": "artysta"}}
         ]
         """
-        return prompt
