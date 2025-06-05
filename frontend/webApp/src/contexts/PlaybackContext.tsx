@@ -28,7 +28,7 @@ export const PlaybackProvider = ({ children }: { children: ReactNode }) => {
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<null | AppError>(null);
     const [deviceId, setDeviceId] = useState<string | null>(null);
-    const iframe = document.querySelector("iframe");
+    let sdkLoaded = false;
 
     const initiateScript = () => {
         const script = document.createElement("script");
@@ -47,13 +47,17 @@ export const PlaybackProvider = ({ children }: { children: ReactNode }) => {
         return res.access_token;
     };
 
-    const updateState = async () => await player?.getCurrentState?.()?.then?.((newState) => setCurrentState(newState));
+    const updateState = async () => {
+        if (!player) return;
+        const newState = await player.getCurrentState();
+        if (newState) setCurrentState(newState);
+    };
 
     const transferPlayback = async () =>
         await sendRequest("POST", "spotify/playback/transfer/", { body: JSON.stringify({ device_id: deviceId }) });
 
     const initiatePlayer = () => {
-        if (player) return;
+        if (player || sdkLoaded) return;
 
         const newPlayer: Spotify.Player = new window.Spotify.Player({
             name: "NextListen",
@@ -86,11 +90,17 @@ export const PlaybackProvider = ({ children }: { children: ReactNode }) => {
         setPlayer(newPlayer);
     };
 
+    const handleBeforeUnload = () => {
+        if (player) {
+            player.pause();
+            player.disconnect();
+        }
+    };
+
     useEffect(() => {
         setLoading(true);
-        if (!player && !iframe) {
+        if (!player && !sdkLoaded) {
             const script = initiateScript();
-
             window.onSpotifyWebPlaybackSDKReady = initiatePlayer;
 
             return () => closeScript(script);
@@ -100,17 +110,18 @@ export const PlaybackProvider = ({ children }: { children: ReactNode }) => {
     useEffect(() => {
         if (!player) return;
 
-        player.connect();
-        setLoading(false);
+        let interval: number;
+        player.connect().then((success) => {
+            if (success) {
+                interval = setInterval(updateState, 1000);
+                setLoading(false);
+            }
+        });
 
-        const interval = setInterval(updateState, 1000);
-
-        const handleBeforeUnload = () => player.disconnect();
         window.addEventListener("beforeunload", handleBeforeUnload);
-
         return () => {
             clearInterval(interval);
-            player.disconnect();
+            handleBeforeUnload();
             window.removeEventListener("beforeunload", handleBeforeUnload);
         };
     }, [player]);
@@ -126,7 +137,6 @@ export const PlaybackProvider = ({ children }: { children: ReactNode }) => {
     const { nextTrack, previousTrack, pause, setVolume, getVolume, seek } = player;
 
     const togglePlay = async () => {
-        console.log(deviceId);
         if (isNull(currentState)) {
             await transferPlayback();
         }
