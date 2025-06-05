@@ -42,7 +42,7 @@ export const PlaybackProvider = ({ children }: { children: ReactNode }) => {
     };
 
     useEffect(() => {
-        if (!isEmpty(queue) && currentState?.track_window.current_track.uri !== current.uri) {
+        if (!isEmpty(queue) && currentState?.track_window.current_track.uri !== current?.uri) {
             playCurrent();
         }
     }, [currentIndex]);

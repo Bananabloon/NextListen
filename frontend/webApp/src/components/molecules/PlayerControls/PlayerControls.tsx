@@ -32,9 +32,8 @@ const PlayerControls = ({ ...props }): React.JSX.Element => {
 
     const updateFeedback = (value: Feedback) => {
         setFeedback(value);
-        console.log(currentState?.track_window.current_track.uri);
         sendRequest("POST", "songs/feedback/update", {
-            body: JSON.stringify({ spotify_uri: currentState?.track_window.current_track.uri, feedback: value }),
+            body: JSON.stringify({ spotify_uri: currentState?.track_window.current_track.uri, feedback_value: value }),
         });
     };
 
