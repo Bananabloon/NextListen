@@ -1,33 +1,19 @@
-from rest_framework.views import APIView
-from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from drf_spectacular.utils import extend_schema, OpenApiParameter
 import requests
-from drf_spectacular.utils import extend_schema
-from .profile import get_spotify_instance
 from constants import SPOTIFY_SEARCH_URL
-
-
-class SpotifyBaseView(APIView):
-    permission_classes = [IsAuthenticated]
-
-    def initial(self, request, *args, **kwargs):
-        super().initial(request, *args, **kwargs)
-        self.spotify = get_spotify_instance(request.user)
+from .views_helpers import SpotifyBaseView
 
 
 class TopTracksView(SpotifyBaseView):
-    @extend_schema(
-        summary="Get user's top tracks",
-        description="Returns a list of the user's most listened tracks on Spotify.",
-    )
+    @extend_schema(summary="Get user's top tracks", description="Most listened tracks.")
     def get(self, request):
         return Response(self.spotify.get_top_tracks())
 
 
 class TopArtistsView(SpotifyBaseView):
     @extend_schema(
-        summary="Get user's top artists",
-        description="Returns a list of the user's most listened artists on Spotify.",
+        summary="Get user's top artists", description="Most listened artists."
     )
     def get(self, request):
         return Response(self.spotify.get_top_artists())
@@ -35,8 +21,7 @@ class TopArtistsView(SpotifyBaseView):
 
 class CurrentlyPlayingView(SpotifyBaseView):
     @extend_schema(
-        summary="Get currently playing track",
-        description="Returns information about the track currently playing on Spotify.",
+        summary="Get currently playing track", description="Track currently playing."
     )
     def get(self, request):
         return Response(self.spotify.get_current_playing())
@@ -45,41 +30,30 @@ class CurrentlyPlayingView(SpotifyBaseView):
 class AddTrackToQueueView(SpotifyBaseView):
     @extend_schema(
         summary="Add track to queue",
-        description="Adds the specified track to the user's Spotify playback queue.",
+        description="Adds a track to the user's Spotify queue.",
         request={"application/json": {"example": {"track_uri": "spotify:track:xyz"}}},
     )
     def post(self, request):
-        track_uri = request.data.get("track_uri")
-        if not track_uri:
-            return Response({"error": "Missing track_uri"}, status=400)
-
-        success, error = self.spotify.add_to_queue(track_uri)
-        if success:
-            return Response({"message": "Track added to queue"})
-        return Response(
-            {"error": "Failed to add track to queue", "details": error}, status=400
+        (track_uri,) = self.require_fields(request.data, ["track_uri"])
+        return self.respond_action(
+            *self.spotify.add_to_queue(track_uri), message="Track added to queue"
         )
 
 
 class SpotifySearchView(SpotifyBaseView):
     @extend_schema(
         summary="Search tracks or artists",
-        description="Searches for tracks or artists on Spotify based on a text query.",
+        description="Search on Spotify.",
         parameters=[
-            {
-                "name": "q",
-                "required": True,
-                "description": "Search phrase",
-                "in": "query",
-                "type": "string",
-            },
-            {
-                "name": "type",
-                "required": False,
-                "description": "Search type: track or artist",
-                "in": "query",
-                "type": "string",
-            },
+            OpenApiParameter(
+                name="q", required=True, description="Search phrase", type=str
+            ),
+            OpenApiParameter(
+                name="type",
+                required=False,
+                description="Search type: track or artist",
+                type=str,
+            ),
         ],
     )
     def get(self, request):
@@ -90,10 +64,10 @@ class SpotifySearchView(SpotifyBaseView):
             return Response({"error": "Invalid query or type"}, status=400)
 
         token = request.user.spotify_access_token
-        params = {"q": query, "type": search_type, "limit": 10}
         headers = {"Authorization": f"Bearer {token}"}
-        response = requests.get(SPOTIFY_SEARCH_URL, headers=headers, params=params)
+        params = {"q": query, "type": search_type, "limit": 10}
 
+        response = requests.get(SPOTIFY_SEARCH_URL, headers=headers, params=params)
         if response.status_code != 200:
             return Response({"error": "Spotify API error"}, status=response.status_code)
 
@@ -103,26 +77,21 @@ class SpotifySearchView(SpotifyBaseView):
 class TransferPlaybackView(SpotifyBaseView):
     @extend_schema(
         summary="Transfer playback",
-        description="Transfers playback to the selected Spotify device.",
+        description="Switch Spotify playback to selected device.",
         request={"application/json": {"example": {"device_id": "abc123"}}},
     )
     def post(self, request):
-        device_id = request.data.get("device_id")
-        if not device_id:
-            return Response({"error": "Missing device_id"}, status=400)
-
-        success, error = self.spotify.transfer_playback(device_id)
-        if success:
-            return Response({"message": "Playback transferred successfully"})
-        return Response(
-            {"error": "Failed to transfer playback", "details": error}, status=400
+        (device_id,) = self.require_fields(request.data, ["device_id"])
+        return self.respond_action(
+            *self.spotify.transfer_playback(device_id),
+            message="Playback transferred successfully",
         )
 
 
 class StartPlaybackView(SpotifyBaseView):
     @extend_schema(
         summary="Start playback of a track",
-        description="Starts playback of the selected track on the specified Spotify device.",
+        description="Starts playback on selected device.",
         request={
             "application/json": {
                 "example": {"device_id": "abc123", "track_uri": "spotify:track:xyz"}
@@ -130,15 +99,10 @@ class StartPlaybackView(SpotifyBaseView):
         },
     )
     def post(self, request):
-        device_id = request.data.get("device_id")
-        track_uri = request.data.get("track_uri")
-
-        if not device_id or not track_uri:
-            return Response({"error": "Missing device_id or track_uri"}, status=400)
-
-        success, error = self.spotify.start_playback(device_id, track_uri)
-        if success:
-            return Response({"message": "Playback started"})
-        return Response(
-            {"error": "Failed to start playback", "details": error}, status=400
+        device_id, track_uri = self.require_fields(
+            request.data, ["device_id", "track_uri"]
+        )
+        return self.respond_action(
+            *self.spotify.start_playback(device_id, track_uri),
+            message="Playback started",
         )

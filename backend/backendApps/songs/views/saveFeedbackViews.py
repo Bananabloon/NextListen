@@ -6,17 +6,31 @@ from users.models import Media, UserFeedback
 from songs.utils import update_curveball_enjoyment
 from django.utils import timezone
 import requests
+from drf_spectacular.utils import extend_schema
 
 from constants import SPOTIFY_TRACK_URL
+from .serializers import SongFeedbackSerializer, SongFeedbackResponseSerializer
+
 
 class SongFeedbackView(APIView):
     permission_classes = [IsAuthenticated]
 
+    @extend_schema(
+        request=SongFeedbackSerializer,
+        responses={200: SongFeedbackResponseSerializer},
+        summary="Save user feedback for a song by Spotify URI",
+        description=(
+            "Saves user feedback (like, dislike, or none) for a song identified by its Spotify URI. "
+            "If the song does not exist in the database, its metadata is fetched from Spotify and saved. "
+            "Updates curveball enjoyment if applicable. "
+            "Returns the status, track title, artist, and updated curveball enjoyment."
+        ),
+    )
     def post(self, request):
         spotify_uri = request.data.get("spotify_uri")
-        feedback = request.data.get("feedback")
+        feedback_value = request.data.get("feedback_value")
 
-        if not spotify_uri or feedback not in ["like", "dislike", "none"]:
+        if not spotify_uri or feedback_value not in [1, 0, -1]:
             return Response(
                 {"error": "Invalid input"}, status=status.HTTP_400_BAD_REQUEST
             )
@@ -34,7 +48,9 @@ class SongFeedbackView(APIView):
 
             if resp.status_code != 200:
                 print("Spotify API error:", resp.status_code, resp.text)
-                return Response({"error": "Could not fetch song data from Spotify"}, status=400)
+                return Response(
+                    {"error": "Could not fetch song data from Spotify"}, status=400
+                )
 
             data = resp.json()
             media = Media.objects.create(
@@ -43,11 +59,11 @@ class SongFeedbackView(APIView):
                 artist_name=data["artists"][0]["name"],
                 album_name=data["album"]["name"],
                 media_type=Media.SONG,
-                genre=[],  # brak w track API
+                genre=[], 
                 saved_at=timezone.now(),
             )
 
-        liked = {"like": True, "dislike": False, "none": None}[feedback]
+        liked = {1: True, -1: False, 0: None}[feedback_value]
 
         if liked is not None:
             UserFeedback.objects.update_or_create(
@@ -63,9 +79,11 @@ class SongFeedbackView(APIView):
         if getattr(media, "is_curveball", False):
             update_curveball_enjoyment(request.user, liked)
 
-        return Response({
-            "status": "ok",
-            "track_title": media.title,
-            "artist": media.artist_name,
-            "curveball_enjoyment": request.user.curveball_enjoyment,
-        })
+        return Response(
+            {
+                "status": "ok",
+                "track_title": media.title,
+                "artist": media.artist_name,
+                "curveball_enjoyment": request.user.curveball_enjoyment,
+            }
+        )

@@ -1,18 +1,19 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework import status
 from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework import status
 from rest_framework_simplejwt.exceptions import TokenError, InvalidToken
 from django.shortcuts import redirect
 from urllib.parse import urlencode
 from drf_spectacular.utils import extend_schema, OpenApiResponse
-from users.models import Media, UserFeedback
 
+from users.models import Media, UserFeedback
 from .services.spotify_service import SpotifyService
 from .services.spotify_auth_service import SpotifyAuthService
 from .services.token_service import TokenService, CustomRefreshToken
 from constants import SPOTIFY_AUTHORIZE_URL
 from django.conf import settings
+from .serializers import DeleteResponseSerializer
 
 
 from .serializers import (
@@ -153,6 +154,14 @@ class DeleteTokens(APIView):
 class DeleteAccountView(APIView):
     permission_classes = [IsAuthenticated]
 
+    @extend_schema(
+        summary="Delete user account",
+        description=(
+            "Deletes the authenticated user's account along with all associated "
+            "media and feedback data. Also clears access and refresh tokens from cookies."
+        ),
+        responses={204: DeleteResponseSerializer},
+    )
     def delete(self, request):
         user = request.user
 
@@ -177,6 +186,14 @@ class DeleteAccountView(APIView):
 class DeleteUserDataView(APIView):
     permission_classes = [IsAuthenticated]
 
+    @extend_schema(
+        summary="Delete user data",
+        description=(
+            "Deletes all media and feedback data related to the authenticated user "
+            "without deleting the user account."
+        ),
+        responses={200: DeleteResponseSerializer},
+    )
     def delete(self, request):
         user = request.user
 
@@ -186,4 +203,5 @@ class DeleteUserDataView(APIView):
         Media.objects.filter(id__in=media_ids).delete()
         UserFeedback.objects.filter(user=user).delete()
 
-        return Response({"detail": "User data deleted."}, status=status.HTTP_200_OK)
+        serializer = DeleteResponseSerializer({"detail": "User data deleted."})
+        return Response(serializer.data, status=status.HTTP_200_OK)

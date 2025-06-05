@@ -6,11 +6,15 @@ from ..services.spotifyClient import SpotifyAPI
 from openai import OpenAI
 from django.conf import settings
 import json
+from collections import namedtuple
 from songs.utils import find_best_match
 from .serializers import (
     DiscoveryGenerateRequestSerializer,
     DiscoveryGenerateResponseSerializer,
 )
+
+
+MatchResult = namedtuple("MatchResult", ["discovered", "errors"])
 
 
 class DiscoveryGenerateView(APIView):
@@ -29,40 +33,78 @@ class DiscoveryGenerateView(APIView):
     def post(self, request):
         serializer = DiscoveryGenerateRequestSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
+
         genre = serializer.validated_data["genre"]
         count = serializer.validated_data.get("count", 10)
-
         user = request.user
 
-        spotify = SpotifyAPI(
+        spotify = self._get_spotify(user)
+        openai_client = self._get_openai_client()
+
+        top_artists = self._get_top_artists(spotify)
+        top_tracks = self._get_top_tracks(spotify)
+
+        prompt = self._build_prompt(top_artists, top_tracks, genre, count)
+        raw_openai_response = self._query_openai(openai_client, prompt)
+
+        songs = self._parse_openai_response(raw_openai_response)
+        if songs is None:
+            return Response(
+                {
+                    "error": "Failed to parse OpenAI response",
+                    "raw": raw_openai_response,
+                },
+                status=500,
+            )
+
+        match_result = self._match_songs(songs, spotify, user)
+
+        response_data = {
+            "message": f"Discovery songs generated for genre: {genre}",
+            "genre": genre,
+            "songs": match_result.discovered,
+            "errors": match_result.errors,
+        }
+
+        response_serializer = DiscoveryGenerateResponseSerializer(response_data)
+        return Response(response_serializer.data)
+
+    def _get_spotify(self, user):
+        return SpotifyAPI(
             user.spotify_access_token,
             refresh_token=user.spotify_refresh_token,
             user=user,
         )
-        client = OpenAI(api_key=settings.OPENAI_API_KEY)
 
-        top_artists_data = spotify.get_top_artists(limit=10)
-        top_tracks_data = spotify.get_top_tracks(limit=10)
+    def _get_openai_client(self):
+        return OpenAI(api_key=settings.OPENAI_API_KEY)
 
-        top_tracks = [
+    def _get_top_artists(self, spotify):
+        data = spotify.get_top_artists(limit=10)
+        return [artist["name"] for artist in data.get("items", [])]
+
+    def _get_top_tracks(self, spotify):
+        data = spotify.get_top_tracks(limit=10)
+        return [
             f"{track['name']} by {track['artists'][0]['name']}"
-            for track in top_tracks_data.get("items", [])
+            for track in data.get("items", [])
         ]
-        top_artists = [artist["name"] for artist in top_artists_data.get("items", [])]
 
-        prompt = f"""
-        Użytkownik zwykle słucha:
-        Artyści: {json.dumps(top_artists, indent=2, ensure_ascii=False)}
-        Utwory: {json.dumps(top_tracks, indent=2, ensure_ascii=False)}
+    def _build_prompt(self, artists, tracks, genre, count):
+        return f"""
+Użytkownik zwykle słucha:
+Artyści: {json.dumps(artists, indent=2, ensure_ascii=False)}
+Utwory: {json.dumps(tracks, indent=2, ensure_ascii=False)}
 
-        Teraz chce poznać nową muzykę z gatunku: {genre}
+Teraz chce poznać nową muzykę z gatunku: {genre}
 
-        Podaj {count} rekomendacji muzycznych w tym gatunku, w formacie JSON:
-        [
-          {{"title": "tytuł", "artist": "artysta"}}
-        ]
-        """
+Podaj {count} rekomendacji muzycznych w tym gatunku, w formacie JSON:
+[
+  {{"title": "tytuł", "artist": "artysta"}}
+]
+"""
 
+    def _query_openai(self, client, prompt):
         response = client.chat.completions.create(
             model="gpt-4o",
             messages=[
@@ -71,20 +113,23 @@ class DiscoveryGenerateView(APIView):
             ],
             temperature=0.8,
         )
-
         raw_content = response.choices[0].message.content.strip()
+
+        # Usuń ewentualne markdownowe oznaczenia kodu
         if raw_content.startswith("```") and raw_content.endswith("```"):
             raw_content = "\n".join(raw_content.split("\n")[1:-1])
+        return raw_content
 
+    def _parse_openai_response(self, raw_content):
         try:
-            songs = json.loads(raw_content)
-        except Exception:
-            return Response(
-                {"error": "Failed to parse OpenAI response", "raw": raw_content},
-                status=500,
-            )
+            return json.loads(raw_content)
+        except json.JSONDecodeError:
+            return None
 
-        discovered, errors = [], []
+    def _match_songs(self, songs, spotify, user) -> MatchResult:
+        discovered = []
+        errors = []
+
         for song in songs:
             query = f"{song['title']} {song['artist']}"
             try:
@@ -112,15 +157,8 @@ class DiscoveryGenerateView(APIView):
                     )
                 else:
                     errors.append({"song": song, "error": "No match found"})
+
             except Exception as e:
                 errors.append({"song": song, "error": str(e)})
 
-        response_data = {
-            "message": f"Discovery songs generated for genre: {genre}",
-            "genre": genre,
-            "songs": discovered,
-            "errors": errors,
-        }
-
-        response_serializer = DiscoveryGenerateResponseSerializer(response_data)
-        return Response(response_serializer.data)
+        return MatchResult(discovered, errors)

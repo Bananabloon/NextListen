@@ -11,3 +11,7 @@ class ErrorSerializer(serializers.Serializer):
 
 class EmptyRequestSerializer(serializers.Serializer):
     pass
+
+
+class DeleteResponseSerializer(serializers.Serializer):
+    detail = serializers.CharField()

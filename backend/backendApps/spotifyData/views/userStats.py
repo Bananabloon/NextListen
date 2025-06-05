@@ -1,18 +1,14 @@
-from rest_framework.views import APIView
-from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from drf_spectacular.utils import extend_schema
 from datetime import timedelta
 from django.utils import timezone
 from collections import Counter
-
+from .views_helpers import SpotifyBaseView
 from users.models import UserFeedback
 from .serializers import UserStatsResponseSerializer
 
 
-class UserStatsView(APIView):
-    permission_classes = [IsAuthenticated]
-
+class UserStatsView(SpotifyBaseView):
     @extend_schema(
         summary="User statistics",
         description=(
@@ -26,45 +22,41 @@ class UserStatsView(APIView):
         user = request.user
         feedbacks = UserFeedback.objects.filter(user=user).select_related("media")
 
-        total = feedbacks.count()
-        liked = feedbacks.filter(is_liked=True).count()
-        disliked = feedbacks.filter(is_liked=False).count()
+        total_feedbacks = feedbacks.count()
+        liked_count = feedbacks.filter(is_liked=True).count()
+        disliked_count = total_feedbacks - liked_count
 
         curveballs = feedbacks.filter(source="curveball")
-        liked_curveballs = curveballs.filter(is_liked=True).count()
+        curveballs_total = curveballs.count()
+        curveballs_liked = curveballs.filter(is_liked=True).count()
 
-        genre_counter = Counter()
-        for f in feedbacks:
-            genre_counter.update(f.media.genre)
+        top_genres = self.get_top_counts(feedbacks, "genre", 5)
+        top_artists = self.get_top_counts(feedbacks, "artist_name", 5)
+        most_common_media_type = self.get_most_common_value(feedbacks, "media_type")
 
-        top_genres = genre_counter.most_common(5)
-
-        artist_counter = Counter(f.media.artist_name for f in feedbacks)
-        top_artists = artist_counter.most_common(5)
-
-        media_type_counter = Counter(f.media.media_type for f in feedbacks)
-        most_common_type = media_type_counter.most_common(1)
-
-        month_ago = timezone.now().date() - timedelta(days=30)
-        recent_feedback = feedbacks.filter(feedback_at__gte=month_ago)
-        recent_genres = Counter()
-        for f in recent_feedback:
-            recent_genres.update(f.media.genre)
-        recent_top_genres = recent_genres.most_common(3)
+        month_ago = timezone.now() - timedelta(days=30)
+        recent_feedbacks = feedbacks.filter(feedback_at__gte=month_ago)
+        recent_top_genres = self.get_top_counts(recent_feedbacks, "genre", 3)
 
         data = {
-            "total_feedbacks": total,
-            "liked": liked,
-            "disliked": disliked,
+            "total_feedbacks": total_feedbacks,
+            "liked": liked_count,
+            "disliked": disliked_count,
             "curveball_enjoyment": user.curveball_enjoyment,
-            "curveballs_total": curveballs.count(),
-            "curveballs_liked": liked_curveballs,
+            "curveballs_total": curveballs_total,
+            "curveballs_liked": curveballs_liked,
             "top_genres": top_genres,
             "top_artists": top_artists,
-            "most_common_media_type": most_common_type[0][0]
-            if most_common_type
-            else None,
+            "most_common_media_type": most_common_media_type,
             "recent_top_genres": recent_top_genres,
         }
 
         return Response(data)
+
+    def get_top_counts(self, queryset, field_name, limit):
+        values = queryset.values_list(f"media__{field_name}", flat=True)
+        return Counter(values).most_common(limit)
+
+    def get_most_common_value(self, queryset, field_name):
+        values = queryset.values_list(f"media__{field_name}", flat=True)
+        return Counter(values).most_common(1)[0][0] if values else None
