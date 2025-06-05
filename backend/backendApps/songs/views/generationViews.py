@@ -151,6 +151,7 @@ class GenerateQueueView(BaseGenerateView):
 
         {build_preferences_prompt(preferences)}
         Tylko utwory i artyści, którzy rzeczywiście istnieją i są dostępni na Spotify.
+        Upewnij się, że wygenerowane propozycje zachowują różnorodność – unikaj powtarzania tego samego artysty w zbyt wielu utworach.
 
         Format JSON:
         [
