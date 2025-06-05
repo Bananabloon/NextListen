@@ -66,7 +66,7 @@ class SongViewsTestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data["status"], "ok")
 
-    @patch("songs.views.feedbackViews.requests.get")
+    @patch("songs.views.saveFeedbackViews.requests.get")
     def test_feedback_creates_media_from_spotify(self, mock_get):
         client, user = authenticate_client()
 

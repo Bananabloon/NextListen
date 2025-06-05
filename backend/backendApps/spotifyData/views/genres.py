@@ -1,11 +1,16 @@
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from drf_spectacular.utils import extend_schema, OpenApiParameter
+
 from ..services.spotifyClient import SpotifyAPI
+from django.conf import settings
 import os
 import json
 import random
-from django.conf import settings
+
+from .serializers import DiscoveryGenresResponseSerializer
+
 
 GENRE_FILE_PATH = os.path.join(settings.BASE_DIR, "genres.json")
 
@@ -13,9 +18,26 @@ GENRE_FILE_PATH = os.path.join(settings.BASE_DIR, "genres.json")
 class DiscoveryGenresView(APIView):
     permission_classes = [IsAuthenticated]
 
+    @extend_schema(
+        summary="Get discovery genres",
+        description=(
+            "Returns a list of music genres for discovery, excluding genres the user already listens to. "
+            "Genres are selected based on popularity and can be limited with the 'count' query parameter."
+        ),
+        parameters=[
+            OpenApiParameter(
+                name="count",
+                type=int,
+                required=False,
+                description="Number of genres to return (default: 5)",
+            )
+        ],
+        responses=DiscoveryGenresResponseSerializer,
+    )
     def get(self, request):
         user = request.user
         count = int(request.query_params.get("count", 5))
+
         spotify = SpotifyAPI(
             user.spotify_access_token,
             refresh_token=user.spotify_refresh_token,
@@ -35,7 +57,7 @@ class DiscoveryGenresView(APIView):
         ]
 
         if not available_genres:
-            return Response({"message": "No new genres to discover"}, status=200)
+            return Response({"genres": []}, status=200)
 
         weighted_genres = sorted(
             [g for g in all_genres if g["category"] in available_genres],

@@ -5,37 +5,13 @@ import json
 from users.models import UserFeedback, Media
 from spotifyData.services.spotifyClient import SpotifyAPI
 from songs.utils import should_send_curveball, extract_filters, find_best_match
-from songs.services.songGeneration import build_preferences_prompt, generate_songs_with_buffer
+from songs.services.songGeneration import build_preferences_prompt, generate_songs_with_buffer, get_user_preferences
 import logging
-from constants import GENERATION_BUFFER_MULTIPLIER
-
 logger = logging.getLogger(__name__)
 from constants import GENERATION_BUFFER_MULTIPLIER
 
 class GenerateQueueBase(APIView):
     permission_classes = [IsAuthenticated]
-
-    def get_user_preferences(self, user):
-        feedbacks = UserFeedback.objects.select_related("media").filter(user=user)
-
-        liked_genres, liked_artists = set(), set()
-        disliked_genres, disliked_artists = set(), set()
-
-        for feedback in feedbacks:
-            if feedback.is_liked:
-                liked_genres.update(feedback.media.genre)
-                liked_artists.add(feedback.media.artist_name)
-            else:
-                disliked_genres.update(feedback.media.genre)
-                disliked_artists.add(feedback.media.artist_name)
-
-        return {
-            "explicit_content": "Tak" if user.explicit_content_enabled else "Nie",
-            "liked_genres": list(liked_genres),
-            "liked_artists": list(liked_artists),
-            "disliked_genres": list(disliked_genres),
-            "disliked_artists": list(disliked_artists),
-        }
 
     def prepare_song_list_only(self, user, songs, spotify):
         prepared = []
@@ -164,7 +140,7 @@ class GenerateQueueView(BaseGenerateView):
             raise ValueError("title and artist are required")
         count = data.get("count")
         filter_str = extract_filters(data)
-        preferences = self.get_user_preferences(user)
+        preferences = get_user_preferences(user)
 
         prompt = f"""
         Podaj {count*GENERATION_BUFFER_MULTIPLIER} utworów podobnych do:
@@ -174,6 +150,7 @@ class GenerateQueueView(BaseGenerateView):
 
         {build_preferences_prompt(preferences)}
         Tylko utwory i artyści, którzy rzeczywiście istnieją i są dostępni na Spotify.
+        Upewnij się, że wygenerowane propozycje zachowują różnorodność – unikaj powtarzania tego samego artysty w zbyt wielu utworach.
 
         Format JSON:
         [
@@ -187,7 +164,7 @@ class GenerateFromTopView(BaseGenerateView):
     def get_prompt(self, user, data):
         count = data.get("count")
         filter_str = extract_filters(data)
-        preferences = self.get_user_preferences(user)
+        preferences = get_user_preferences(user)
         spotify = SpotifyAPI(
             user.spotify_access_token,
             refresh_token=user.spotify_refresh_token,
@@ -205,7 +182,7 @@ class GenerateFromTopView(BaseGenerateView):
         if not count:
             raise ValueError("count is required")
 
-        preferences = self.get_user_preferences(user)
+        preferences = get_user_preferences(user)
 
         prompt = f"""
         Na podstawie ulubionych utworów:
@@ -234,7 +211,7 @@ class GenerateFromArtistsView(BaseGenerateView):
             raise ValueError("List of artists is required")
         count = data.get("count")
         filter_str = extract_filters(data)
-        preferences = self.get_user_preferences(user)
+        preferences = get_user_preferences(user)
         if not count:
             return Response({"error": "count is required"}, status=400)
 
@@ -260,7 +237,7 @@ class GenerateQueueFromPromptView(BaseGenerateView):
         if not prompt_input:
             raise ValueError("Prompt is required")
         count = data.get("count")
-        preferences = self.get_user_preferences(user)
+        preferences = get_user_preferences(user)
         if not count:
             return Response({"error": "count is required"}, status=400)
 
