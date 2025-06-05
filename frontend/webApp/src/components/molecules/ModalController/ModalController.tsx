@@ -1,17 +1,21 @@
 import { useEffect, useRef } from "react";
-import classes from "./QueueGenerateOverlay.module.css";
+import classes from "./ModalController.module.css";
 import Portal from "../../atoms/Portal/Portal";
 import Button from "../../atoms/Button/Button";
-interface QueueGenerateOverlayProps extends React.HTMLAttributes<HTMLDivElement> {
-    show: boolean;
+interface ModalControllerProps extends React.HTMLAttributes<HTMLDivElement> {
+    buttonText: string;
+    width: number;
+    height: number;
 }
 
-const QueueGenerateOverlay = ({
-    show,
+const ModalController = ({
+    buttonText,
+    width,
+    height,
     children,
     className,
     ...props
-}: QueueGenerateOverlayProps): React.JSX.Element => {
+}: ModalControllerProps): React.JSX.Element => {
     const ref = useRef(null);
     const inboundEventListener = (e: MouseEvent) => {
         const element = ref.current! as HTMLDialogElement;
@@ -23,6 +27,7 @@ const QueueGenerateOverlay = ({
                 e.clientX > modalPos.right ||
                 e.clientY > modalPos.bottom
             ) {
+                element.style.opacity = "0";
                 element.close();
             }
         }
@@ -39,7 +44,10 @@ const QueueGenerateOverlay = ({
                 <dialog
                     ref={ref}
                     className={classes.container}
-                ></dialog>
+                    style={{ width: `${width}px`, height: `${height}px` }}
+                >
+                    {children}
+                </dialog>
             </Portal>
             <Button
                 size="md"
@@ -49,12 +57,13 @@ const QueueGenerateOverlay = ({
                     e.stopPropagation();
                     const element = ref.current! as HTMLDialogElement;
                     element.showModal();
+                    element.style.opacity = "1";
                 }}
             >
-                Generate New Queue
+                {buttonText}
             </Button>
         </>
     );
 };
 
-export default QueueGenerateOverlay;
+export default ModalController;

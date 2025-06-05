@@ -1,0 +1,58 @@
+.modalTitleText {
+    font-size: var(--font-size-xxxl);
+    font-weight: 600;
+    margin-bottom: var(--spacing-md);
+    padding-left: var(--spacing-xxxl);
+    padding-top: var(--spacing-xxl);
+}
+.supportiveText {
+    padding-left: var(--spacing-xxxl);
+}
+.selectorsGroup button {
+    border-radius: 0;
+}
+.selectorsGroup button:first-of-type {
+    border-radius: var(--radius-sm) 0px 0px var(--radius-sm);
+}
+.selectorsGroup button:last-of-type {
+    border-radius: 0px var(--radius-sm) var(--radius-sm) 0px;
+}
+.inputContainer,
+.selectionViewContainer {
+    padding-top: var(--spacing-xxxl);
+    padding-left: var(--spacing-xxxl);
+    width: 50%;
+    height: 250px;
+    gap: var(--spacing-sm);
+}
+.selectionViewContainer {
+    overflow: auto;
+    scrollbar-width: 0;
+}
+.selectionElement {
+    background-color: var(--background-color-4);
+    border-radius: var(--radius-xl) var(--radius-sm) var(--radius-sm) var(--radius-xl);
+    width: 340px;
+    height: 36px;
+}
+.selectionElementPfp {
+    width: 38px;
+    height: 38px;
+    border-radius: var(--radius-xl);
+}
+.elementText {
+    align-self: center;
+}
+.elementGenreText {
+    margin-left: auto;
+    color: var(--text-color-disabled);
+    font-size: var(--font-size-sm);
+}
+.removeIcon {
+    margin-right: var(--spacing-sm);
+}
+.genButton {
+    color: black;
+    margin-left: auto;
+    margin-right: var(--spacing-xxl);
+}

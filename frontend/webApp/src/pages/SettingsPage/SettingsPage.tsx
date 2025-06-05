@@ -1,4 +1,4 @@
-import { Navigate, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import Button from "../../components/atoms/Button/Button";
 import Group from "../../components/atoms/Group/Group";
 import Stack from "../../components/atoms/Stack/Stack";
@@ -7,7 +7,6 @@ import StatsDisplay from "../../components/molecules/StatsDisplay/StatsDisplay";
 import classes from "./SettingsPage.module.css";
 import { IconSettings } from "@tabler/icons-react";
 const SettingsPage = (): React.JSX.Element => {
-    //navigate -1
     const navigate = useNavigate();
     return (
         <Stack className={classes.container}>
