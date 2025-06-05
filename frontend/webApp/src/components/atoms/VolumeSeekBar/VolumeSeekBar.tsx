@@ -12,18 +12,19 @@ interface VolumeSeekBarProps extends React.HTMLAttributes<HTMLDivElement> {}
 const VolumeSeekBar = ({ className, ...props }: VolumeSeekBarProps): React.JSX.Element => {
     const { currentState, setVolume } = usePlayback();
     const [volume, setVolumeState] = useState(0);
-    let [volumeUpdateFlag, setVolumeUpdateFlag] = useState(false);
     const [muted, setMuted] = useState(false);
     const [showBar, setShowBar] = useState(false);
+
     useEffect(() => {
-        if (!isNull(currentState)) {
-            setVolume(volume);
-        }
-    }, [volumeUpdateFlag]);
-    const muteVolume = () => {
-        setVolumeState(0);
-        setMuted(!muted);
-    };
+        if (!muted && !isNull(currentState)) setVolume(volume);
+    }, [volume, muted]);
+
+    const toggleMute = () =>
+        setMuted((prev) => {
+            if (!prev) setVolume(0);
+            return !prev;
+        });
+
     return (
         <div
             className={cs(classes.container, className)}
@@ -34,7 +35,7 @@ const VolumeSeekBar = ({ className, ...props }: VolumeSeekBarProps): React.JSX.E
                     size="md"
                     variant="transparent"
                     onMouseEnter={(e) => setShowBar(true)}
-                    onClick={(e) => muteVolume()}
+                    onClick={toggleMute}
                 >
                     {muted ? (
                         <IconVolumeOff
@@ -51,10 +52,6 @@ const VolumeSeekBar = ({ className, ...props }: VolumeSeekBarProps): React.JSX.E
                 <input
                     onChange={(e) => {
                         setVolumeState(parseFloat(e.target.value));
-                    }}
-                    //only send the request when letting go of the input. onchange is too frequent
-                    onMouseUp={(e) => {
-                        (e) => setVolumeUpdateFlag(!volumeUpdateFlag);
                     }}
                     onMouseLeave={(e) => setShowBar(false)}
                     type="range"

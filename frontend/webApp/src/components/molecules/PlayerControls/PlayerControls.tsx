@@ -18,7 +18,7 @@ import VolumeSeekBar from "../../atoms/VolumeSeekBar/VolumeSeekBar";
 import { isNull } from "lodash";
 
 const PlayerControls = ({ ...props }): React.JSX.Element => {
-    const { currentState, previousTrack, nextTrack, togglePlay } = usePlayback();
+    const { currentState, playNext, playPrevious, togglePlay } = usePlayback();
     const [feedback, setFeedback] = useState<Feedback>(0);
     const { sendRequest } = useRequests();
 
@@ -74,7 +74,7 @@ const PlayerControls = ({ ...props }): React.JSX.Element => {
                 <IconButton
                     size="md"
                     variant="transparent"
-                    onClick={() => previousTrack()}
+                    onClick={() => playPrevious()}
                 >
                     <IconPlayerTrackPrevFilled />
                 </IconButton>
@@ -89,7 +89,7 @@ const PlayerControls = ({ ...props }): React.JSX.Element => {
                 <IconButton
                     size="md"
                     variant="transparent"
-                    onClick={() => nextTrack()}
+                    onClick={() => playNext()}
                 >
                     <IconPlayerTrackNextFilled />
                 </IconButton>

@@ -1,158 +1,39 @@
-import { createContext, useContext, ReactNode, useState, useEffect } from "react";
+import { createContext, useContext, ReactNode, useEffect } from "react";
 import useRequests from "../hooks/useRequests";
-import { AppError } from "../utils/errors";
-import ERRORS from "../config/errors.config";
-import { isNull } from "lodash";
+import { isEmpty, isNull } from "lodash";
+import { useQueue } from "./QueueContext";
+import { useSpotifyScript } from "../hooks/useSpotifyScript";
+import { useSpotifyPlayer } from "../hooks/useSpotifyPlayer";
+import { useThrottledCallback } from "@mantine/hooks";
 
 interface ContextType {
     loading: boolean;
     currentState: Spotify.PlaybackState | null;
     updateState: () => Promise<void>;
-    nextTrack: () => Promise<void>;
-    previousTrack: () => Promise<void>;
+    playNext: () => void;
+    playPrevious: () => void;
+    playCurrent: () => Promise<any>;
+    setVolume: (value: number) => void;
     pause: () => Promise<void>;
     togglePlay: () => Promise<void>;
     resume: () => Promise<void>;
-    setVolume: (volume: number) => Promise<void>;
     getVolume: () => Promise<number>;
     seek: (ms: number) => Promise<void>;
-    playTrack: (uri: string) => Promise<any>;
 }
 
 const PlaybackContext = createContext<ContextType | undefined>(undefined);
 
 export const PlaybackProvider = ({ children }: { children: ReactNode }) => {
+    const { queue, current, currentIndex, setCurrentIndex } = useQueue();
+    const { player, deviceId, currentState, updateState, loading, error, initiatePlayer } = useSpotifyPlayer();
     const { sendRequest } = useRequests();
-    const [player, setPlayer] = useState<Spotify.Player | null>(null);
-    const [currentState, setCurrentState] = useState<Spotify.PlaybackState | null>(null);
-    const [loading, setLoading] = useState<boolean>(true);
-    const [error, setError] = useState<null | AppError>(null);
-    const [deviceId, setDeviceId] = useState<string | null>(null);
-    let sdkLoaded = false;
 
-    const initiateScript = () => {
-        const script = document.createElement("script");
-        script.src = "https://sdk.scdn.co/spotify-player.js";
-        script.async = true;
-        document.body.appendChild(script);
-        return script;
-    };
-
-    const closeScript = (script: HTMLScriptElement) => {
-        document.body.removeChild(script);
-    };
-
-    const getToken = async () => {
-        const res = await sendRequest("GET", "/spotify/tokens");
-        return res.access_token;
-    };
-
-    const updateState = async () => {
-        if (!player) return;
-        const newState = await player.getCurrentState();
-        if (newState) setCurrentState(newState);
-    };
+    useSpotifyScript(initiatePlayer);
 
     const transferPlayback = async () =>
-        await sendRequest("POST", "spotify/playback/transfer/", { body: JSON.stringify({ device_id: deviceId }) });
-
-    const initiatePlayer = () => {
-        if (player || sdkLoaded) return;
-
-        const newPlayer: Spotify.Player = new window.Spotify.Player({
-            name: "NextListen",
-            volume: 0.1,
-            getOAuthToken: (callback) => getToken().then(callback),
+        await sendRequest("POST", "spotify/playback/transfer/", {
+            body: JSON.stringify({ device_id: deviceId }),
         });
-
-        newPlayer.addListener("ready", ({ device_id }) => {
-            console.log("Ready with Device ID", device_id);
-            setDeviceId(device_id);
-        });
-
-        newPlayer.addListener("not_ready", ({ device_id }) => {
-            console.log("Device ID has gone offline", device_id);
-            setDeviceId(null);
-        });
-
-        newPlayer.addListener("initialization_error", ({ message }) => {
-            console.error(message);
-        });
-
-        newPlayer.addListener("authentication_error", ({ message }) => {
-            console.error(message);
-        });
-
-        newPlayer.addListener("account_error", ({ message }) => {
-            setError(new AppError(ERRORS._403_PREMIUM_REQUIRED));
-        });
-
-        setPlayer(newPlayer);
-    };
-
-    const handleBeforeUnload = () => {
-        if (player) {
-            player.pause();
-            player.disconnect();
-        }
-    };
-
-    useEffect(() => {
-        setLoading(true);
-        if (!player && !sdkLoaded) {
-            const script = initiateScript();
-            window.onSpotifyWebPlaybackSDKReady = initiatePlayer;
-
-            return () => closeScript(script);
-        }
-    }, []);
-
-    useEffect(() => {
-        if (!player) return;
-
-        let interval: number;
-        player.connect().then((success) => {
-            if (success) {
-                interval = setInterval(updateState, 1000);
-                setLoading(false);
-            }
-        });
-
-        window.addEventListener("beforeunload", handleBeforeUnload);
-        return () => {
-            clearInterval(interval);
-            handleBeforeUnload();
-            window.removeEventListener("beforeunload", handleBeforeUnload);
-        };
-    }, [player]);
-
-    if (loading || !player) {
-        return null;
-    }
-
-    if (error) {
-        throw error;
-    }
-
-    const { nextTrack, previousTrack, pause, setVolume, getVolume, seek } = player;
-
-    const togglePlay = async () => {
-        if (isNull(currentState)) {
-            await transferPlayback();
-        }
-        return await player.togglePlay();
-    };
-
-    const resume = async () => {
-        if (isNull(currentState)) {
-            await transferPlayback();
-        }
-        return await player.resume();
-    };
-
-    const addToQueue = (uri: string) => {};
-
-    const setQueue = (uris: string[]) => {};
 
     const playTrack = async (uri: string) => {
         return await sendRequest("POST", "/spotify/playback/start", {
@@ -160,19 +41,72 @@ export const PlaybackProvider = ({ children }: { children: ReactNode }) => {
         });
     };
 
+    useEffect(() => {
+        if (!isEmpty(queue) && currentState?.track_window.current_track.uri !== current.uri) {
+            playCurrent();
+        }
+    }, [currentIndex]);
+
+    useEffect(() => {
+        transferPlayback();
+    }, [deviceId]);
+
+    const playCurrent = async () => await playTrack(current.uri);
+
+    const playNext = () => setCurrentIndex((prev) => (prev === queue.length - 1 ? prev : prev + 1));
+
+    const playPrevious = () => setCurrentIndex((prev) => (prev === 0 ? 0 : prev - 1));
+
+    const setVolume = useThrottledCallback(async (value: number) => await player?.setVolume?.(value), 200);
+
+    if (loading || !player) return null;
+    if (error) throw error;
+
+    const togglePlay = async () => {
+        if (isNull(queue)) return;
+        if (
+            isNull(currentState) ||
+            (currentState.paused && current.uri !== currentState?.track_window.current_track.uri)
+        )
+            await playCurrent();
+        return await player.togglePlay();
+    };
+
+    const pause = async () => {
+        if (isNull(currentState)) await transferPlayback();
+        return await player.pause();
+    };
+
+    const resume = async () => {
+        if (isNull(queue)) return;
+        if (
+            isNull(currentState) ||
+            (currentState.paused && current.uri !== currentState?.track_window.current_track.uri)
+        )
+            await playCurrent();
+        return await player.resume();
+    };
+
+    const seek = async (ms_pos: number) => {
+        await player.seek(ms_pos);
+        if (currentState?.paused) await resume();
+    };
+
+    const getVolume = async () => await player.getVolume();
+
     const value = {
         loading,
         currentState,
         updateState,
-        nextTrack,
-        previousTrack,
+        playNext,
+        playPrevious,
+        playCurrent,
         pause,
         togglePlay,
         resume,
         setVolume,
         getVolume,
         seek,
-        playTrack,
     };
 
     return <PlaybackContext.Provider value={value}>{children}</PlaybackContext.Provider>;

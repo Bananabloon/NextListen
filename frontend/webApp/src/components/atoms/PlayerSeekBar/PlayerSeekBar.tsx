@@ -10,7 +10,7 @@ import { isNull } from "lodash";
 interface PlayerSeekBarProps extends React.HTMLAttributes<HTMLDivElement> {}
 
 const PlayerSeekBar = ({ className, ...props }: PlayerSeekBarProps): React.JSX.Element => {
-    const { currentState, player } = usePlayback();
+    const { currentState, seek } = usePlayback();
     const [position, setPosition] = useState(0);
 
     useEffect(() => {
@@ -37,7 +37,7 @@ const PlayerSeekBar = ({ className, ...props }: PlayerSeekBarProps): React.JSX.E
                 disabled={isNull(maxPosition)}
                 onChange={(e) => {
                     const newPosition = parseInt(e.currentTarget.value);
-                    player.seek(newPosition);
+                    seek(newPosition);
                     setPosition(newPosition);
                 }}
                 style={
