@@ -2,22 +2,39 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from users.models import Media, UserFeedback
+from drf_spectacular.utils import extend_schema
+from .serializers import (
+    SingleSongFeedbackRequestSerializer,
+    SingleSongFeedbackResponseSerializer,
+    AllUserFeedbackSerializer,
+    TrackInfoSerializer,
+)
 import requests
+
 
 class AllUserFeedbacksView(APIView):
     permission_classes = [IsAuthenticated]
 
+    @extend_schema(
+        summary="Get all user feedbacks with Spotify track info",
+        description=(
+            "Returns a list of all feedback entries for the authenticated user, "
+            "including detailed Spotify track information for each feedback."
+        ),
+        responses={200: AllUserFeedbackSerializer(many=True)},
+    )
     def get(self, request):
-        feedbacks = UserFeedback.objects.filter(user=request.user).select_related('media')
+        feedbacks = UserFeedback.objects.filter(user=request.user).select_related(
+            "media"
+        )
         spotify_uris = [fb.media.spotify_uri for fb in feedbacks]
 
         if not spotify_uris:
             return Response({"feedbacks": []})
 
-        # Podział paczek po max 50 URI (limit Spotify)
         def chunks(lst, n):
             for i in range(0, len(lst), n):
-                yield lst[i:i + n]
+                yield lst[i : i + n]
 
         token = request.user.spotify_access_token
         headers = {"Authorization": f"Bearer {token}"}
@@ -29,7 +46,9 @@ class AllUserFeedbacksView(APIView):
             resp = requests.get(url, headers=headers)
 
             if resp.status_code != 200:
-                return Response({"error": "Spotify API error", "details": resp.json()}, status=400)
+                return Response(
+                    {"error": "Spotify API error", "details": resp.json()}, status=400
+                )
 
             data = resp.json().get("tracks", [])
             for track in data:
@@ -48,43 +67,64 @@ class AllUserFeedbacksView(APIView):
             spotify_uri = fb.media.spotify_uri
             track_info = all_track_info.get(spotify_uri, {})
 
-            feedback_list.append({
+            track_info_serializer = TrackInfoSerializer(data=track_info)
+            if track_info and track_info_serializer.is_valid():
+                spotify_data = track_info_serializer.data
+            else:
+                spotify_data = {}
+
+            feedback_data = {
                 "spotify_uri": spotify_uri,
                 "is_liked": fb.is_liked,
                 "source": fb.source,
                 "feedback_at": fb.feedback_at,
-                "spotify_data": track_info
-            })
+                "spotify_data": spotify_data,
+            }
+
+            feedback_serializer = AllUserFeedbackSerializer(data=feedback_data)
+            if feedback_serializer.is_valid():
+                feedback_list.append(feedback_serializer.data)
+            else:
+                feedback_list.append(feedback_data)
 
         return Response({"feedbacks": feedback_list})
+
 
 class SingleSongFeedbackView(APIView):
     permission_classes = [IsAuthenticated]
 
+    @extend_schema(
+        summary="Get feedback for a single song",
+        description=(
+            "Returns the feedback value (like/dislike/none) for a single song identified by its Spotify URI, "
+            "for the authenticated user."
+        ),
+        request=SingleSongFeedbackRequestSerializer,
+        responses={200: SingleSongFeedbackResponseSerializer},
+    )
     def get(self, request):
-        spotify_uri = request.query_params.get("spotify_uri")
+        serializer = SingleSongFeedbackRequestSerializer(data=request.query_params)
+        serializer.is_valid(raise_exception=True)
 
-        if not spotify_uri:
-            return Response({
-                "error": "spotify_uri is required",
-                "expected_format": {"spotify_uri": "<Spotify track URI>"}
-            }, status=400)
+        spotify_uri = serializer.validated_data["spotify_uri"]
 
         try:
             media = Media.objects.get(spotify_uri=spotify_uri)
-            feedback = UserFeedback.objects.filter(user=request.user, media=media).first()
-
-            value = 0 if feedback is None or feedback.is_liked is None else (1 if feedback.is_liked else -1)
-
-            return Response({
-                "spotify_uri": spotify_uri,
-                "feedback_value": value
-            })
-
+            feedback = UserFeedback.objects.filter(
+                user=request.user, media=media
+            ).first()
+            value = (
+                0
+                if feedback is None or feedback.is_liked is None
+                else (1 if feedback.is_liked else -1)
+            )
+            response_data = {"spotify_uri": spotify_uri, "feedback_value": value}
         except Media.DoesNotExist:
-            return Response({
+            response_data = {
                 "spotify_uri": spotify_uri,
                 "feedback_value": 0,
-                "message": "No feedback found for this track."
-            })
- 
+                "message": "No feedback found for this track.",
+            }
+
+        response_serializer = SingleSongFeedbackResponseSerializer(response_data)
+        return Response(response_serializer.data)
