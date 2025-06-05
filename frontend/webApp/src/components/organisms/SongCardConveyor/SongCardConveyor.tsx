@@ -2,24 +2,23 @@ import classes from "./SongCardConveyor.module.css";
 import cs from "classnames";
 import SongCard from "../../molecules/SongCard/SongCard";
 import React, { useEffect, useState } from "react";
-import useRequests from "../../../hooks/useRequests";
 import { GeneratedSong } from "../../../types/api.types";
 import { remToPx } from "css-unit-converter-js";
 import ScrollContainer from "react-indiana-drag-scroll";
 import { useElementSize } from "@mantine/hooks";
 import { isEmpty } from "lodash";
-import { SyncLoader } from "react-spinners";
+import { useQueue } from "../../../contexts/QueueContext";
 import { usePlayback } from "../../../contexts/PlaybackContext";
+import SongCardPlaceholder from "../../molecules/SongCard/SongCardPlaceholder";
+import Stack from "../../atoms/Stack/Stack";
+import { GridLoader } from "react-spinners";
 
 interface SongCardConveyorProps extends React.HTMLAttributes<HTMLDivElement> {}
 
 const SongCardConveyor = ({ children, className, ...props }: SongCardConveyorProps): React.JSX.Element => {
-    const [songs, setSongs] = useState<GeneratedSong[]>([]);
-    const [loading, setLoading] = useState<boolean>(false);
-    const [selectedIndex, setSelectedIndex] = useState<number>(0);
+    const { queue, currentIndex, setCurrentIndex, generateDiscoveryFromTop } = useQueue();
     const { width, ref } = useElementSize();
-    const { sendRequest } = useRequests();
-    const { playTrack, currentState } = usePlayback();
+    const [suppressFocusUpdate, setSuppressFocusUpdate] = useState(false);
 
     const getDimensions = () => {
         const container = ref.current!;
@@ -40,7 +39,7 @@ const SongCardConveyor = ({ children, className, ...props }: SongCardConveyorPro
         const currentSnap = Math.floor(
             (scrollCenter - cardWidth - selectedCardWidth - 2.5 * containerGap) / (containerGap + cardWidth)
         );
-        setSelectedIndex(currentSnap);
+        setCurrentIndex(currentSnap);
     };
 
     // manual snap implementation due to using grabbable scroll
@@ -52,53 +51,34 @@ const SongCardConveyor = ({ children, className, ...props }: SongCardConveyorPro
     };
 
     const onScroll = () => {
-        if (ref.current) updateFocus();
+        if (ref.current && !suppressFocusUpdate) updateFocus();
     };
 
     const onEndScroll = () => {
-        if (ref.current) snap(selectedIndex);
+        if (ref.current) snap(currentIndex);
     };
 
     useEffect(() => {
-        if (ref.current) snap(selectedIndex);
-    }, [width]);
-
-    useEffect(() => {
-        if (isEmpty(songs)) {
-            setLoading(true);
-            sendRequest("POST", "/songs/generate-from-top/", { body: JSON.stringify({ count: 10 }) }).then((data) => {
-                setSongs(data?.songs ?? []);
-                setLoading(false);
-            });
-        }
+        if (isEmpty(queue)) generateDiscoveryFromTop();
     }, []);
 
     useEffect(() => {
-        if (!isEmpty(songs) && currentState?.track_window.current_track.uri !== songs[selectedIndex].uri) {
-            playTrack(songs[selectedIndex].uri);
+        if (ref.current) {
+            setSuppressFocusUpdate(true);
+            snap(currentIndex);
+
+            // Allow time for smooth scroll to complete before re-enabling focus updates
+            const timeout = setTimeout(() => setSuppressFocusUpdate(false), 300);
+
+            return () => clearTimeout(timeout);
         }
-    }, [selectedIndex]);
+    }, [width, currentIndex]);
 
-    const emptySongCard = (
-        <SongCard
-            song={{} as GeneratedSong}
-            style={{ visibility: "hidden" }}
-        />
-    );
-
-    const songCards = songs.map((song, i) => (
+    const songCards = queue.map((song, i) => (
         <SongCard
             key={i}
             song={song}
-            onClick={() => {
-                playTrack(song.uri);
-                snap(i);
-            }}
-            isSelected={i === selectedIndex}
-            style={{
-                marginLeft: song.uri === songs[0].uri ? "auto" : "0",
-                marginRight: song.uri === songs[songs.length - 1].uri ? "auto" : "0",
-            }}
+            isSelected={i === currentIndex}
         />
     ));
 
@@ -108,18 +88,6 @@ const SongCardConveyor = ({ children, className, ...props }: SongCardConveyorPro
             {...props}
             draggable="false"
         >
-            {loading && (
-                <SyncLoader
-                    style={{
-                        position: "absolute",
-                        top: "50%",
-                        left: "50%",
-                        transform: "translate(-50%, -50%)",
-                        zIndex: 100,
-                    }}
-                    color="white"
-                />
-            )}
             <ScrollContainer
                 horizontal
                 vertical={false}
@@ -128,11 +96,22 @@ const SongCardConveyor = ({ children, className, ...props }: SongCardConveyorPro
                 className={cs(classes.cards, "scroll-container")}
                 innerRef={ref}
             >
-                {emptySongCard}
-                {emptySongCard}
+                <SongCardPlaceholder transparent />
+                <SongCardPlaceholder transparent />
                 {songCards}
-                {emptySongCard}
-                {emptySongCard}
+                <SongCardPlaceholder>
+                    <Stack
+                        style={{
+                            height: "100%",
+                            alignItems: "center",
+                            justifyContent: "center",
+                        }}
+                    >
+                        <GridLoader color="white" />
+                        <span style={{ fontSize: "var(--font-size-lg)", fontWeight: "600" }}>Generating more...</span>
+                    </Stack>
+                </SongCardPlaceholder>
+                <SongCardPlaceholder transparent />
             </ScrollContainer>
             <div className={classes.conveyorShadow} />
         </div>

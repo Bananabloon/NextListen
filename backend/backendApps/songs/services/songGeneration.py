@@ -1,7 +1,7 @@
 import json
 from songs.utils import ask_openai
 import re
-
+from users.models import UserFeedback
 
 def build_preferences_prompt(preferences):
     return f"""
@@ -45,3 +45,23 @@ def generate_songs_with_buffer(
             return songs[:count], songs[count:]
         attempts += 1
     return songs[:count], []
+
+def get_user_preferences(user):
+    feedbacks = UserFeedback.objects.select_related("media").filter(user=user)
+    liked_genres, disliked_genres, liked_artists, disliked_artists = set(), set(), set(), set()
+
+    for feedback in feedbacks:
+        if feedback.is_liked:
+            liked_genres.update(feedback.media.genre)
+            liked_artists.add(feedback.media.artist_name)
+        else:
+            disliked_genres.update(feedback.media.genre)
+            disliked_artists.add(feedback.media.artist_name)
+
+    return {
+        "explicit_content": "Tak" if user.explicit_content_enabled else "Nie",
+        "liked_genres": list(liked_genres),
+        "liked_artists": list(liked_artists),
+        "disliked_genres": list(disliked_genres),
+        "disliked_artists": list(disliked_artists),
+    }

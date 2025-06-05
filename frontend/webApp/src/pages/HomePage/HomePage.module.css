@@ -7,20 +7,6 @@
     height: 800px;
     margin-top: 20px;
 }
-@keyframes pulse {
-    0% {
-        box-shadow: 0 0 5px white;
-    }
-    50% {
-        box-shadow: 0 0 10px var(--spotify-green);
-    }
-    100% {
-        box-shadow: none;
-    }
-}
-.loginButton {
-    animation: pulse 4s infinite linear;
-}
 .title {
     padding: var(--spacing-xxxl) var(--spacing-xxxl);
     font-size: var(--font-size-xxl);

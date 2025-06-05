@@ -18,7 +18,7 @@ import VolumeSeekBar from "../../atoms/VolumeSeekBar/VolumeSeekBar";
 import { isNull } from "lodash";
 
 const PlayerControls = ({ ...props }): React.JSX.Element => {
-    const { currentState, previousTrack, nextTrack, togglePlay } = usePlayback();
+    const { currentState, playNext, playPrevious, togglePlay } = usePlayback();
     const [feedback, setFeedback] = useState<Feedback>(0);
     const { sendRequest } = useRequests();
 
@@ -33,8 +33,8 @@ const PlayerControls = ({ ...props }): React.JSX.Element => {
     const updateFeedback = (value: Feedback) => {
         setFeedback(value);
         sendRequest("POST", "songs/feedback/update", {
-            body: JSON.stringify({ spotify_uri: currentState?.track_window.current_track.uri }),
-        } as RequestInit);
+            body: JSON.stringify({ spotify_uri: currentState?.track_window.current_track.uri, feedback_value: value }),
+        });
     };
 
     return (
@@ -74,7 +74,7 @@ const PlayerControls = ({ ...props }): React.JSX.Element => {
                 <IconButton
                     size="md"
                     variant="transparent"
-                    onClick={() => previousTrack()}
+                    onClick={() => playPrevious()}
                 >
                     <IconPlayerTrackPrevFilled />
                 </IconButton>
@@ -89,7 +89,7 @@ const PlayerControls = ({ ...props }): React.JSX.Element => {
                 <IconButton
                     size="md"
                     variant="transparent"
-                    onClick={() => nextTrack()}
+                    onClick={() => playNext()}
                 >
                     <IconPlayerTrackNextFilled />
                 </IconButton>

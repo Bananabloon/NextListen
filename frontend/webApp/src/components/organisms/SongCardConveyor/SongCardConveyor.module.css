@@ -30,7 +30,7 @@
 
 .conveyorShadow {
     width: 100%;
-    height: 150px;
+    height: 250px;
     background-color: var(--background-color-2);
     position: absolute;
     top: 50%;

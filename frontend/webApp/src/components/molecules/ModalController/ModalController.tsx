@@ -1,22 +1,14 @@
-import { useEffect, useRef } from "react";
-import classes from "./ModalController.module.css";
+import { useEffect, useRef, useState } from "react";
+import classes from "./QueueGenerateOverlay.module.css";
 import Portal from "../../atoms/Portal/Portal";
 import Button from "../../atoms/Button/Button";
-interface ModalControllerProps extends React.HTMLAttributes<HTMLDivElement> {
-    buttonText: string;
-    width: number;
-    height: number;
-}
 
-const ModalController = ({
-    buttonText,
-    width,
-    height,
-    children,
-    className,
-    ...props
-}: ModalControllerProps): React.JSX.Element => {
+interface QueueGenerateOverlayProps extends React.HTMLAttributes<HTMLDivElement> {}
+
+const QueueGenerateOverlay = ({ children, className, ...props }: QueueGenerateOverlayProps): React.JSX.Element => {
+    const [show, setShow] = useState(false);
     const ref = useRef(null);
+
     const inboundEventListener = (e: MouseEvent) => {
         const element = ref.current! as HTMLDialogElement;
         if (element.open) {
@@ -32,12 +24,14 @@ const ModalController = ({
             }
         }
     };
+
     useEffect(() => {
         window.addEventListener("click", inboundEventListener);
         return () => {
             window.removeEventListener("click", inboundEventListener);
         };
     }, []);
+
     return (
         <>
             <Portal>
