@@ -49,6 +49,7 @@ export const PlaybackProvider = ({ children }: { children: ReactNode }) => {
 
     useEffect(() => {
         transferPlayback();
+        player?.pause();
     }, [deviceId]);
 
     const playCurrent = async () => await playTrack(current.uri);

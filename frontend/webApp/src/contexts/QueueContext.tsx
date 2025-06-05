@@ -1,6 +1,7 @@
-import { createContext, useContext, ReactNode, useState } from "react";
+import { createContext, useContext, ReactNode, useState, useEffect } from "react";
 import { GeneratedSong } from "../types/api.types";
 import useRequests from "../hooks/useRequests";
+import { isEmpty } from "lodash";
 
 interface QueueContextType {
     queue: GeneratedSong[];
@@ -17,11 +18,14 @@ export const QueueProvider = ({ children }: { children: ReactNode }) => {
     const [queue, setQueue] = useState<GeneratedSong[]>([]);
     const [currentIndex, setCurrentIndex] = useState(0);
     const [loading, setLoading] = useState(false);
+    const [updating, setUpdating] = useState(false);
     const { sendRequest } = useRequests();
+
+    const current = queue?.[currentIndex] ?? null;
 
     const generateDiscoveryFromTop = async () => {
         setLoading(true);
-        return sendRequest("POST", "/songs/generate-from-top/", { body: JSON.stringify({ count: 10 }) }).then(
+        return sendRequest("POST", "/songs/generate-from-top/", { body: JSON.stringify({ count: 30 }) }).then(
             (data) => {
                 setQueue(data?.songs ?? []);
                 setLoading(false);
@@ -29,7 +33,16 @@ export const QueueProvider = ({ children }: { children: ReactNode }) => {
         );
     };
 
-    const current = queue?.[currentIndex] ?? null;
+    useEffect(() => {
+        if (!isEmpty(queue) && !loading && !updating && currentIndex + 10 >= queue.length) {
+            setUpdating(true);
+            sendRequest("POST", "/songs/generate-from-top/", { body: JSON.stringify({ count: 30 }) }).then((data) => {
+                console.log("a", data);
+                if (data?.songs) setQueue((prev) => [...prev, ...data?.songs]);
+                setUpdating(false);
+            });
+        }
+    }, [currentIndex]);
 
     const value = {
         queue,

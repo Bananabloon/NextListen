@@ -7,13 +7,16 @@ import { remToPx } from "css-unit-converter-js";
 import ScrollContainer from "react-indiana-drag-scroll";
 import { useElementSize } from "@mantine/hooks";
 import { isEmpty } from "lodash";
-import { SyncLoader } from "react-spinners";
 import { useQueue } from "../../../contexts/QueueContext";
+import { usePlayback } from "../../../contexts/PlaybackContext";
+import SongCardPlaceholder from "../../molecules/SongCard/SongCardPlaceholder";
+import Stack from "../../atoms/Stack/Stack";
+import { GridLoader } from "react-spinners";
 
 interface SongCardConveyorProps extends React.HTMLAttributes<HTMLDivElement> {}
 
 const SongCardConveyor = ({ children, className, ...props }: SongCardConveyorProps): React.JSX.Element => {
-    const { queue, loading, currentIndex, setCurrentIndex, generateDiscoveryFromTop } = useQueue();
+    const { queue, currentIndex, setCurrentIndex, generateDiscoveryFromTop } = useQueue();
     const { width, ref } = useElementSize();
     const [suppressFocusUpdate, setSuppressFocusUpdate] = useState(false);
 
@@ -71,21 +74,10 @@ const SongCardConveyor = ({ children, className, ...props }: SongCardConveyorPro
         }
     }, [width, currentIndex]);
 
-    const emptySongCard = (
-        <SongCard
-            song={{} as GeneratedSong}
-            style={{ visibility: "hidden" }}
-        />
-    );
-
     const songCards = queue.map((song, i) => (
         <SongCard
             key={i}
             song={song}
-            onClick={() => {
-                setCurrentIndex(i);
-                snap(i);
-            }}
             isSelected={i === currentIndex}
         />
     ));
@@ -104,11 +96,22 @@ const SongCardConveyor = ({ children, className, ...props }: SongCardConveyorPro
                 className={cs(classes.cards, "scroll-container")}
                 innerRef={ref}
             >
-                {emptySongCard}
-                {emptySongCard}
+                <SongCardPlaceholder transparent />
+                <SongCardPlaceholder transparent />
                 {songCards}
-                {emptySongCard}
-                {emptySongCard}
+                <SongCardPlaceholder>
+                    <Stack
+                        style={{
+                            height: "100%",
+                            alignItems: "center",
+                            justifyContent: "center",
+                        }}
+                    >
+                        <GridLoader color="white" />
+                        <span style={{ fontSize: "var(--font-size-lg)", fontWeight: "600" }}>Generating more...</span>
+                    </Stack>
+                </SongCardPlaceholder>
+                <SongCardPlaceholder transparent />
             </ScrollContainer>
             <div className={classes.conveyorShadow} />
         </div>
