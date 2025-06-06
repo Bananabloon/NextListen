@@ -1,8 +1,8 @@
 import Group from "../../atoms/Group/Group";
 import classes from "./Footer.module.css";
-import PlayerSeekBar from "../../atoms/PlayerSeekBar/PlayerSeekBar";
 import PlayerControls from "../../molecules/PlayerControls/PlayerControls";
 import { useQueue } from "../../../contexts/QueueContext";
+import PlayerSeekBar from "../../molecules/PlayerSeekBar/PlayerSeekBar";
 
 const Footer = (): React.JSX.Element => {
     const { loading } = useQueue();

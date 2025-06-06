@@ -61,10 +61,15 @@
     gap: 0px;
     font-weight: 600;
     margin-top: auto;
+    align-items: center;
 }
 .spotifyLogo {
     margin-left: auto;
     width: 30px;
+}
+
+.link {
+    pointer-events: auto;
 }
 
 @keyframes curveball {

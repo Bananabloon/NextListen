@@ -1,7 +1,5 @@
-import { IconThumbDown, IconThumbDownFilled, IconThumbUp, IconThumbUpFilled } from "@tabler/icons-react";
 import cs from "classnames";
 import Group from "../../atoms/Group/Group";
-import IconButton from "../../atoms/IconButton/IconButton";
 import Stack from "../../atoms/Stack/Stack";
 import classes from "./SongCard.module.css";
 import ScrollingText from "../../atoms/ScrollingText/ScrollingText";
@@ -37,33 +35,13 @@ const SongCard = ({ isSelected = false, song, children, className, ...props }: S
                         <p className={classes.artistsText}>{song.track_details.artists.join(", ")}</p>
                     </Stack>
                     <Group className={classes.controlGroup}>
-                        {isSelected ? (
-                            <a
-                                href={song.uri}
-                                style={{ alignSelf: "center" }}
-                            >
-                                OPEN ON SPOTIFY
-                            </a>
-                        ) : (
-                            <>
-                                <IconButton
-                                    variant="transparent"
-                                    style={{ alignItems: "flex-end", alignSelf: "center", marginLeft: "-10px" }}
-                                >
-                                    {song.feedback_value === -1 ? (
-                                        <IconThumbDownFilled style={{ transform: "scaleX(-1)" }} />
-                                    ) : (
-                                        <IconThumbDown style={{ transform: "scaleX(-1)" }} />
-                                    )}
-                                </IconButton>
-                                <IconButton
-                                    variant="transparent"
-                                    style={{ paddingLeft: "0" }}
-                                >
-                                    {song.feedback_value === 1 ? <IconThumbUpFilled /> : <IconThumbUp />}
-                                </IconButton>
-                            </>
-                        )}
+                        <a
+                            href={song.uri}
+                            className={classes.link}
+                            target="_blank"
+                        >
+                            OPEN ON SPOTIFY
+                        </a>
                         <img
                             className={classes.spotifyLogo}
                             src="/icons/spotify/logo_white.svg"

@@ -4,15 +4,15 @@ import Portal from "../../atoms/Portal/Portal";
 import Button from "../../atoms/Button/Button";
 
 interface ModalControllerProps extends React.HTMLAttributes<HTMLDivElement> {
-    buttonText: string;
     width: number;
     height: number;
+    buttonText: string;
 }
 
 const ModalController = ({
-    buttonText,
     width,
     height,
+    buttonText,
     children,
     className,
     ...props

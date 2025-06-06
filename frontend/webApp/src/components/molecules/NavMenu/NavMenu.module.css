@@ -3,3 +3,8 @@
     display: flex;
     align-items: center;
 }
+
+.navButton[data-active="true"] {
+    color: var(--primary-color-3);
+    background-color: var(--background-color-4);
+}

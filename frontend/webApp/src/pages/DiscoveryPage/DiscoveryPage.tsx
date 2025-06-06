@@ -4,8 +4,16 @@ import classes from "./DiscoveryPage.module.css";
 import DiscoveryModalController from "../../components/organisms/DiscoveryModalController/DiscoveryModalController";
 import { useQueue } from "../../contexts/QueueContext";
 import QueueLoadingOverlay from "../../components/organisms/QueueLoadingOverlay/QueueLoadingOverlay";
+import { useEffect } from "react";
+import { isEmpty } from "lodash";
+
 const DiscoveryPage = (): React.JSX.Element => {
-    const { loading } = useQueue();
+    const { queue, loading, createNewDiscoveryQueue } = useQueue();
+
+    useEffect(() => {
+        if (isEmpty(queue)) createNewDiscoveryQueue("top", { count: 20 });
+    }, []);
+
     return (
         <Stack className={classes.container}>
             {loading ? <QueueLoadingOverlay /> : <SongCardConveyor className={classes.conveyor} />}
