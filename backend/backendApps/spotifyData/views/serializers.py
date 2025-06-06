@@ -88,3 +88,18 @@ class SongSerializer(serializers.Serializer):
     uri = serializers.CharField()
     explicit = serializers.BooleanField()
 
+
+class DiscoveryGenerateResponseSerializer(serializers.Serializer):
+    message = serializers.CharField()
+    genre = serializers.CharField()
+    songs = SongSerializer(many=True)
+    errors = serializers.ListField(child=serializers.DictField())
+
+
+# === Liked ===
+class LikeTrackSerializer(serializers.Serializer):
+    track_id = serializers.CharField()
+
+
+class RemoveLikedTrackSerializer(serializers.Serializer):
+    track_id = serializers.CharField()
