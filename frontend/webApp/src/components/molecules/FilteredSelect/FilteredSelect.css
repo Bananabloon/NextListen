@@ -1,0 +1,28 @@
+.filteredSelect__control {
+    padding-left: "var(--spacing-sm)";
+    margin-top: "var(--spacing-sm)";
+    background-color: "var(--background-color-4)";
+    border-radius: "var(--radius-sm)";
+}
+
+.filteredSelect__option {
+    background-color: var(--background-color-4);
+    padding: var(--spacing-sm) 0 var(--spacing-sm) var(--spacing-sm);
+    height: 2rem;
+    text-wrap: nowrap;
+    text-overflow: ellipsis;
+}
+.filteredSelect__option:last-of-type {
+    border-radius: 0 0 var(--radius-sm) var(--radius-sm);
+}
+.filteredSelect__menu-list {
+    height: 200px;
+    border-radius: 0 0 var(--radius-sm) var(--radius-sm);
+    padding-bottom: var(--spacing-xs);
+    scroll-behavior: smooth;
+    scrollbar-width: none;
+}
+
+.filteredSelect__placeholder {
+    color: var(--text-color-disabled);
+}

@@ -1,0 +1,33 @@
+.selectionViewContainer {
+    padding-top: var(--spacing-xxxl);
+    padding-left: var(--spacing-xxxl);
+    width: 50%;
+    height: 250px;
+    gap: var(--spacing-sm);
+    overflow: auto;
+    scrollbar-width: none;
+}
+
+.selectionViewContainer::-webkit-scrollbar {
+    display: none;
+}
+
+.selectionElement {
+    background-color: var(--background-color-4);
+    border-radius: var(--radius-xl) var(--radius-sm) var(--radius-sm) var(--radius-xl);
+    width: 340px;
+    height: 36px;
+    align-items: center;
+}
+
+.selectionElementPfp {
+    width: 38px;
+    height: 38px;
+    border-radius: var(--radius-xl);
+    aspect-ratio: 1/1;
+    object-fit: cover;
+}
+
+.removeIcon {
+    margin-right: var(--spacing-sm);
+}

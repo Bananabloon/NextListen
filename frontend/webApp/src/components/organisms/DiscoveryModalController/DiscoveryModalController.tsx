@@ -4,62 +4,25 @@ import Group from "../../atoms/Group/Group";
 import Stack from "../../atoms/Stack/Stack";
 import ModalController from "../../molecules/ModalController/ModalController";
 import classes from "./DiscoveryModalController.module.css";
-import cs from "classnames";
-import { IconX } from "@tabler/icons-react";
-import AsyncSelect from "react-select/async";
-import useRequests from "../../../hooks/useRequests";
+import ItemSelectionContainer from "../../molecules/ItemSelectionContainer/ItemSelectionContainer";
+import FilteredSelect from "../../molecules/FilteredSelect/FilteredSelect";
 interface DiscoveryModalControllerProps extends React.HTMLAttributes<HTMLDivElement> {}
-
 const DiscoveryModalController = ({
     children,
     className,
     ...props
 }: DiscoveryModalControllerProps): React.JSX.Element => {
-    const [activeFilter, setActiveFilter] = useState<number>(0);
-    const [artists, setArtists] = useState<string[]>([]);
-    const [songs, setSongs] = useState<string[]>([]);
-    const [prompt, setPrompt] = useState<string>("");
-    const filters: string[] = ["Top Songs", "Artists", "Songs", "Genres"];
-    const filtersQueryName: string[] = ["", "artist", "song", "genre"];
-    let filterAmount = 4;
+    const [activeFilter, setActiveFilter] = useState<"artists" | "tracks" | "genres">("artists");
+    const [items, setItems] = useState<any[]>([]);
 
     useEffect(() => {
-        console.log(artists);
-    }, [artists]);
+        setItems([]);
+    }, [activeFilter]);
 
-    useEffect(() => {
-        console.log(songs);
-    }, [songs]);
-
-    useEffect(() => {
-        console.log(prompt);
-    }, [prompt]);
-
-    const options = [
-        {
-            value: "arianagrande",
-            label: "Ariana Grande",
-        },
-    ];
-
-    const requests = useRequests();
-    const loadOptions = async (inputValue: string, callback) => {
-        const inputValueFinal: string = inputValue.split(" ").join("+");
-        const query = `q=${inputValueFinal}&type=${filtersQueryName[activeFilter]}`;
-        let url = `spotify/search?${query}`;
-        try {
-            console.log(url);
-            const response = await requests.sendRequest("GET", url);
-            console.log(JSON.stringify(response, null, 2));
-            const options = response.map((item) => {
-                label: item.name;
-                value: item.id;
-            });
-            callback(response);
-        } catch (error) {
-            console.error(error);
-        }
+    const addNewObject = (option) => {
+        setItems((prev) => [...prev, option]);
     };
+
     return (
         <ModalController
             buttonText="Generate New Queue"
@@ -74,67 +37,39 @@ const DiscoveryModalController = ({
             >
                 <Button
                     size="sm"
-                    onClick={() => setActiveFilter(0)}
+                    // onClick={() => setActiveFilter()}
                 >
                     My Top Songs
                 </Button>
                 <Button
                     size="sm"
-                    onClick={() => setActiveFilter(1)}
+                    onClick={() => setActiveFilter("artists")}
                 >
                     Selected Artists
                 </Button>
                 <Button
                     size="sm"
-                    onClick={() => setActiveFilter(2)}
+                    onClick={() => setActiveFilter("tracks")}
                 >
                     Selected Songs
                 </Button>
                 <Button
                     size="sm"
-                    onClick={() => setActiveFilter(3)}
+                    onClick={() => setActiveFilter("genres")}
                 >
                     Selected Genres
                 </Button>
             </Group>
             <Stack>
                 <Group>
-                    <div className={classes.inputContainer}>
-                        <h3>Choose {filters[activeFilter]}:</h3>
-                        <AsyncSelect
-                            cacheOptions
-                            // loadOptions={loadOptions}
-                            defaultOptions
-                            styles={{
-                                control: (baseStyles, state) => ({
-                                    ...baseStyles,
-                                    paddingLeft: "0.25rem",
-                                    border: "none",
-                                    marginTop: "0.5rem",
-                                    backgroundColor: "var(--background-color-4)",
-                                    borderRadius: "0.5rem",
-                                }),
-                            }}
-                        />
-                    </div>
-                    <Stack className={classes.selectionViewContainer}>
-                        <h3>Selected {filters[activeFilter]}:</h3>
-                        <div className={classes.selectionElement}>
-                            <Group>
-                                <img
-                                    className={classes.selectionElementPfp}
-                                    src="https://i.scdn.co/image/ab676161000051746725802588d7dc1aba076ca5"
-                                />
-                                <p className={classes.elementText}>Ariana Grande</p>
-                                <p className={cs(classes.elementText, classes.elementGenreText)}>Trap, Rage</p>
-                                <IconX
-                                    color="#3f3e3e" /* text-color-disabled */
-                                    size={20}
-                                    className={classes.removeIcon}
-                                />
-                            </Group>
-                        </div>
-                    </Stack>
+                    <FilteredSelect
+                        filter={activeFilter}
+                        changeSelectOption={addNewObject}
+                    />
+                    <ItemSelectionContainer
+                        filter={activeFilter}
+                        data={items}
+                    />
                 </Group>
                 <Button
                     size="md"
