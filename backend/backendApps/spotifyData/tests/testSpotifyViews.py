@@ -64,7 +64,9 @@ class SpotifyDataViewsTest(APITestCase):
         mock_search.return_value = {"tracks": {"items": [{"uri": "spotify:track:123"}]}}
         mock_add.return_value = (True, None)
 
-        response = self.client.post("/api/spotify/discover/generate/", {"genre": "rock", "count": 1})
+        response = self.client.post(
+            "/api/spotify/discover/generate/", {"genre": "rock", "count": 1}
+        )
 
         self.assertEqual(response.status_code, 200)
         self.assertIn("songs", response.data)
@@ -101,7 +103,9 @@ class SpotifyDataViewsTest(APITestCase):
     @patch("spotifyData.services.spotifyClient.SpotifyAPI.add_to_queue")
     def test_add_track_to_queue(self, mock_add):
         mock_add.return_value = (True, None)
-        response = self.client.post("/api/spotify/queue/add/", {"track_uri": "spotify:track:abc"})
+        response = self.client.post(
+            "/api/spotify/queue/add/", {"track_uri": "spotify:track:abc"}
+        )
 
         self.assertEqual(response.status_code, 200)
         self.assertIn("message", response.data)
@@ -126,7 +130,9 @@ class SpotifyDataViewsTest(APITestCase):
     @patch("spotifyData.services.spotifyClient.SpotifyAPI.transfer_playback")
     def test_transfer_playback_success(self, mock_transfer):
         mock_transfer.return_value = (True, None)
-        response = self.client.post("/api/spotify/playback/transfer/", {"device_id": "device123"})
+        response = self.client.post(
+            "/api/spotify/playback/transfer/", {"device_id": "device123"}
+        )
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.data["message"], "Playback transferred successfully")
 
@@ -138,10 +144,10 @@ class SpotifyDataViewsTest(APITestCase):
     @patch("spotifyData.services.spotifyClient.SpotifyAPI.start_playback")
     def test_start_playback_success(self, mock_start):
         mock_start.return_value = (True, None)
-        response = self.client.post("/api/spotify/playback/start/", {
-            "device_id": "device123",
-            "track_uri": "spotify:track:xyz"
-        })
+        response = self.client.post(
+            "/api/spotify/playback/start/",
+            {"device_id": "device123", "track_uri": "spotify:track:xyz"},
+        )
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.data["message"], "Playback started")
 
@@ -150,10 +156,14 @@ class SpotifyDataViewsTest(APITestCase):
         self.assertEqual(response.status_code, 400)
         self.assertIn("error", response.data)
 
-        response = self.client.post("/api/spotify/playback/start/", {"track_uri": "spotify:track:xyz"})
+        response = self.client.post(
+            "/api/spotify/playback/start/", {"track_uri": "spotify:track:xyz"}
+        )
         self.assertEqual(response.status_code, 400)
 
-        response = self.client.post("/api/spotify/playback/start/", {"device_id": "device123"})
+        response = self.client.post(
+            "/api/spotify/playback/start/", {"device_id": "device123"}
+        )
         self.assertEqual(response.status_code, 400)
 
     @patch("requests.get")
@@ -163,3 +173,24 @@ class SpotifyDataViewsTest(APITestCase):
 
         response = self.client.get("/api/spotify/search/?q=test&type=artist")
         self.assertEqual(response.status_code, 200)
+
+    @patch("spotifyData.services.spotifyClient.SpotifyAPI.get_liked_tracks")
+    def test_liked_tracks_view(self, mock_get_liked_tracks):
+        mock_get_liked_tracks.return_value = {"items": [{"id": "1", "name": "Song"}]}
+        response = self.client.get("/api/spotify/liked/?limit=1&offset=0")
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("items", response.data)
+
+    @patch("spotifyData.services.spotifyClient.SpotifyAPI.like_track")
+    def test_like_track_view(self, mock_like_track):
+        mock_like_track.return_value = (True, None)
+        response = self.client.post("/api/spotify/liked/like/", {"track_id": "1"})
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("message", response.data)
+
+    @patch("spotifyData.services.spotifyClient.SpotifyAPI.remove_liked_track")
+    def test_remove_liked_track_view(self, mock_remove_liked_track):
+        mock_remove_liked_track.return_value = (True, None)
+        response = self.client.post("/api/spotify/liked/remove/", {"track_id": "1"})
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("message", response.data)
