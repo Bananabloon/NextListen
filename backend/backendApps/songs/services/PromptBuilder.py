@@ -52,3 +52,18 @@ class PromptBuilder:
         Format JSON:
         [{{"title": "tytuł", "artist": "artysta"}}]
         """
+
+    def for_discovery(self, artists, tracks, genre):
+        return f"""
+        Użytkownik zwykle słucha:
+        Artyści: {json.dumps(artists, indent=2, ensure_ascii=False)}
+        Utwory: {json.dumps(tracks, indent=2, ensure_ascii=False)}
+
+        Teraz chce poznać nową muzykę z gatunku: {genre}
+        {self.filters}
+        {self.prefix}
+
+        Podaj {self.count * GENERATION_BUFFER_MULTIPLIER} rekomendacji 
+        Format JSON:
+        [{{"title": "tytuł", "artist": "artysta"}}]
+        """

@@ -88,9 +88,3 @@ class SongSerializer(serializers.Serializer):
     uri = serializers.CharField()
     explicit = serializers.BooleanField()
 
-
-class DiscoveryGenerateResponseSerializer(serializers.Serializer):
-    message = serializers.CharField()
-    genre = serializers.CharField()
-    songs = SongSerializer(many=True)
-    errors = serializers.ListField(child=serializers.DictField())

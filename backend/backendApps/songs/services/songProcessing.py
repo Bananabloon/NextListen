@@ -8,6 +8,8 @@ logger = logging.getLogger(__name__)
 def prepare_song_list(user, raw_songs, count):
     spotify = SpotifyAPI(user.spotify_access_token, user.spotify_refresh_token, user)
     prepared = []
+    track_id_map = {}
+    uris = []
 
     for i, song in enumerate(raw_songs):
         if len(prepared) >= count:
@@ -26,31 +28,50 @@ def prepare_song_list(user, raw_songs, count):
                 continue
 
             uri = best_match["uri"]
-            track_info = spotify.get_track(best_match["id"])
-
-            try:
-                media = Media.objects.get(spotify_uri=uri)
-                feedback = UserFeedback.objects.filter(user=user, media=media).first()
-                feedback_value = (
-                    1 if feedback and feedback.is_liked else
-                    -1 if feedback and feedback.is_liked is False else
-                    0
-                )
-            except Media.DoesNotExist:
-                feedback_value = 0
-
-            prepared.append({
+            uris.append(uri)
+            track_id_map[uri] = {
                 "title": song["title"],
                 "artist": song["artist"],
-                "uri": uri,
                 "explicit": best_match["explicit"],
-                "curveball": should_send_curveball(user, len(prepared) + 1),
-                "feedback_value": feedback_value,
-                "track_details": extract_track_details(track_info),
-            })
+                "id": best_match["id"],
+            }
+
         except Exception as e:
-            logger.error(f"[{i}] Błąd przy przetwarzaniu '{query}': {e}")
+            logger.error(f"[{i}] Błąd przy wyszukiwaniu '{query}': {e}")
             continue
+
+    track_ids = [meta["id"] for meta in track_id_map.values()]
+    track_infos = spotify.get_several_tracks(track_ids)
+    track_info_map = {track["uri"]: track for track in track_infos}
+
+    for uri, meta in track_id_map.items():
+        track_info = next((t for t in track_infos if t["id"] == meta["id"]), None)
+        if not track_info:
+            continue
+
+        try:
+            media = Media.objects.get(spotify_uri=uri)
+            feedback = UserFeedback.objects.filter(user=user, media=media).first()
+            feedback_value = (
+                1 if feedback and feedback.is_liked else
+                -1 if feedback and feedback.is_liked is False else
+                0
+            )
+        except Media.DoesNotExist:
+            feedback_value = 0
+
+        prepared.append({
+            "title": meta["title"],
+            "artist": meta["artist"],
+            "uri": uri,
+            "explicit": meta["explicit"],
+            "curveball": should_send_curveball(user, len(prepared) + 1),
+            "feedback_value": feedback_value,
+            "track_details": extract_track_details(track_info),
+        })
+
+        if len(prepared) >= count:
+            break
 
     return prepared
 

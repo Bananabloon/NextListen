@@ -2,6 +2,9 @@ import requests
 from django.contrib.auth import get_user_model
 from django.conf import settings
 import sys
+import time
+import logging
+logger = logging.getLogger(__name__)
 
 from constants import SPOTIFY_API_BASE_URL, SPOTIFY_TOKEN_URL, SPOTIFY_QUEUE_URL
 
@@ -140,3 +143,28 @@ class SpotifyAPI:
         url = f"{self.BASE_URL}/me/player/pause"
         response = requests.put(url, headers=self.headers)
         return response.status_code in [204, 202], response.text
+
+    def get_several_tracks(self, track_ids):
+        url = f"{self.BASE_URL}/tracks"
+        params = {"ids": ",".join(track_ids)}
+
+        for attempt in range(2):  
+            response = requests.get(url, headers=self.headers, params=params)
+
+            if response.status_code == 200:
+                return response.json().get("tracks", [])
+
+            if response.status_code == 429:
+                retry_after = int(response.headers.get("Retry-After", 1))
+                logger.warning(f"Rate limited. Retrying after {retry_after} seconds.")
+                time.sleep(retry_after)
+                continue 
+
+            if response.status_code == 401 and self.refresh_token:
+                self._refresh_access_token()
+                continue 
+
+            raise Exception(f"Failed to get tracks info: {response.status_code} - {response.text}")
+
+        raise Exception("Rate limited again or failed after retry")
+
