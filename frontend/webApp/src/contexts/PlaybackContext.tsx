@@ -41,6 +41,14 @@ export const PlaybackProvider = ({ children }: { children: ReactNode }) => {
         });
     };
 
+    const playCurrent = async () => await playTrack(current.uri);
+
+    // playNext and playPrevious just update the index, useEffect bellow handles the rest
+    const playNext = () => setCurrentIndex((prev) => (prev === queue.length - 1 ? prev : prev + 1));
+
+    const playPrevious = () => setCurrentIndex((prev) => (prev === 0 ? 0 : prev - 1));
+
+    // if currentIndex changed, update the track that is being played
     useEffect(() => {
         if (!isEmpty(queue) && currentState?.track_window.current_track.uri !== current?.uri) {
             playCurrent();
@@ -48,28 +56,27 @@ export const PlaybackProvider = ({ children }: { children: ReactNode }) => {
     }, [currentIndex]);
 
     useEffect(() => {
-        transferPlayback();
-        player?.pause();
+        if (deviceId) transferPlayback();
     }, [deviceId]);
 
-    const playCurrent = async () => await playTrack(current.uri);
-
-    const playNext = () => setCurrentIndex((prev) => (prev === queue.length - 1 ? prev : prev + 1));
-
-    const playPrevious = () => setCurrentIndex((prev) => (prev === 0 ? 0 : prev - 1));
+    // currentState gets updated every second, so this check will match exactly once at the end of the track
+    useEffect(() => {
+        if (!isEmpty(currentState) && currentState.duration - currentState.position <= 1000) {
+            playNext();
+        }
+    }, [currentState?.timestamp]);
 
     const setVolume = useThrottledCallback(async (value: number) => await player?.setVolume?.(value), 200);
 
     if (loading || !player) return null;
     if (error) throw error;
 
+    const shouldUpdateCurrentTrack = () =>
+        isNull(currentState) || (currentState.paused && current.uri !== currentState?.track_window.current_track.uri);
+
     const togglePlay = async () => {
         if (isNull(queue)) return;
-        if (
-            isNull(currentState) ||
-            (currentState.paused && current.uri !== currentState?.track_window.current_track.uri)
-        )
-            await playCurrent();
+        if (shouldUpdateCurrentTrack()) return await playCurrent();
         return await player.togglePlay();
     };
 
@@ -80,12 +87,8 @@ export const PlaybackProvider = ({ children }: { children: ReactNode }) => {
 
     const resume = async () => {
         if (isNull(queue)) return;
-        if (
-            isNull(currentState) ||
-            (currentState.paused && current.uri !== currentState?.track_window.current_track.uri)
-        )
-            await playCurrent();
-        return await player.resume();
+        if (shouldUpdateCurrentTrack()) return await playCurrent();
+        return await player.togglePlay();
     };
 
     const seek = async (ms_pos: number) => {

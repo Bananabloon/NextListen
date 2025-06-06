@@ -2,22 +2,17 @@ import classes from "./SongCardConveyor.module.css";
 import cs from "classnames";
 import SongCard from "../../molecules/SongCard/SongCard";
 import React, { useEffect, useState } from "react";
-import { GeneratedSong } from "../../../types/api.types";
 import { remToPx } from "css-unit-converter-js";
 import ScrollContainer from "react-indiana-drag-scroll";
 import { useElementSize } from "@mantine/hooks";
-import { isEmpty } from "lodash";
 import { useQueue } from "../../../contexts/QueueContext";
-import { usePlayback } from "../../../contexts/PlaybackContext";
 import SongCardPlaceholder from "../../molecules/SongCard/SongCardPlaceholder";
-import Stack from "../../atoms/Stack/Stack";
-import { GridLoader } from "react-spinners";
 import SongCardLoading from "../../molecules/SongCard/SongCardLoading";
 
 interface SongCardConveyorProps extends React.HTMLAttributes<HTMLDivElement> {}
 
 const SongCardConveyor = ({ children, className, ...props }: SongCardConveyorProps): React.JSX.Element => {
-    const { queue, currentIndex, setCurrentIndex, generateDiscoveryFromTop } = useQueue();
+    const { queue, currentIndex, setCurrentIndex } = useQueue();
     const { width, ref } = useElementSize();
     const [suppressFocusUpdate, setSuppressFocusUpdate] = useState(false);
 
@@ -58,10 +53,6 @@ const SongCardConveyor = ({ children, className, ...props }: SongCardConveyorPro
     const onEndScroll = () => {
         if (ref.current) snap(currentIndex);
     };
-
-    useEffect(() => {
-        if (isEmpty(queue)) generateDiscoveryFromTop();
-    }, []);
 
     useEffect(() => {
         if (ref.current) {

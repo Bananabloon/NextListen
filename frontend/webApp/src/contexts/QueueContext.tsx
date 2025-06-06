@@ -1,7 +1,7 @@
 import { createContext, useContext, ReactNode, useState, useEffect } from "react";
-import { GeneratedSong } from "../types/api.types";
+import { DiscoveryOptionsMap, DiscoveryState, DiscoveryType, GeneratedSong } from "../types/api.types";
 import useRequests from "../hooks/useRequests";
-import { isEmpty } from "lodash";
+import { isEmpty, isNull } from "lodash";
 
 interface QueueContextType {
     queue: GeneratedSong[];
@@ -9,39 +9,52 @@ interface QueueContextType {
     loading: boolean;
     currentIndex: number;
     setCurrentIndex: (callback: number | ((prev: number) => number)) => void;
-    generateDiscoveryFromTop: () => Promise<void>;
+    createNewDiscoveryQueue: <T extends DiscoveryType>(type: T, options: DiscoveryOptionsMap[T]) => Promise<void>;
 }
 
 const QueueContext = createContext<QueueContextType | undefined>(undefined);
+
+const API_PATHS: Record<DiscoveryType, string> = {
+    top: "/songs/generate-from-top/",
+    song: "/songs/generate-from-song/",
+    artist: "/songs/generate-from-artist/",
+    genre: "/songs/generate-from-genre/",
+};
 
 export const QueueProvider = ({ children }: { children: ReactNode }) => {
     const [queue, setQueue] = useState<GeneratedSong[]>([]);
     const [currentIndex, setCurrentIndex] = useState(0);
     const [loading, setLoading] = useState(false);
     const [updating, setUpdating] = useState(false);
+    const [discoveryState, setDiscoveryState] = useState<DiscoveryState>(null);
     const { sendRequest } = useRequests();
 
     const current = queue?.[currentIndex] ?? null;
 
-    const generateDiscoveryFromTop = async () => {
+    const generateDiscovery = async <T extends DiscoveryType>(type: T, options: DiscoveryOptionsMap[T]) => {
+        const data = await sendRequest("POST", API_PATHS[type], { body: JSON.stringify(options) });
+        return data?.songs ?? [];
+    };
+
+    const updateDiscoveryQueue = async () => {
+        if (isEmpty(queue) || isNull(discoveryState) || loading || updating || currentIndex + 10 >= queue.length)
+            return;
+
+        setUpdating(true);
+        const songs = await generateDiscovery(discoveryState.type, discoveryState.options);
+        setQueue((prev) => [...prev, ...songs]);
+        setUpdating(false);
+    };
+
+    const createNewDiscoveryQueue = async <T extends DiscoveryType>(type: T, options: DiscoveryOptionsMap[T]) => {
         setLoading(true);
-        return sendRequest("POST", "/songs/generate-from-top/", { body: JSON.stringify({ count: 30 }) }).then(
-            (data) => {
-                setQueue(data?.songs ?? []);
-                setLoading(false);
-            }
-        );
+        setQueue(await generateDiscovery(type, options));
+        setDiscoveryState({ type, options } as DiscoveryState);
+        setLoading(false);
     };
 
     useEffect(() => {
-        if (!isEmpty(queue) && !loading && !updating && currentIndex + 10 >= queue.length) {
-            setUpdating(true);
-            sendRequest("POST", "/songs/generate-from-top/", { body: JSON.stringify({ count: 30 }) }).then((data) => {
-                console.log("a", data);
-                if (data?.songs) setQueue((prev) => [...prev, ...data?.songs]);
-                setUpdating(false);
-            });
-        }
+        updateDiscoveryQueue();
     }, [currentIndex]);
 
     const value = {
@@ -50,7 +63,7 @@ export const QueueProvider = ({ children }: { children: ReactNode }) => {
         loading,
         currentIndex,
         setCurrentIndex,
-        generateDiscoveryFromTop,
+        createNewDiscoveryQueue,
     };
 
     return <QueueContext.Provider value={value}>{children}</QueueContext.Provider>;
