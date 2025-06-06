@@ -5,5 +5,5 @@ import { trim } from "lodash";
 // and it messes up with nginx and omg im so tired already
 export const normalizePath = (url: string = "") => {
     const [path, query] = url.split("?");
-    return `/${trim(path, "/")}/${query.length ? `?${query}` : ""}`;
+    return `/${trim(path, "/")}/${query ? `?${query}` : ""}`;
 };

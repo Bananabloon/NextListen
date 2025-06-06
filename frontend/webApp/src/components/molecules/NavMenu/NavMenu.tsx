@@ -1,14 +1,14 @@
-import { IconList, IconListTree } from "@tabler/icons-react";
-import Menu from "../../atoms/Menu/Menu";
-import classes from "./NavMenu.module.css";
+import { IconList } from "@tabler/icons-react";
 import cs from "classnames";
-import Group from "../../atoms/Group/Group";
-import PageTitle from "../PageTitle/PageTitle";
-import { useState, useMemo } from "react";
-import PAGE_CONFIG from "../../../config/pages.config";
 import _ from "lodash";
-import Button from "../../atoms/Button/Button";
+import { useMemo } from "react";
 import { Link, useLocation } from "react-router-dom";
+import PAGE_CONFIG from "../../../config/pages.config";
+import Button from "../../atoms/Button/Button";
+import Group from "../../atoms/Group/Group";
+import Menu from "../../atoms/Menu/Menu";
+import PageTitle from "../../atoms/PageTitle/PageTitle";
+import classes from "./NavMenu.module.css";
 
 interface NavMenuProps extends React.HTMLAttributes<HTMLDivElement> {}
 
@@ -24,14 +24,8 @@ const NavMenu = ({ children, className, ...props }: NavMenuProps): React.JSX.Ele
                 >
                     <Button
                         variant="menu"
-                        style={
-                            page.path === location.pathname
-                                ? {
-                                      color: "var(--primary-color-3)",
-                                      backgroundColor: "var(--background-color-4)",
-                                  }
-                                : {}
-                        }
+                        className={classes.navButton}
+                        data-active={page.path === location.pathname}
                         leftSection={<page.icon />}
                     >
                         {page.title}

@@ -1,11 +1,22 @@
 import { useEffect, useRef, useState } from "react";
-import classes from "./QueueGenerateOverlay.module.css";
+import classes from "./ModalController.module.css";
 import Portal from "../../atoms/Portal/Portal";
 import Button from "../../atoms/Button/Button";
 
-interface QueueGenerateOverlayProps extends React.HTMLAttributes<HTMLDivElement> {}
+interface ModalControllerProps extends React.HTMLAttributes<HTMLDivElement> {
+    width: number;
+    height: number;
+    buttonText: string;
+}
 
-const QueueGenerateOverlay = ({ children, className, ...props }: QueueGenerateOverlayProps): React.JSX.Element => {
+const ModalController = ({
+    width,
+    height,
+    buttonText,
+    children,
+    className,
+    ...props
+}: ModalControllerProps): React.JSX.Element => {
     const [show, setShow] = useState(false);
     const ref = useRef(null);
 

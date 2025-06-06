@@ -1,9 +1,9 @@
 import classes from "./VolumeSeekBar.module.css";
 import cs from "classnames";
 import { IconVolume, IconVolumeOff } from "@tabler/icons-react";
-import IconButton from "../IconButton/IconButton";
+import IconButton from "../../atoms/IconButton/IconButton";
 import { useEffect, useState } from "react";
-import Group from "../Group/Group";
+import Group from "../../atoms/Group/Group";
 import { usePlayback } from "../../../contexts/PlaybackContext";
 import { isNull } from "lodash";
 

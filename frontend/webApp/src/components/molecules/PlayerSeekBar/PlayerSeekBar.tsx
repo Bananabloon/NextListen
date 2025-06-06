@@ -1,11 +1,11 @@
 import { useEffect, useRef, useState } from "react";
 import { formatTime } from "../../../utils/datetime";
-import Group from "../Group/Group";
-import Stack from "../Stack/Stack";
 import classes from "./PlayerSeekBar.module.css";
 import cs from "classnames";
 import { usePlayback } from "../../../contexts/PlaybackContext";
 import { isNull } from "lodash";
+import Stack from "../../atoms/Stack/Stack";
+import Group from "../../atoms/Group/Group";
 
 interface PlayerSeekBarProps extends React.HTMLAttributes<HTMLDivElement> {}
 

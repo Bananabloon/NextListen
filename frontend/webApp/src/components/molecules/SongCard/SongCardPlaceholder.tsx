@@ -2,7 +2,7 @@ import cs from "classnames";
 import Stack from "../../atoms/Stack/Stack";
 import classes from "./SongCard.module.css";
 
-interface SongCardPlaceholderProps extends React.HTMLAttributes<HTMLDivElement> {
+export interface SongCardPlaceholderProps extends React.HTMLAttributes<HTMLDivElement> {
     transparent?: boolean;
 }
 

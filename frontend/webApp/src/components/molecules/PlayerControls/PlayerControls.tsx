@@ -14,7 +14,7 @@ import { usePlayback } from "../../../contexts/PlaybackContext";
 import { useEffect, useState } from "react";
 import useRequests from "../../../hooks/useRequests";
 import { Feedback } from "../../../types/api.types";
-import VolumeSeekBar from "../../atoms/VolumeSeekBar/VolumeSeekBar";
+import VolumeSeekBar from "../VolumeSeekBar/VolumeSeekBar";
 import { isNull } from "lodash";
 
 const PlayerControls = ({ ...props }): React.JSX.Element => {
