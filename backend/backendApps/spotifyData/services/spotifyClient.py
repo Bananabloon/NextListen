@@ -135,3 +135,8 @@ class SpotifyAPI:
         params = {"device_id": device_id}
         response = requests.put(url, headers=headers, params=params, json=data)
         return response.status_code in [204, 202], response.text
+    
+    def pause_playback(self):
+        url = f"{self.BASE_URL}/me/player/pause"
+        response = requests.put(url, headers=self.headers)
+        return response.status_code in [204, 202], response.text
