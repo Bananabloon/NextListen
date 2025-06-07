@@ -86,13 +86,13 @@ class SpotifyAPI:
     def get_top_artists(self, limit=20):
         return self._get(f"/me/top/artists?limit={limit}")
 
-    def get_artist(self, endpoint: str):
-        url = f"{self.BASE_URL}{endpoint}"
+    def get_artist(self, artist_id: str):
+        url = f"{self.BASE_URL}/artists/{artist_id}"
         response = requests.get(url, headers=self.headers)
         try:
             return response.json()
         except Exception:
-            print("SPOTIFY RAW RESPONSE:", response.text)  # Dodaj to!
+            print("SPOTIFY RAW RESPONSE:", response.text) 
             return {
                 "error": "Invalid JSON response from Spotify",
                 "raw": response.text,
