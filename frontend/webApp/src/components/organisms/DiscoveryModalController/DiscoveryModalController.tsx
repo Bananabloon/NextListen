@@ -35,20 +35,14 @@ const DiscoveryModalController = (): React.JSX.Element => {
 
     const generateQueue = () => {
         let names = items.map((item) => item.name);
-        // let artist = items[0].artists[0]?.name;
         let count = 20;
         let formattedItems;
-        // if (activeFilter === "tracks") {
-        //     formattedItems = {
-        //         count: count,
-        //         title: names[0],
-        //         artist: artist,
-        //     };
-        // } else {
         formattedItems = {
             count: count,
-            [activeFilter === "artists" ? "artists" : "title"]: names,
+            [activeFilter === "artists" ? "artists" : activeFilter === "tracks" ? "titles" : activeFilter === "genres" ? "genre" : ""]:
+                activeFilter !== "genres" ? names : names[0],
         };
+        console.log(formattedItems);
         // }
         createNewDiscoveryQueue(spotifyToPathMap[activeFilter] as DiscoveryType, formattedItems);
     };
