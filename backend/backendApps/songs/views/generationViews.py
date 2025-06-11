@@ -89,24 +89,23 @@ class GenerateQueueView(BaseGenerateView):
     serializer_class = GenerateQueueSerializer
 
     @extend_schema(
-        summary="Generates a list of recommended songs similar to a given title and artist. "
+        summary="Generates a list of recommended songs similar to a given title/s. "
             "You can provide additional filters (e.g., genre, year). "
             "Returns a list of songs with Spotify metadata and user feedback if available.",
         request=GenerateQueueSerializer,
         responses=None,
     )
     def post(self, request):
-        return super().post(request)
+            return super().post(request)
 
     def get_prompt(self, user, data):
-        title = data["title"]
-        artist = data["artist"]
+        titles = data["titles"] 
         count = data["count"]
         filters = extract_filters(data)
         preferences = get_user_preferences(user)
 
         prompt = PromptBuilder(count, preferences, filters)
-        return prompt.for_song(title, artist)
+        return prompt.for_titles_only(titles)
 
 
 class GenerateFromTopView(BaseGenerateView):

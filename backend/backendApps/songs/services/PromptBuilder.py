@@ -67,3 +67,14 @@ class PromptBuilder:
         Nie dodawaj komentarzy. Format JSON:
         [{{"title": "tytuł", "artist": "artysta"}}]
         """
+
+    def for_titles_only(self, titles):
+        return f"""
+        Podaj {self.count * GENERATION_BUFFER_MULTIPLIER} utworów podobnych do poniższych tytułów:
+        {json.dumps(titles, indent=2, ensure_ascii=False)}
+        {self.filters}
+        {self.prefix}
+        Tylko utwory i artyści, którzy istnieją i są dostępni na Spotify.
+        Nie dodawaj komentarzy. Format JSON:
+        [{{"title": "tytuł", "artist": "artysta"}}]
+        """
