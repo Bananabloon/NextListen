@@ -19,7 +19,8 @@ class Media(models.Model):
     album_name = models.CharField(max_length=255)
     media_type = models.CharField(max_length=10, choices=TYPE_CHOICES)
     saved_at = models.DateTimeField()
-
+    is_curveball = models.BooleanField(default=False)
+    
     def __str__(self):
         return f"{self.title} by {self.artist_name}"
 

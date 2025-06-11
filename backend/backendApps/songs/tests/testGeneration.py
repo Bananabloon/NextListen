@@ -133,16 +133,15 @@ def mock_dependencies(monkeypatch):
     monkeypatch.setattr(
         "songs.views.discoveryGenerationViews.SpotifyAPI", lambda *args, **kwargs: MockSpotify())
 
+    def mock_ask_openai(*args, **kwargs):
+        return '''json
+    [
+    {"title": "Teardrop", "artist": "Massive Attack"},
+    {"title": "Idioteque", "artist": "Radiohead"}
+    ]
+    '''
 
-    monkeypatch.setattr(
-        "songs.utils.ask_openai",
-        lambda *args, **kwargs: """
-        [
-            {"title": "Teardrop", "artist": "Massive Attack"},
-            {"title": "Idioteque", "artist": "Radiohead"}
-        ]
-        """,
-    )
+    monkeypatch.setattr("songs.utils.ask_openai", mock_ask_openai)
 
 
 @pytest.mark.django_db

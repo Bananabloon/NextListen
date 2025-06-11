@@ -17,5 +17,5 @@ RUN pip install --no-cache-dir -r /backend/requirements.txt
 
 COPY . /backend/
 
-CMD ["sh", "-c", "coverage run -m pytest && coverage report -m && sleep 600"]
+CMD ["sh", "-c", "coverage run -m pytest && coverage report -m && coverage xml && coverage html"]
 
