@@ -56,48 +56,49 @@ const DiscoveryModalController = (): React.JSX.Element => {
     return (
         <ModalController
             buttonText="Generate New Queue"
-            width={816}
+            width={820}
             height={500}
-            className={classes.modal}
         >
-            <h1 className={classes.title}>New Queue</h1>
-            <Stack className={classes.content}>
-                <Stack className={classes.itemsWithLabel}>
-                    <p className={classes.label}>Based on:</p>
-                    <SegmentedControl
-                        options={[
-                            { label: "My Top Songs", value: "top" },
-                            { label: "Selected Artists", value: "artists" },
-                            { label: "Selected Songs", value: "tracks" },
-                            { label: "Selected Genres", value: "genres" },
-                        ]}
-                        buttonProps={{ className: classes.segmentedControlButton }}
-                        value={activeFilter}
-                        // ! to be removed
-                        // @ts-ignore
-                        onChange={setActiveFilter}
-                    />
+            <Stack className={classes.container}>
+                <h1 className={classes.title}>New Queue</h1>
+                <Stack className={classes.content}>
+                    <Stack className={classes.itemsWithLabel}>
+                        <p className={classes.label}>Based on:</p>
+                        <SegmentedControl
+                            options={[
+                                { label: "My Top Songs", value: "top" },
+                                { label: "Selected Artists", value: "artists" },
+                                { label: "Selected Songs", value: "tracks" },
+                                { label: "Selected Genres", value: "genres" },
+                            ]}
+                            buttonProps={{ className: classes.segmentedControlButton }}
+                            value={activeFilter}
+                            // ! to be removed
+                            // @ts-ignore
+                            onChange={setActiveFilter}
+                        />
+                    </Stack>
+                    <Group className={classes.controlGroup}>
+                        <FilteredSelect
+                            filter={activeFilter}
+                            changeSelectOption={addNewObject}
+                        />
+                        <ItemSelectionContainer
+                            onRemoveItem={removeItem}
+                            filter={activeFilter}
+                            data={items}
+                            className={classes.selectedItemsStack}
+                        />
+                    </Group>
+                    <Button
+                        size="md"
+                        background="white"
+                        className={classes.genButton}
+                        onClick={generateQueue}
+                    >
+                        Generate
+                    </Button>
                 </Stack>
-                <Group className={classes.controlGroup}>
-                    <FilteredSelect
-                        filter={activeFilter}
-                        changeSelectOption={addNewObject}
-                    />
-                    <ItemSelectionContainer
-                        onRemoveItem={removeItem}
-                        filter={activeFilter}
-                        data={items}
-                        className={classes.selectedItemsStack}
-                    />
-                </Group>
-                <Button
-                    size="md"
-                    background="white"
-                    className={classes.genButton}
-                    onClick={generateQueue}
-                >
-                    Generate
-                </Button>
             </Stack>
         </ModalController>
     );
