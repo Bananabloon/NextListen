@@ -66,7 +66,8 @@ export const PlaybackProvider = ({ children }: { children: ReactNode }) => {
         }
     }, [currentState?.timestamp]);
 
-    const setVolume = useThrottledCallback(async (value: number) => await player?.setVolume?.(value), 200);
+    //volume value was way too high so it's divided by 5
+    const setVolume = useThrottledCallback(async (value: number) => await player?.setVolume?.(value / 5), 200);
 
     if (loading || !player) return null;
     if (error) throw error;

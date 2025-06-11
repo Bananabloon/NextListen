@@ -9,27 +9,14 @@ interface ModalControllerProps extends React.HTMLAttributes<HTMLDivElement> {
     buttonText: string;
 }
 
-const ModalController = ({
-    width,
-    height,
-    buttonText,
-    children,
-    className,
-    ...props
-}: ModalControllerProps): React.JSX.Element => {
+const ModalController = ({ width, height, buttonText, children, className, ...props }: ModalControllerProps): React.JSX.Element => {
     const ref = useRef(null);
 
     const inboundEventListener = (e: MouseEvent) => {
         const element = ref.current! as HTMLDialogElement;
         if (element.open) {
             let modalPos = element.getBoundingClientRect();
-            if (
-                e.clientX < modalPos.left ||
-                e.clientY < modalPos.top ||
-                e.clientX > modalPos.right ||
-                e.clientY > modalPos.bottom
-            ) {
-                element.style.opacity = "0";
+            if (e.clientX < modalPos.left || e.clientY < modalPos.top || e.clientX > modalPos.right || e.clientY > modalPos.bottom) {
                 element.close();
             }
         }
@@ -49,6 +36,10 @@ const ModalController = ({
                     ref={ref}
                     className={classes.container}
                     style={{ width: `${width}px`, height: `${height}px` }}
+                    onClose={() => {
+                        const element = ref.current! as HTMLDialogElement;
+                        element.style.opacity = "0";
+                    }}
                 >
                     {children}
                 </dialog>

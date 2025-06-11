@@ -11,6 +11,8 @@
     height: 6px;
     align-self: center;
     --progress-color: var(--primary-color-7);
+
+    display: none;
 }
 /* Track: webkit browsers */
 .seekBar::-webkit-slider-runnable-track {
@@ -55,7 +57,27 @@
     /* it doesnt work when its zoomed out */
     box-shadow: -603px 0 0 600px var(--progress-color);
 }
+
 .seekBarDisabled {
     /* hitbox */
     visibility: hidden;
+}
+
+.widthAligner {
+    width: 200px;
+    align-items: center;
+}
+
+.wrapper {
+    width: 48px;
+    display: block;
+}
+.wrapper:hover {
+    width: 140px;
+    display: flex;
+    height: 48px;
+}
+.wrapper:hover > .seekBar {
+    display: flex;
+    width: 80px;
 }

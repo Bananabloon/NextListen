@@ -6,11 +6,13 @@ import cs from "classnames";
 import ScrollingText from "../../atoms/ScrollingText/ScrollingText";
 
 interface ItemSelectionContainerProps extends React.HTMLAttributes<HTMLDivElement> {
+    onRemoveItem: Function;
     filter: "artists" | "tracks" | "genres";
     data: any[];
 }
 
 const ItemSelectionContainer = ({
+    onRemoveItem,
     filter,
     data,
     children,
@@ -35,9 +37,10 @@ const ItemSelectionContainer = ({
                 />
                 <ScrollingText style={{ flex: "1" }}>{dataObject.name}</ScrollingText>
                 <IconX
-                    color="#3f3e3e" /* text-color-disabled */
+                    color="var(--text-color-disabled)"
                     size={20}
                     className={classes.removeIcon}
+                    onClick={() => onRemoveItem(i)}
                 />
             </Group>
         );

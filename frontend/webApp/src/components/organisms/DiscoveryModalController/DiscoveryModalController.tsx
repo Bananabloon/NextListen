@@ -7,20 +7,18 @@ import classes from "./DiscoveryModalController.module.css";
 import ItemSelectionContainer from "../../molecules/ItemSelectionContainer/ItemSelectionContainer";
 import FilteredSelect from "../../molecules/FilteredSelect/FilteredSelect";
 import { useQueue } from "../../../contexts/QueueContext";
+import { DiscoveryType } from "../../../types/api.types";
 interface DiscoveryModalControllerProps extends React.HTMLAttributes<HTMLDivElement> {}
-const DiscoveryModalController = ({
-    children,
-    className,
-    ...props
-}: DiscoveryModalControllerProps): React.JSX.Element => {
+const DiscoveryModalController = ({ children, className, ...props }: DiscoveryModalControllerProps): React.JSX.Element => {
     const [activeFilter, setActiveFilter] = useState<"artists" | "tracks" | "genres">("artists");
     const [items, setItems] = useState<any[]>([]);
     const { queue, createNewDiscoveryQueue } = useQueue();
-    const spotifyToPathFilter = new Map();
 
-    spotifyToPathFilter.set("tracks", "song");
-    spotifyToPathFilter.set("artists", "artist");
-    spotifyToPathFilter.set("genres", "genre");
+    const spotifyToPathMap = {
+        artists: "artist",
+        tracks: "song",
+        genres: "genre",
+    };
 
     useEffect(() => {
         setItems([]);
@@ -30,8 +28,28 @@ const DiscoveryModalController = ({
         setItems((prev) => [...prev, option]);
     };
 
+    const removeItem = (id) => {
+        setItems((prev) => prev.filter((item, i) => i !== id));
+    };
+
     const generateQueue = () => {
-        createNewDiscoveryQueue(spotifyToPathFilter[activeFilter], items);
+        let names = items.map((item) => item.name);
+        // let artist = items[0].artists[0]?.name;
+        let count = 20;
+        let formattedItems;
+        // if (activeFilter === "tracks") {
+        //     formattedItems = {
+        //         count: count,
+        //         title: names[0],
+        //         artist: artist,
+        //     };
+        // } else {
+        formattedItems = {
+            count: count,
+            [activeFilter === "artists" ? "artists" : "title"]: names,
+        };
+        // }
+        createNewDiscoveryQueue(spotifyToPathMap[activeFilter] as DiscoveryType, formattedItems);
     };
 
     return (
@@ -78,6 +96,7 @@ const DiscoveryModalController = ({
                         changeSelectOption={addNewObject}
                     />
                     <ItemSelectionContainer
+                        onRemoveItem={removeItem}
                         filter={activeFilter}
                         data={items}
                     />

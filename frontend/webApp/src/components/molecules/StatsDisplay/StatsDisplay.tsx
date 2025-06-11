@@ -28,10 +28,10 @@ const StatsDisplay = ({ children, className, ...props }: StatsDisplayProps): Rea
                         </Group>
                     </Stack>
 
-                    <IconChartArrowsVertical
+                    {/* <IconChartArrowsVertical
                         className={classes.statIcon}
                         size={280}
-                    />
+                    /> */}
                 </Group>
             </div>
         </div>

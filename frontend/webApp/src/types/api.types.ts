@@ -38,8 +38,8 @@ export interface GenerateFromArtistOptions {
 
 export interface GenerateFromSongOptions {
     count: number;
-    artists: string[]; // names
-    title: string[]; // song title
+    artist: string; // names
+    title: string; // song title
 }
 
 export interface GenerateFromGenreOptions {
