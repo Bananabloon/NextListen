@@ -96,6 +96,7 @@ def find_best_match(
                 best_score = combined_score
                 best_match = track
 
+    print(f"TEST - find_best_match zwraca: {best_match}", flush=True)
     return best_match
 
 def create_playlist_with_uris(user, spotify, name, description, uris):
