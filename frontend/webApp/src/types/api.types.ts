@@ -33,13 +33,13 @@ export interface GenerateFromTopOptions {
 
 export interface GenerateFromArtistOptions {
     count: number;
-    artists: string[]; // names
+    artists: string[];
 }
 
 export interface GenerateFromSongOptions {
     count: number;
-    artists: string[]; // names
-    title: string[]; // song title
+    artists: string;
+    title: string;
 }
 
 export interface GenerateFromGenreOptions {

@@ -4,20 +4,22 @@ import Stack from "../../atoms/Stack/Stack";
 import classes from "./ItemSelectionContainer.module.css";
 import cs from "classnames";
 import ScrollingText from "../../atoms/ScrollingText/ScrollingText";
+import { Dictionary, isEmpty, last } from "lodash";
+
+type ImageEntry = { url: string } | undefined;
 
 interface ItemSelectionContainerProps extends React.HTMLAttributes<HTMLDivElement> {
-    filter: "artists" | "tracks" | "genres";
+    filter: "top" | "artists" | "tracks" | "genres";
     data: any[];
 }
 
-const ItemSelectionContainer = ({
-    filter,
-    data,
-    children,
-    className,
-    ...props
-}: ItemSelectionContainerProps): React.JSX.Element => {
-    let items = data.map((dataObject, i) => {
+const ItemSelectionContainer = ({ filter, data, children, className, ...props }: ItemSelectionContainerProps): React.JSX.Element => {
+    const getImageSource = {
+        artists: (dataEntry: Dictionary<any>) => (last(dataEntry?.images) as ImageEntry)?.url,
+        tracks: (dataEntry: Dictionary<any>) => (last(dataEntry?.album?.images) as ImageEntry)?.url,
+    }[filter];
+
+    let items = data.map((dataEntry, i) => {
         return (
             <Group
                 className={classes.selectionElement}
@@ -25,30 +27,25 @@ const ItemSelectionContainer = ({
             >
                 <img
                     className={classes.selectionElementPfp}
-                    src={
-                        filter === "artists" && dataObject.images?.length > 0
-                            ? dataObject.images[dataObject.images.length - 1].url
-                            : filter === "tracks" && dataObject.album?.images?.length > 0
-                              ? dataObject.album.images[dataObject.album.images.length - 1].url
-                              : ""
-                    }
+                    src={getImageSource?.(dataEntry)}
                 />
-                <ScrollingText style={{ flex: "1" }}>{dataObject.name}</ScrollingText>
+                <ScrollingText style={{ flex: "1" }}>{dataEntry.name}</ScrollingText>
                 <IconX
-                    color="#3f3e3e" /* text-color-disabled */
+                    color="var(--text-color-disabled)"
                     size={20}
                     className={classes.removeIcon}
                 />
             </Group>
         );
     });
+
     return (
         <Stack
-            className={cs(classes.selectionViewContainer, className)}
+            className={cs(classes.container, className)}
             {...props}
         >
-            <h3>Selected {filter}:</h3>
-            {items}
+            <p className={classes.label}>Selected {filter}:</p>
+            {isEmpty(items) ? <p className={classes.placeholder}>None selected yet</p> : <Stack className={classes.items}>{items}</Stack>}
         </Stack>
     );
 };

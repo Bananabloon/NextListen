@@ -14,6 +14,7 @@
 
     --text-color: #ffffff;
     --text-color-dimmed: #bdbdbd;
+    --text-color-strongly-dimmed: #5d5d5d;
     --text-color-disabled: #3f3e3e;
 
     --primary-color-0: #f6e9ff;
@@ -54,8 +55,10 @@
     --spacing-xxl: 1.5rem;
     --spacing-xxxl: 2rem;
 
-    --font-size-xs: 0.6rem;
-    --font-size-sm: 0.75rem;
+    --font-size-xxxs: 0.5rem;
+    --font-size-xxs: 0.625rem;
+    --font-size-xs: 0.75rem;
+    --font-size-sm: 0.875rem;
     --font-size-md: 1rem;
     --font-size-lg: 1.25rem;
     --font-size-xl: 1.5rem;

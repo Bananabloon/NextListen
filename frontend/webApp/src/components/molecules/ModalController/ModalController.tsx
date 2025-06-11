@@ -2,6 +2,7 @@ import { useEffect, useRef } from "react";
 import classes from "./ModalController.module.css";
 import Portal from "../../atoms/Portal/Portal";
 import Button from "../../atoms/Button/Button";
+import cs from "classnames";
 
 interface ModalControllerProps extends React.HTMLAttributes<HTMLDivElement> {
     width: number;
@@ -9,26 +10,14 @@ interface ModalControllerProps extends React.HTMLAttributes<HTMLDivElement> {
     buttonText: string;
 }
 
-const ModalController = ({
-    width,
-    height,
-    buttonText,
-    children,
-    className,
-    ...props
-}: ModalControllerProps): React.JSX.Element => {
+const ModalController = ({ width, height, buttonText, children, className, ...props }: ModalControllerProps): React.JSX.Element => {
     const ref = useRef(null);
 
     const inboundEventListener = (e: MouseEvent) => {
         const element = ref.current! as HTMLDialogElement;
         if (element.open) {
             let modalPos = element.getBoundingClientRect();
-            if (
-                e.clientX < modalPos.left ||
-                e.clientY < modalPos.top ||
-                e.clientX > modalPos.right ||
-                e.clientY > modalPos.bottom
-            ) {
+            if (e.clientX < modalPos.left || e.clientY < modalPos.top || e.clientX > modalPos.right || e.clientY > modalPos.bottom) {
                 element.style.opacity = "0";
                 element.close();
             }
@@ -47,7 +36,7 @@ const ModalController = ({
             <Portal>
                 <dialog
                     ref={ref}
-                    className={classes.container}
+                    className={cs(classes.container, className)}
                     style={{ width: `${width}px`, height: `${height}px` }}
                 >
                     {children}

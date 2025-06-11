@@ -7,13 +7,10 @@ import classes from "./DiscoveryModalController.module.css";
 import ItemSelectionContainer from "../../molecules/ItemSelectionContainer/ItemSelectionContainer";
 import FilteredSelect from "../../molecules/FilteredSelect/FilteredSelect";
 import { useQueue } from "../../../contexts/QueueContext";
-interface DiscoveryModalControllerProps extends React.HTMLAttributes<HTMLDivElement> {}
-const DiscoveryModalController = ({
-    children,
-    className,
-    ...props
-}: DiscoveryModalControllerProps): React.JSX.Element => {
-    const [activeFilter, setActiveFilter] = useState<"artists" | "tracks" | "genres">("artists");
+import SegmentedControl from "../../atoms/SegmentedControl/SegmentedControl";
+
+const DiscoveryModalController = (): React.JSX.Element => {
+    const [activeFilter, setActiveFilter] = useState<"top" | "top" | "artists" | "tracks" | "genres">("artists");
     const [items, setItems] = useState<any[]>([]);
     const { queue, createNewDiscoveryQueue } = useQueue();
     const spotifyToPathFilter = new Map();
@@ -39,40 +36,27 @@ const DiscoveryModalController = ({
             buttonText="Generate New Queue"
             width={816}
             height={500}
+            className={classes.modal}
         >
-            <h1 className={classes.modalTitleText}>New Queue</h1>
-            <h3 className={classes.supportiveText}>Based on:</h3>
-            <Group
-                className={classes.selectorsGroup}
-                style={{ gap: "0", justifyContent: "center" }}
-            >
-                <Button
-                    size="sm"
-                    // onClick={() => setActiveFilter()}
-                >
-                    My Top Songs
-                </Button>
-                <Button
-                    size="sm"
-                    onClick={() => setActiveFilter("artists")}
-                >
-                    Selected Artists
-                </Button>
-                <Button
-                    size="sm"
-                    onClick={() => setActiveFilter("tracks")}
-                >
-                    Selected Songs
-                </Button>
-                <Button
-                    size="sm"
-                    onClick={() => setActiveFilter("genres")}
-                >
-                    Selected Genres
-                </Button>
-            </Group>
-            <Stack>
-                <Group>
+            <h1 className={classes.title}>New Queue</h1>
+            <Stack className={classes.content}>
+                <Stack className={classes.itemsWithLabel}>
+                    <p className={classes.label}>Based on:</p>
+                    <SegmentedControl
+                        options={[
+                            { label: "My Top Songs", value: "top" },
+                            { label: "Selected Artists", value: "artists" },
+                            { label: "Selected Songs", value: "tracks" },
+                            { label: "Selected Genres", value: "genres" },
+                        ]}
+                        buttonProps={{ className: classes.segmentedControlButton }}
+                        value={activeFilter}
+                        // ! to be removed
+                        // @ts-ignore
+                        onChange={setActiveFilter}
+                    />
+                </Stack>
+                <Group className={classes.controlGroup}>
                     <FilteredSelect
                         filter={activeFilter}
                         changeSelectOption={addNewObject}
@@ -80,6 +64,7 @@ const DiscoveryModalController = ({
                     <ItemSelectionContainer
                         filter={activeFilter}
                         data={items}
+                        className={classes.selectedItemsStack}
                     />
                 </Group>
                 <Button

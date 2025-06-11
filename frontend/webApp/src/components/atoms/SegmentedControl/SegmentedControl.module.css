@@ -1,0 +1,23 @@
+.container {
+    gap: 0;
+    background-color: var(--background-color-4);
+    border-radius: var(--segmented-control-radius);
+}
+
+.button {
+    border-radius: 0;
+    font-weight: 400;
+    border-radius: var(--segmented-control-radius);
+}
+
+.button:hover {
+    transform: scale(102%);
+}
+
+.button:active {
+    transform: scale(100%);
+}
+
+.button[data-selected="true"] {
+    background-color: var(--background-color-5);
+}

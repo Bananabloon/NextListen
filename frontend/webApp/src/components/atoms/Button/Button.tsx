@@ -3,7 +3,7 @@ import Group from "../Group/Group";
 import classes from "./Button.module.css";
 import cs from "classnames";
 
-interface ButtonProps extends React.HTMLAttributes<HTMLButtonElement> {
+export interface ButtonProps extends React.HTMLAttributes<HTMLButtonElement> {
     size?: Size;
     leftSection?: React.ReactNode;
     rightSection?: React.ReactNode;

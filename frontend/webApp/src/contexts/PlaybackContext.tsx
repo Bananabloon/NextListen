@@ -4,7 +4,7 @@ import { isEmpty, isNull } from "lodash";
 import { useQueue } from "./QueueContext";
 import { useSpotifyScript } from "../hooks/useSpotifyScript";
 import { useSpotifyPlayer } from "../hooks/useSpotifyPlayer";
-import { useThrottledCallback } from "@mantine/hooks";
+import { useDebouncedCallback, useThrottledCallback } from "@mantine/hooks";
 
 interface ContextType {
     loading: boolean;
@@ -35,11 +35,11 @@ export const PlaybackProvider = ({ children }: { children: ReactNode }) => {
             body: JSON.stringify({ device_id: deviceId }),
         });
 
-    const playTrack = async (uri: string) => {
+    const playTrack = useDebouncedCallback(async (uri: string) => {
         return await sendRequest("POST", "/spotify/playback/start", {
             body: JSON.stringify({ device_id: deviceId, track_uri: uri }),
         });
-    };
+    }, 500);
 
     const playCurrent = async () => await playTrack(current.uri);
 

@@ -1,7 +1,10 @@
 .inputContainer {
-    padding-top: var(--spacing-xxxl);
-    padding-left: var(--spacing-xxxl);
     width: 50%;
-    height: 250px;
-    gap: var(--spacing-sm);
+    gap: 4px;
+    min-height: 0;
+}
+
+.label {
+    font-size: var(--font-size-sm);
+    padding-left: 2px;
 }

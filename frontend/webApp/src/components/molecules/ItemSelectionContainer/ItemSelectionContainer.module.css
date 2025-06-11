@@ -1,15 +1,12 @@
-.selectionViewContainer {
-    padding-top: var(--spacing-xxxl);
-    padding-left: var(--spacing-xxxl);
+.container {
     width: 50%;
-    height: 250px;
-    gap: var(--spacing-sm);
-    overflow: auto;
-    scrollbar-width: none;
+    gap: 4px;
 }
 
-.selectionViewContainer::-webkit-scrollbar {
-    display: none;
+.items {
+    min-height: 0;
+    gap: var(--spacing-sm);
+    overflow: auto;
 }
 
 .selectionElement {
@@ -21,8 +18,8 @@
 }
 
 .selectionElementPfp {
-    width: 38px;
-    height: 38px;
+    width: 36px;
+    height: 36px;
     border-radius: var(--radius-xl);
     aspect-ratio: 1/1;
     object-fit: cover;
@@ -30,4 +27,17 @@
 
 .removeIcon {
     margin-right: var(--spacing-sm);
+}
+
+.label {
+    font-size: var(--font-size-sm);
+    padding-left: 2px;
+}
+
+.placeholder {
+    font-size: var(--font-size-sm);
+    font-style: italic;
+    padding-left: 2px;
+
+    color: var(--text-color-dimmed);
 }
