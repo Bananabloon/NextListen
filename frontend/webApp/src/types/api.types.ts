@@ -18,11 +18,9 @@ export interface TrackDetails {
 }
 
 export interface GeneratedSong {
-    artist: string;
     curveball: boolean;
     explicit: boolean;
     feedback_value: Feedback;
-    title: string;
     track_details: TrackDetails;
     uri: string;
 }
