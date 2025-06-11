@@ -21,6 +21,8 @@ type OptionType = {
 const FilteredSelect = ({ changeSelectOption, filter, children, className, ...props }: ItemFilterContainerProps): React.JSX.Element => {
     const [options, setOptions] = useState<OptionType[]>([]);
     const [items, setItems] = useState<any[]>([]);
+    const [value, setValue] = useState(null);
+
     const { sendRequest } = useRequests();
 
     const debouncedSearch = useDebouncedCallback(async (inputValue: string) => {
@@ -45,6 +47,7 @@ const FilteredSelect = ({ changeSelectOption, filter, children, className, ...pr
     const handleSelect = (selectedOption) => {
         const selectedItem = items.find((item) => item.uri === selectedOption.value);
         changeSelectOption(selectedItem);
+        setValue(null);
     };
 
     return (
@@ -54,6 +57,7 @@ const FilteredSelect = ({ changeSelectOption, filter, children, className, ...pr
         >
             <p className={classes.label}>Choose {filter}:</p>
             <Select
+                value={value}
                 className="filteredSelectContainer"
                 classNamePrefix="filteredSelect"
                 unstyled
