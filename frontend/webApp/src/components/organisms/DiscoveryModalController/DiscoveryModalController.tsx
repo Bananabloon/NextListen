@@ -6,6 +6,7 @@ import ModalController from "../../molecules/ModalController/ModalController";
 import classes from "./DiscoveryModalController.module.css";
 import ItemSelectionContainer from "../../molecules/ItemSelectionContainer/ItemSelectionContainer";
 import FilteredSelect from "../../molecules/FilteredSelect/FilteredSelect";
+import { useQueue } from "../../../contexts/QueueContext";
 interface DiscoveryModalControllerProps extends React.HTMLAttributes<HTMLDivElement> {}
 const DiscoveryModalController = ({
     children,
@@ -14,6 +15,12 @@ const DiscoveryModalController = ({
 }: DiscoveryModalControllerProps): React.JSX.Element => {
     const [activeFilter, setActiveFilter] = useState<"artists" | "tracks" | "genres">("artists");
     const [items, setItems] = useState<any[]>([]);
+    const { queue, createNewDiscoveryQueue } = useQueue();
+    const spotifyToPathFilter = new Map();
+
+    spotifyToPathFilter.set("tracks", "song");
+    spotifyToPathFilter.set("artists", "artist");
+    spotifyToPathFilter.set("genres", "genre");
 
     useEffect(() => {
         setItems([]);
@@ -21,6 +28,10 @@ const DiscoveryModalController = ({
 
     const addNewObject = (option) => {
         setItems((prev) => [...prev, option]);
+    };
+
+    const generateQueue = () => {
+        createNewDiscoveryQueue(spotifyToPathFilter[activeFilter], items);
     };
 
     return (
@@ -75,6 +86,7 @@ const DiscoveryModalController = ({
                     size="md"
                     background="white"
                     className={classes.genButton}
+                    onClick={generateQueue}
                 >
                     Generate
                 </Button>

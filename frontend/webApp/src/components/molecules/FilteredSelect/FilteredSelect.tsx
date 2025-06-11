@@ -48,7 +48,7 @@ const FilteredSelect = ({
         }
     };
 
-    const debouncedSearch = useDebouncedCallback(search, 1000);
+    const debouncedSearch = useDebouncedCallback(search, 400);
     const handleOptionChange = (selectedOption) => {
         const selectedItem = items.find((item) => item.uri === selectedOption.value);
         changeSelectOption(selectedItem);
@@ -71,6 +71,7 @@ const FilteredSelect = ({
                 onMenuClose={() => setOptions([])}
                 options={options}
                 placeholder="Enter an artist name to select"
+                noOptionsMessage={({ inputValue }) => (inputValue === "" ? "" : "Looking for matches...")}
                 styles={{
                     control: (baseStyles, state) => ({
                         ...baseStyles,

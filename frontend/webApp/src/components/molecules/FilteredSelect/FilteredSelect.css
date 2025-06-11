@@ -26,3 +26,7 @@
 .filteredSelect__placeholder {
     color: var(--text-color-disabled);
 }
+.filteredSelect__indicators {
+    padding-right: 5px;
+    visibility: hidden;
+}
