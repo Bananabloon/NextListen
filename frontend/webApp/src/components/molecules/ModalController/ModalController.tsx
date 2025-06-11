@@ -18,7 +18,6 @@ const ModalController = ({ width, height, buttonText, children, className, ...pr
         if (element.open) {
             let modalPos = element.getBoundingClientRect();
             if (e.clientX < modalPos.left || e.clientY < modalPos.top || e.clientX > modalPos.right || e.clientY > modalPos.bottom) {
-                element.style.opacity = "0";
                 element.close();
             }
         }
@@ -38,6 +37,10 @@ const ModalController = ({ width, height, buttonText, children, className, ...pr
                     ref={ref}
                     className={cs(classes.container, className)}
                     style={{ width: `${width}px`, height: `${height}px` }}
+                    onClose={() => {
+                        const element = ref.current! as HTMLDialogElement;
+                        element.style.opacity = "0";
+                    }}
                 >
                     {children}
                 </dialog>

@@ -1,0 +1,42 @@
+version: "3.9"
+services:
+  backend-tests:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.tests 
+    env_file:
+      - ./backend/.env
+    volumes:
+      - ./backend:/backend
+      - ./backend/coverage:/backend/htmlcov 
+    depends_on:
+      - db
+    environment:
+      - PYTHONUNBUFFERED=1
+      - DB_HOST=db
+      - DB_NAME=spotify_db
+      - DB_USER=user
+      - DB_PASSWORD=novell123
+    networks:
+      - mynetwork
+
+  db:
+    image: mysql:8
+    environment:
+      MYSQL_DATABASE: spotify_db
+      MYSQL_USER: user
+      MYSQL_PASSWORD: novell123
+      MYSQL_ROOT_PASSWORD: novell123
+    ports:
+      - "3306:3306"
+    volumes:
+      - dbdata:/var/lib/mysql
+    networks:
+      - mynetwork
+
+volumes:
+  dbdata:
+
+networks:
+  mynetwork:
+    driver: bridge

@@ -37,8 +37,7 @@ export const QueueProvider = ({ children }: { children: ReactNode }) => {
     };
 
     const updateDiscoveryQueue = async () => {
-        if (isEmpty(queue) || isNull(discoveryState) || loading || updating || currentIndex + 10 >= queue.length)
-            return;
+        if (isEmpty(queue) || isNull(discoveryState) || loading || updating || currentIndex + 10 >= queue.length) return;
 
         setUpdating(true);
         const songs = await generateDiscovery(discoveryState.type, discoveryState.options);
@@ -47,6 +46,7 @@ export const QueueProvider = ({ children }: { children: ReactNode }) => {
     };
 
     const createNewDiscoveryQueue = async <T extends DiscoveryType>(type: T, options: DiscoveryOptionsMap[T]) => {
+        console.log(type);
         setLoading(true);
         setQueue(await generateDiscovery(type, options));
         setDiscoveryState({ type, options } as DiscoveryState);

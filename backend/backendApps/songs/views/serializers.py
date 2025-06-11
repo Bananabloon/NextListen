@@ -110,3 +110,15 @@ class SingleSongFeedbackResponseSerializer(serializers.Serializer):
     spotify_uri = serializers.CharField()
     feedback_value = serializers.IntegerField()
     message = serializers.CharField(required=False)
+
+class DiscoveryGenerateRequestSerializer(serializers.Serializer):
+    genre = serializers.CharField(required=True, help_text="Genre to discover")
+    count = serializers.IntegerField(
+        required=False, default=10, min_value=1, max_value=50
+    )
+
+class DiscoveryGenerateResponseSerializer(serializers.Serializer):
+    message = serializers.CharField()
+    genre = serializers.CharField()
+    # songs = SongSerializer(many=True)
+    errors = serializers.ListField(child=serializers.DictField())

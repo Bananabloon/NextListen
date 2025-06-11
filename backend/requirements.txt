@@ -12,3 +12,6 @@ python-decouple
 pytest
 rapidfuzz
 drf-spectacular
+coverage
+pytest-cov
+pytest-django

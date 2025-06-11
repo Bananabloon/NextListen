@@ -28,7 +28,8 @@ class SongViewsTestCase(APITestCase):
     def test_song_analysis_missing_data(self):
         response = self.client.post("/api/songs/analysis/", {})
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertIn("error", response.data)
+        self.assertIn("title", response.data)
+        self.assertIn("artist", response.data)
 
     def test_song_analysis_success(self):
         data = {
@@ -43,7 +44,7 @@ class SongViewsTestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_feedback_invalid_input(self):
-        response = self.client.post("/api/songs/feedback/update", {"spotify_uri": "xyz", "feedback": "meh"})
+        response = self.client.post("/api/songs/feedback/update/", {"spotify_uri": "xyz", "feedback_value": "meh"})
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_feedback_success_existing_media(self):
@@ -59,9 +60,9 @@ class SongViewsTestCase(APITestCase):
             saved_at=timezone.now(),
         )
 
-        data = {"spotify_uri": media.spotify_uri, "feedback": "like"}
+        data = {"spotify_uri": media.spotify_uri, "feedback_value": 1}
 
-        response = client.post("/api/songs/feedback/update", data, format="json")
+        response = client.post("/api/songs/feedback/update/", data, format="json")
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data["status"], "ok")
@@ -79,9 +80,9 @@ class SongViewsTestCase(APITestCase):
             "album": {"name": "New Album"},
         }
 
-        data = {"spotify_uri": spotify_uri, "feedback": "dislike"}
+        data = {"spotify_uri": spotify_uri, "feedback_value": -1}
 
-        response = client.post("/api/songs/feedback/update", data, format="json")
+        response = client.post("/api/songs/feedback/update/", data, format="json")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data["track_title"], "New Track")
         self.assertEqual(response.data["artist"], "New Artist")
@@ -94,9 +95,9 @@ class SongViewsTestCase(APITestCase):
         )
 
     def test_feedback_invalid_uri_format(self):
-        response = self.client.post("/api/songs/feedback/update", {
+        response = self.client.post("/api/songs/feedback/update/", {
             "spotify_uri": "",
-            "feedback": "like"
+            "feedback_value": 1
         })
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
@@ -113,9 +114,9 @@ class SongViewsTestCase(APITestCase):
             saved_at=timezone.now(),
         )
 
-        data = {"spotify_uri": media.spotify_uri, "feedback": "none"}
+        data = {"spotify_uri": media.spotify_uri, "feedback_value": 0}
 
-        response = client.post("/api/songs/feedback/update", data, format="json")
+        response = client.post("/api/songs/feedback/update/", data, format="json")
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIn("status", response.data)
@@ -124,3 +125,4 @@ class SongViewsTestCase(APITestCase):
         response = self.client.post("/api/songs/similar/", {})
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response.data["error"], "title and artist are required")
+

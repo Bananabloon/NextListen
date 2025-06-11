@@ -11,9 +11,17 @@ type ImageEntry = { url: string } | undefined;
 interface ItemSelectionContainerProps extends React.HTMLAttributes<HTMLDivElement> {
     filter: "top" | "artists" | "tracks" | "genres";
     data: any[];
+    onRemoveItem: (index: number) => void;
 }
 
-const ItemSelectionContainer = ({ filter, data, children, className, ...props }: ItemSelectionContainerProps): React.JSX.Element => {
+const ItemSelectionContainer = ({
+    onRemoveItem,
+    filter,
+    data,
+    children,
+    className,
+    ...props
+}: ItemSelectionContainerProps): React.JSX.Element => {
     const getImageSource = {
         artists: (dataEntry: Dictionary<any>) => (last(dataEntry?.images) as ImageEntry)?.url,
         tracks: (dataEntry: Dictionary<any>) => (last(dataEntry?.album?.images) as ImageEntry)?.url,
@@ -34,6 +42,7 @@ const ItemSelectionContainer = ({ filter, data, children, className, ...props }:
                     color="var(--text-color-disabled)"
                     size={20}
                     className={classes.removeIcon}
+                    onClick={() => onRemoveItem(i)}
                 />
             </Group>
         );

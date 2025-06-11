@@ -39,9 +39,11 @@ class AllUserFeedbacksView(APIView):
         token = request.user.spotify_access_token
         headers = {"Authorization": f"Bearer {token}"}
 
+        track_ids = [uri.split(":")[-1] for uri in spotify_uris] 
         all_track_info = {}
-        for chunk_uris in chunks(spotify_uris, 50):
-            ids_param = ",".join(chunk_uris)
+
+        for chunk_ids in chunks(track_ids, 50):
+            ids_param = ",".join(chunk_ids)
             url = f"https://api.spotify.com/v1/tracks?ids={ids_param}"
             resp = requests.get(url, headers=headers)
 
@@ -52,7 +54,8 @@ class AllUserFeedbacksView(APIView):
 
             data = resp.json().get("tracks", [])
             for track in data:
-                all_track_info[track["uri"]] = {
+                full_uri = f"spotify:track:{track['id']}"
+                all_track_info[full_uri] = {
                     "title": track["name"],
                     "artist": ", ".join([a["name"] for a in track["artists"]]),
                     "album": track["album"]["name"],
@@ -61,6 +64,7 @@ class AllUserFeedbacksView(APIView):
                     "preview_url": track["preview_url"],
                     "external_url": track["external_urls"]["spotify"],
                 }
+
 
         feedback_list = []
         for fb in feedbacks:
