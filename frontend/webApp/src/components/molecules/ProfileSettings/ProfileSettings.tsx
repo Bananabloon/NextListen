@@ -24,12 +24,12 @@ const ProfileSettings = ({ children, className, ...props }: ProfileSettingsProps
     };
 
     return (
-        <Stack>
-            <h1 className={classes.sectionTitle}>Your account</h1>
-            <Group
-                className={cs(classes.container, className)}
-                {...props}
-            >
+        <Stack
+            {...props}
+            className={className}
+        >
+            <h1 className={classes.sectionTitle}>Account</h1>
+            <Group className={classes.container}>
                 <Stack className={classes.dataContainer}>
                     <h1 className={classes.usernameText}>{data?.display_name}</h1>
                     <p className={classes.emailText}>{data?.email} </p>

@@ -31,6 +31,12 @@ export const QueueProvider = ({ children }: { children: ReactNode }) => {
 
     const current = queue?.[currentIndex] ?? null;
 
+    useEffect(() => {
+        if (queue.length > 0) {
+            sessionStorage.setItem("queue", JSON.stringify(queue));
+        }
+    }, [queue]);
+
     const generateDiscovery = async <T extends DiscoveryType>(type: T, options: DiscoveryOptionsMap[T]) => {
         const data = await sendRequest("POST", API_PATHS[type], { body: JSON.stringify(options) });
         return data?.songs ?? [];
@@ -44,10 +50,20 @@ export const QueueProvider = ({ children }: { children: ReactNode }) => {
         setQueue((prev) => [...prev, ...songs]);
         setUpdating(false);
     };
-
-    const createNewDiscoveryQueue = async <T extends DiscoveryType>(type: T, options: DiscoveryOptionsMap[T]) => {
-        console.log(type);
+    const restoreDiscoveryQueue = async <T extends DiscoveryType>(type: T, options: DiscoveryOptionsMap[T]) => {
         setLoading(true);
+        const storedQueue = sessionStorage.getItem("queue");
+        const parsedQueue = storedQueue ? JSON.parse(storedQueue) : null;
+        if (Array.isArray(parsedQueue) && parsedQueue.length > 0) {
+            setQueue(parsedQueue);
+        } else setQueue(await generateDiscovery(type, options));
+        setDiscoveryState({ type, options } as DiscoveryState);
+        setLoading(false);
+    };
+    const createNewDiscoveryQueue = async <T extends DiscoveryType>(type: T, options: DiscoveryOptionsMap[T]) => {
+        setLoading(true);
+        const storedQueue = sessionStorage.getItem("queue");
+        const parsedQueue = storedQueue ? JSON.parse(storedQueue) : null;
         setQueue(await generateDiscovery(type, options));
         setDiscoveryState({ type, options } as DiscoveryState);
         setLoading(false);

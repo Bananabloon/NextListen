@@ -40,6 +40,7 @@ const PlayerControls = ({ ...props }): React.JSX.Element => {
         let trackUri = currentState?.track_window?.current_track?.uri;
         let trackIdStart = trackUri!.lastIndexOf(":");
         let trackId = trackUri!.slice(trackIdStart! + 1);
+
         console.log(trackId);
         sendRequest("POST", "spotify/liked-tracks/like", {
             body: JSON.stringify({ track_id: trackId }),

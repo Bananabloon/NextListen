@@ -5,6 +5,7 @@ import Stack from "../../components/atoms/Stack/Stack";
 import ProfileSettings from "../../components/molecules/ProfileSettings/ProfileSettings";
 import classes from "./SettingsPage.module.css";
 import { IconSettings } from "@tabler/icons-react";
+import AppInformationView from "../../components/molecules/AppInformationView/AppInformationView";
 const SettingsPage = (): React.JSX.Element => {
     const navigate = useNavigate();
     return (
@@ -24,10 +25,11 @@ const SettingsPage = (): React.JSX.Element => {
                     Return
                 </Button>
             </Group>
-            <Group className={classes.content}>
+            <Stack className={classes.content}>
                 <ProfileSettings />
+                <AppInformationView />
                 {/* <StatsDisplay /> */}
-            </Group>
+            </Stack>
         </Stack>
     );
 };
