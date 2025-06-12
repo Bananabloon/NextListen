@@ -36,7 +36,6 @@ const ProfileSettings = ({ children, className, ...props }: ProfileSettingsProps
                     <ModalController
                         width={820}
                         height={380}
-                        buttonStyle={{ backgroundColor: "#E60F32", marginLeft: "0", marginTop: "auto", marginBottom: "var(--spacing-lg)" }}
                         buttonContent={
                             <>
                                 <IconLockOpen className={classes.openLockIcon} />
