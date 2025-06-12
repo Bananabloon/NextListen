@@ -23,11 +23,9 @@ const PlayerControls = ({ ...props }): React.JSX.Element => {
     const { sendRequest } = useRequests();
 
     useEffect(() => {
-        sendRequest("GET", `songs/feedback/?spotify_uri=${currentState?.track_window.current_track.uri}`).then(
-            (data) => {
-                setFeedback(data?.feedback_value ?? 0);
-            }
-        );
+        sendRequest("GET", `songs/feedback/?spotify_uri=${currentState?.track_window.current_track.uri}`).then((data) => {
+            setFeedback(data?.feedback_value ?? 0);
+        });
     }, [currentState?.track_window.current_track.uri]);
 
     const updateFeedback = (value: Feedback) => {
@@ -40,7 +38,7 @@ const PlayerControls = ({ ...props }): React.JSX.Element => {
     return (
         <>
             <Group {...props}>
-                <div style={{ width: "80px" }}></div>
+                <div style={{ width: "140px" }}></div>
                 <IconButton
                     size="md"
                     variant="transparent"

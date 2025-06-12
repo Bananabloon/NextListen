@@ -1,12 +1,15 @@
-import { createContext, useContext, ReactNode, useState, useEffect } from "react";
+import { createContext, useContext, ReactNode, useState, useEffect, useMemo, RefObject } from "react";
 import { DiscoveryOptionsMap, DiscoveryState, DiscoveryType, GeneratedSong } from "../types/api.types";
 import useRequests from "../hooks/useRequests";
-import { isEmpty, isNull } from "lodash";
+import { isEmpty, isNull, max } from "lodash";
+import { average, prominent } from "color.js";
+import { getBrightestColor, hexToRgb } from "../utils/colors";
 
 interface QueueContextType {
     queue: GeneratedSong[];
     current: GeneratedSong;
     loading: boolean;
+    currentColor: string;
     currentIndex: number;
     setCurrentIndex: (callback: number | ((prev: number) => number)) => void;
     createNewDiscoveryQueue: <T extends DiscoveryType>(type: T, options: DiscoveryOptionsMap[T]) => Promise<void>;
@@ -23,7 +26,8 @@ const API_PATHS: Record<DiscoveryType, string> = {
 
 export const QueueProvider = ({ children }: { children: ReactNode }) => {
     const [queue, setQueue] = useState<GeneratedSong[]>([]);
-    const [currentIndex, setCurrentIndex] = useState(0);
+    const [currentIndex, setCurrentIndex] = useState(-1);
+    const [currentColor, setCurrentColor] = useState("var(--primary-color)");
     const [loading, setLoading] = useState(false);
     const [updating, setUpdating] = useState(false);
     const [discoveryState, setDiscoveryState] = useState<DiscoveryState>(null);
@@ -46,21 +50,34 @@ export const QueueProvider = ({ children }: { children: ReactNode }) => {
     };
 
     const createNewDiscoveryQueue = async <T extends DiscoveryType>(type: T, options: DiscoveryOptionsMap[T]) => {
-        console.log(type);
         setLoading(true);
         setQueue(await generateDiscovery(type, options));
         setDiscoveryState({ type, options } as DiscoveryState);
         setLoading(false);
+        setCurrentIndex(0);
+        updateCurrentColor();
+    };
+
+    const updateCurrentColor = async () => {
+        const colors = (await prominent(current?.track_details?.album_cover, { amount: 20, format: "hex", group: 50 })) as string[];
+        const aliveColor =
+            colors.find((color) => {
+                const rgb = hexToRgb(color);
+                return (max(rgb) ?? 0) >= 128;
+            }) ?? "var(--primary-color-7)";
+        setCurrentColor(aliveColor);
     };
 
     useEffect(() => {
         updateDiscoveryQueue();
+        updateCurrentColor();
     }, [currentIndex]);
 
     const value = {
         queue,
         current,
         loading,
+        currentColor,
         currentIndex,
         setCurrentIndex,
         createNewDiscoveryQueue,

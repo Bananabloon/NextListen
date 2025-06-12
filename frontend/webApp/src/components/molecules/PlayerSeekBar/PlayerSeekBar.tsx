@@ -6,11 +6,13 @@ import { usePlayback } from "../../../contexts/PlaybackContext";
 import { isNull } from "lodash";
 import Stack from "../../atoms/Stack/Stack";
 import Group from "../../atoms/Group/Group";
+import { useQueue } from "../../../contexts/QueueContext";
 
 interface PlayerSeekBarProps extends React.HTMLAttributes<HTMLDivElement> {}
 
 const PlayerSeekBar = ({ className, ...props }: PlayerSeekBarProps): React.JSX.Element => {
     const { currentState, seek } = usePlayback();
+    const { currentColor } = useQueue();
     const [position, setPosition] = useState(0);
 
     useEffect(() => {
@@ -42,7 +44,7 @@ const PlayerSeekBar = ({ className, ...props }: PlayerSeekBarProps): React.JSX.E
                 }}
                 style={
                     {
-                        // "--progress-color": color,
+                        "--progress-color": currentColor,
                     } as React.CSSProperties
                 }
             />
