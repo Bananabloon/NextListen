@@ -209,3 +209,5 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+backend-tests.yml

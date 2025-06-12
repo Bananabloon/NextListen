@@ -157,10 +157,11 @@ def test_generate_from_artists_success(client):
     assert "songs" in response.data
     assert len(response.data["songs"]) >= 1 
     first_song = response.data["songs"][0]
-    assert "name" in first_song or "title" in first_song  
-    song_name = first_song.get("name") or first_song.get("title")
-    assert song_name is not None
-
+    
+    assert "track_details" in first_song
+    track_details = first_song["track_details"]
+    assert "name" in track_details
+    assert track_details["name"] is not None and track_details["name"] != ""
 
 @pytest.mark.django_db
 def test_generate_prefers_liked(user, factory, media_instance):
@@ -178,9 +179,10 @@ def test_generate_prefers_liked(user, factory, media_instance):
     assert "songs" in response.data
     names = []
     for track in response.data["songs"]:
-        name = track.get("name") or track.get("title")
-        if name:
-            names.append(name)
+        if "track_details" in track and "name" in track["track_details"]:
+            name = track["track_details"]["name"]
+            if name:
+                names.append(name)
     
     assert "Teardrop" in names
 
@@ -203,4 +205,5 @@ def test_discovery_generate_view(client):
     assert isinstance(response.data["songs"], list)
     if response.data["songs"]:
         first_song = response.data["songs"][0]
-        assert any(field in first_song for field in ["name", "title"])
+        assert "track_details" in first_song
+        assert "name" in first_song["track_details"]
