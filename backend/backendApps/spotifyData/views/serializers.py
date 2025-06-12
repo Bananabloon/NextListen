@@ -98,8 +98,12 @@ class DiscoveryGenerateResponseSerializer(serializers.Serializer):
 
 # === Liked ===
 class LikeTrackSerializer(serializers.Serializer):
-    track_id = serializers.CharField()
+    track_uri = serializers.CharField(
+        help_text="Spotify track URI (e.g. spotify:track:7ouMYWpwJ422jRcDASZB7P) or ID"
+    )
 
 
 class RemoveLikedTrackSerializer(serializers.Serializer):
-    track_id = serializers.CharField()
+    track_uri = serializers.CharField(
+        help_text="Spotify track URI (e.g. spotify:track:7ouMYWpwJ422jRcDASZB7P) or ID"
+    )

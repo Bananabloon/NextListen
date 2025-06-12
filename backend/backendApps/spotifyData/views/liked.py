@@ -5,6 +5,17 @@ from .views_helpers import SpotifyBaseView
 from .serializers import LikeTrackSerializer, RemoveLikedTrackSerializer
 
 
+def parse_spotify_uris_to_ids(uris_string):
+    uris = [u.strip() for u in uris_string.split(",") if u.strip()]
+    ids = []
+    for uri in uris:
+        if uri.startswith("spotify:track:"):
+            ids.append(uri.split(":")[-1])
+        else:
+            ids.append(uri)
+    return ids
+
+
 class LikedTracksView(SpotifyBaseView):
     @extend_schema(
         summary="Get user's liked tracks",
@@ -40,7 +51,8 @@ class LikeTrackView(SpotifyBaseView):
     def post(self, request):
         serializer = LikeTrackSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        track_id = serializer.validated_data["track_id"]
+        track_uri = serializer.validated_data["track_uri"]
+        track_id = parse_spotify_uris_to_ids(track_uri)[0]
         self.spotify.like_track(track_id)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
@@ -55,7 +67,8 @@ class RemoveLikedTrackView(SpotifyBaseView):
     def post(self, request):
         serializer = RemoveLikedTrackSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        track_id = serializer.validated_data["track_id"]
+        track_uri = serializer.validated_data["track_uri"]
+        track_id = parse_spotify_uris_to_ids(track_uri)[0]
         self.spotify.remove_liked_track(track_id)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
@@ -63,23 +76,27 @@ class RemoveLikedTrackView(SpotifyBaseView):
 class AreTracksLikedView(SpotifyBaseView):
     @extend_schema(
         summary="Check if track(s) are liked",
-        description="Checks if given track IDs are liked by the current user on Spotify.",
+        description="Checks if given track URIs or IDs are liked by the current user on Spotify.",
         parameters=[
             OpenApiParameter(
-                name="ids",
+                name="uris",
                 type=str,
                 required=True,
-                description="Comma-separated list of Spotify track IDs (max 50)",
+                description="Comma-separated list of Spotify track URIs or IDs (max 50)",
             ),
         ],
         responses={200: None},
     )
     def get(self, request):
-        ids = request.query_params.get("ids")
-        if not ids:
+        uris = request.query_params.get("uris")
+        if not uris:
             return Response(
-                {"error": "Missing 'ids' query parameter"},
+                {"error": "Missing 'uris' query parameter"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
-        result = self.spotify.are_tracks_liked(ids)
-        return Response(result)
+        id_list = parse_spotify_uris_to_ids(uris)
+        ids_param = ",".join(id_list)
+        result = self.spotify.are_tracks_liked(ids_param)
+        uri_list = [u.strip() for u in uris.split(",") if u.strip()]
+        liked_map = {uri: liked for uri, liked in zip(uri_list, result)}
+        return Response(liked_map)
