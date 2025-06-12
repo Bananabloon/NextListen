@@ -3,7 +3,12 @@ from .views.genres import DiscoveryGenresView
 from .views.userStats import UserStatsView
 from .views.solidData import GetArtistView
 from .views.profile import CurrentUserProfileView, SpotifyTokenView
-from .views.liked import LikedTracksView, LikeTrackView, RemoveLikedTrackView
+from .views.liked import (
+    LikedTracksView,
+    LikeTrackView,
+    RemoveLikedTrackView,
+    AreTracksLikedView,
+)
 from .views.tracks import (
     TopTracksView,
     TopArtistsView,
@@ -16,6 +21,7 @@ from .views.tracks import (
 
 
 urlpatterns = [
+    path("are-tracks-liked/", AreTracksLikedView.as_view()),
     path("profile/", CurrentUserProfileView.as_view()),
     path("tokens/", SpotifyTokenView.as_view()),
     path("top-tracks/", TopTracksView.as_view()),

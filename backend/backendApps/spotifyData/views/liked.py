@@ -58,3 +58,28 @@ class RemoveLikedTrackView(SpotifyBaseView):
         track_id = serializer.validated_data["track_id"]
         self.spotify.remove_liked_track(track_id)
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class AreTracksLikedView(SpotifyBaseView):
+    @extend_schema(
+        summary="Check if track(s) are liked",
+        description="Checks if given track IDs are liked by the current user on Spotify.",
+        parameters=[
+            OpenApiParameter(
+                name="ids",
+                type=str,
+                required=True,
+                description="Comma-separated list of Spotify track IDs (max 50)",
+            ),
+        ],
+        responses={200: None},
+    )
+    def get(self, request):
+        ids = request.query_params.get("ids")
+        if not ids:
+            return Response(
+                {"error": "Missing 'ids' query parameter"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        result = self.spotify.are_tracks_liked(ids)
+        return Response(result)

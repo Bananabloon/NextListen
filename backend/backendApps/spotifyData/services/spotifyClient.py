@@ -116,7 +116,9 @@ class SpotifyAPI:
                 self._refresh_access_token()
                 continue
 
-            raise Exception(f"Failed to get tracks info: {response.status_code} - {response.text}")
+            raise Exception(
+                f"Failed to get tracks info: {response.status_code} - {response.text}"
+            )
 
         raise Exception("Rate limited again or failed after retry")
 
@@ -130,7 +132,10 @@ class SpotifyAPI:
         try:
             return False, response.json()
         except Exception:
-            return False, {"error": "Unexpected response", "status": response.status_code}
+            return False, {
+                "error": "Unexpected response",
+                "status": response.status_code,
+            }
 
     def start_playback(self, device_id, track_uri):
         data = {"uris": [track_uri], "offset": {"position": 0}}
@@ -168,3 +173,7 @@ class SpotifyAPI:
         if not self.access_token:
             raise Exception("Brak access tokena.")
         return self.access_token
+
+    def are_tracks_liked(self, ids: str):
+        response = self._get(f"/me/tracks/contains?ids={ids}")
+        return response.json() if hasattr(response, "json") else response
