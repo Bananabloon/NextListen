@@ -218,3 +218,5 @@ backend/wait-for-it.sh
 
 #Docker
 .Dockerfile.swp
+
+backend-tests.yml

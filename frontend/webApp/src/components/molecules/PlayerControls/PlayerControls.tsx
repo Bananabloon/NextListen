@@ -23,17 +23,26 @@ const PlayerControls = ({ ...props }): React.JSX.Element => {
     const { sendRequest } = useRequests();
 
     useEffect(() => {
-        sendRequest("GET", `songs/feedback/?spotify_uri=${currentState?.track_window.current_track.uri}`).then(
-            (data) => {
-                setFeedback(data?.feedback_value ?? 0);
-            }
-        );
+        sendRequest("GET", `songs/feedback/?spotify_uri=${currentState?.track_window.current_track.uri}`).then((data) => {
+            setFeedback(data?.feedback_value ?? 0);
+        });
     }, [currentState?.track_window.current_track.uri]);
 
     const updateFeedback = (value: Feedback) => {
         setFeedback(value);
         sendRequest("POST", "songs/feedback/update", {
             body: JSON.stringify({ spotify_uri: currentState?.track_window.current_track.uri, feedback_value: value }),
+        });
+    };
+
+    const changeLikedPlaylistInclusion = () => {
+        console.log(JSON.stringify({ track_id: currentState?.track_window.current_track.uri }));
+        let trackUri = currentState?.track_window?.current_track?.uri;
+        let trackIdStart = trackUri!.lastIndexOf(":");
+        let trackId = trackUri!.slice(trackIdStart! + 1);
+        console.log(trackId);
+        sendRequest("POST", "spotify/liked-tracks/like", {
+            body: JSON.stringify({ track_id: trackId }),
         });
     };
 
@@ -96,6 +105,7 @@ const PlayerControls = ({ ...props }): React.JSX.Element => {
                 <IconButton
                     size="md"
                     variant="transparent"
+                    onClick={() => changeLikedPlaylistInclusion()}
                 >
                     <img src={`/icons/spotify/like-icon-like${false ? "d" : ""}.svg`} />
                 </IconButton>

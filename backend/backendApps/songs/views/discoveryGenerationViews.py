@@ -13,7 +13,6 @@ from .serializers import (
     DiscoveryGenerateRequestSerializer,
     DiscoveryGenerateResponseSerializer,
 )
-from constants import GENERATION_BUFFER_MULTIPLIER
 
 import logging
 from collections import namedtuple
@@ -41,7 +40,7 @@ class DiscoveryGenerateView(APIView):
         data = serializer.validated_data
 
         user = request.user
-        genre = data["genre"]
+        genres = data["genres"]
         count = data.get("count", 10)
 
         try:
@@ -51,7 +50,7 @@ class DiscoveryGenerateView(APIView):
             preferences = get_user_preferences(user)
 
             prompt_builder = PromptBuilder(count=count, user_preferences=preferences)
-            prompt = prompt_builder.for_discovery(top_artists, top_tracks, genre)
+            prompt = prompt_builder.for_discovery(top_artists, top_tracks, genres)
             base_prompt = "Jesteś ekspertem muzycznym."
 
             raw_response_text = ask_openai(base_prompt, prompt)
@@ -66,8 +65,8 @@ class DiscoveryGenerateView(APIView):
             match_result = self._match_songs(raw_response, spotify, user)
 
             response_data = {
-                "message": f"Discovery songs generated for genre: {genre}",
-                "genre": genre,
+                "message": f"Discovery songs generated for genres: {', '.join(genres)}",
+                "genres": genres,
                 "songs": match_result.discovered[:count],
                 "errors": match_result.errors,
             }
@@ -76,7 +75,9 @@ class DiscoveryGenerateView(APIView):
 
         except Exception as e:
             logger.exception("Error generating discovery recommendations")
-            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response(
+                {"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
     def _get_spotify(self, user):
         return SpotifyAPI(
@@ -91,7 +92,10 @@ class DiscoveryGenerateView(APIView):
 
     def _get_top_tracks(self, spotify):
         data = spotify.get_top_tracks(limit=10)
-        return [f"{track['name']} by {track['artists'][0]['name']}" for track in data.get("items", [])]
+        return [
+            f"{track['name']} by {track['artists'][0]['name']}"
+            for track in data.get("items", [])
+        ]
 
     def _match_songs(self, songs, spotify, user) -> MatchResult:
         discovered = []
@@ -101,24 +105,34 @@ class DiscoveryGenerateView(APIView):
             query = f"{song['title']} {song['artist']}"
             try:
                 search_result = spotify.search(query=query, type="track")
-                matched = find_best_match(search_result["tracks"]["items"], song["title"], song["artist"])
+                matched = find_best_match(
+                    search_result["tracks"]["items"], song["title"], song["artist"]
+                )
 
                 if matched:
-                    if not user.explicit_content_enabled and matched.get("explicit", False):
-                        errors.append({"song": song, "error": "Explicit content not allowed"})
+                    if not user.explicit_content_enabled and matched.get(
+                        "explicit", False
+                    ):
+                        errors.append(
+                            {"song": song, "error": "Explicit content not allowed"}
+                        )
                         continue
 
                     track_info = spotify.get_track(matched["id"])
                     track_details = extract_track_details(track_info)
 
-                    discovered.append({
-                        "title": song["title"],
-                        "artist": song["artist"],
-                        "uri": matched["uri"],
-                        "explicit": matched.get("explicit", False),
-                        "curveball": should_send_curveball(user, len(discovered) + 1),
-                        "track_details": track_details,
-                    })
+                    discovered.append(
+                        {
+                            "title": song["title"],
+                            "artist": song["artist"],
+                            "uri": matched["uri"],
+                            "explicit": matched.get("explicit", False),
+                            "curveball": should_send_curveball(
+                                user, len(discovered) + 1
+                            ),
+                            "track_details": track_details,
+                        }
+                    )
                 else:
                     errors.append({"song": song, "error": "No match found"})
 

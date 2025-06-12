@@ -143,7 +143,7 @@ class DeleteTokens(APIView):
         request=EmptyRequestSerializer,
         responses={200: OpenApiResponse(description="Tokens deleted")},
     )
-    def post(self, request):
+    def delete(self, request):
         response = Response(
             {"detail": "Tokens deleted successfully."}, status=status.HTTP_200_OK
         )

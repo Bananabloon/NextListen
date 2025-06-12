@@ -10,6 +10,15 @@
     padding-left: var(--spacing-xl);
     padding-top: var(--spacing-xl);
 }
+
+.sectionTitle {
+    font-size: var(--font-size-xxl);
+    padding-left: var(--spacing-md);
+    background-color: var(--background-color-3);
+    width: 800px;
+    border-radius: var(--radius-md);
+}
+
 .usernameText {
     font-size: var(--font-size-xxl);
 }
