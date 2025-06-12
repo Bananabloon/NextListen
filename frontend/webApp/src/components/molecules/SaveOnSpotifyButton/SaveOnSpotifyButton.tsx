@@ -12,15 +12,15 @@ const SaveOnSpotifyButton = ({ ...props }: SaveOnSpotifyButtonProps): React.JSX.
     const { sendRequest } = useRequests();
 
     const updateIsSaved = async () => {
-        return await sendRequest("GET", `/spotify/are-tracks-liked?uris=${current.uri}`).then((data) => setIsSaved(data[current.uri]));
+        return await sendRequest("GET", `/spotify/are-saved?uris=${current.uri}`).then((data) => setIsSaved(data[current.uri]));
     };
 
     const save = async () => {
-        return await sendRequest("POST", `/spotify/liked-tracks/like`, { body: JSON.stringify({ track_uri: current.uri }) });
+        return await sendRequest("POST", `/spotify/saved-tracks/save`, { body: JSON.stringify({ track_uri: current.uri }) });
     };
 
     const unsave = async () => {
-        return await sendRequest("POST", `/spotify/liked-tracks/remove`, { body: JSON.stringify({ track_uri: current.uri }) });
+        return await sendRequest("POST", `/spotify/saved-tracks/remove`, { body: JSON.stringify({ track_uri: current.uri }) });
     };
 
     useEffect(() => {
