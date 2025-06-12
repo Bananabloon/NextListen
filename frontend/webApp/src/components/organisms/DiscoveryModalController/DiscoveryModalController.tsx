@@ -10,6 +10,8 @@ import { useQueue } from "../../../contexts/QueueContext";
 import SegmentedControl from "../../atoms/SegmentedControl/SegmentedControl";
 import { DiscoveryType } from "../../../types/api.types";
 
+type filterType = "top" | "artists" | "tracks" | "genres";
+
 const DiscoveryModalController = (): React.JSX.Element => {
     const [activeFilter, setActiveFilter] = useState<"top" | "top" | "artists" | "tracks" | "genres">("artists");
     const [items, setItems] = useState<any[]>([]);
@@ -39,17 +41,20 @@ const DiscoveryModalController = (): React.JSX.Element => {
         let formattedItems;
         formattedItems = {
             count: count,
-            [activeFilter === "artists" ? "artists" : activeFilter === "tracks" ? "titles" : activeFilter === "genres" ? "genre" : ""]:
-                activeFilter !== "genres" ? names : names[0],
+            [activeFilter === "artists" ? "artists" : activeFilter === "tracks" ? "titles" : activeFilter === "genres" ? "genres" : ""]:
+                names,
         };
-        console.log(formattedItems);
         // }
+        if (activeFilter === "top") {
+            createNewDiscoveryQueue("top", { count: count });
+            return;
+        }
         createNewDiscoveryQueue(spotifyToPathMap[activeFilter] as DiscoveryType, formattedItems);
     };
 
     return (
         <ModalController
-            buttonText="Generate New Queue"
+            buttonContent="Generate New Queue"
             width={820}
             height={500}
         >

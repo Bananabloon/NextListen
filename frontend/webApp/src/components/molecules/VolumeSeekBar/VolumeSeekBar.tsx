@@ -12,7 +12,7 @@ interface VolumeSeekBarProps extends React.HTMLAttributes<HTMLDivElement> {}
 
 const VolumeSeekBar = ({ className, ...props }: VolumeSeekBarProps): React.JSX.Element => {
     const { currentState, setVolume } = usePlayback();
-    const [volume, setVolumeState] = useState(0.2);
+    const [volume, setVolumeState] = useState(0.1);
     const [muted, setMuted] = useState(false);
     const [showBar, setShowBar] = useState(false);
 

@@ -27,7 +27,7 @@ const SettingsPage = (): React.JSX.Element => {
             </Group>
             <Group className={classes.content}>
                 <ProfileSettings />
-                <StatsDisplay />
+                {/* <StatsDisplay /> */}
             </Group>
         </Stack>
     );

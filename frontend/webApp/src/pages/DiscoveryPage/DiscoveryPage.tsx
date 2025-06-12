@@ -18,7 +18,6 @@ const DiscoveryPage = (): React.JSX.Element => {
         <Stack className={classes.container}>
             {loading ? <QueueLoadingOverlay /> : <SongCardConveyor className={classes.conveyor} />}
             <DiscoveryModalController />
-            {/* <div id="test-y"></div> */}
         </Stack>
     );
 };

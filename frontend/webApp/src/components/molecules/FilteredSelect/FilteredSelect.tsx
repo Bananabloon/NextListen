@@ -51,7 +51,7 @@ const FilteredSelect = ({ changeSelectOption, filter, children, className, ...pr
     };
 
     return (
-        <Stack
+        filter !== "top" ? <Stack
             className={cs(classes.inputContainer, className)}
             {...props}
         >
@@ -90,7 +90,7 @@ const FilteredSelect = ({ changeSelectOption, filter, children, className, ...pr
                     noOptionsMessage: (_) => "filteredSelect__noOptionsMessage",
                 }}
             />
-        </Stack>
+        </Stack> : <h2>Generation based on your top songs.</h2>
     );
 };
 

@@ -7,48 +7,63 @@ import classes from "./ProfileSettings.module.css";
 import cs from "classnames";
 import { IconLockOpen } from "@tabler/icons-react";
 import useRequests from "../../../hooks/useRequests";
-import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import ModalController from "../ModalController/ModalController";
 
 interface ProfileSettingsProps extends React.HTMLAttributes<HTMLDivElement> {}
-const unlinkSpotify = () => {
-    return;
-    // const requests = useRequests();
-    // requests.sendRequest("POST", "/");
-};
+
 const ProfileSettings = ({ children, className, ...props }: ProfileSettingsProps): React.JSX.Element => {
     const { loading, data, error } = useFetch("/spotify/profile");
+    const navigate = useNavigate();
+
+    const deleteUserData = () => {
+        const requests = useRequests();
+        requests.sendRequest("DELETE", "/auth/spotify/delete-user-data");
+        requests.sendRequest("POST", "/auth/spotify/delete-tokens");
+        navigate("/login");
+    };
+
     return (
-        <div
+        <Group
             className={cs(classes.container, className)}
             {...props}
         >
-            <div className={classes.accountContainer}>
-                <Group>
-                    <Stack className={classes.userTextContainer}>
-                        <h1 className={classes.usernameText}>{data?.display_name}</h1>
-                        <p className={classes.emailText}>{data?.email} </p>
+            <Stack className={classes.dataContainer}>
+                <h1 className={classes.usernameText}>{data?.display_name}</h1>
+                <p className={classes.emailText}>{data?.email} </p>
+                <ModalController
+                    width={820}
+                    height={360}
+                    buttonStyle={{ backgroundColor: "#E60F32", marginLeft: "0", marginTop: "auto", marginBottom: "var(--spacing-lg)" }}
+                    buttonContent={
+                        <>
+                            <IconLockOpen className={classes.openLockIcon} />
+                            Remove Data
+                        </>
+                    }
+                >
+                    <Stack className={classes.modal}>
+                        <h1 className={classes.modalTitle}>Are you sure?</h1>
+                        <h2 className={classes.modalText}>
+                            This action <span style={{ color: "#E60F32" }}>cannot be undone</span>. Your data will be lost.
+                        </h2>
+                        <h2 className={classes.modalText}>You will be logged out.</h2>
+                        <Button
+                            onClick={deleteUserData}
+                            size="lg"
+                            className={classes.modalConfirmButton}
+                        >
+                            Confirm
+                        </Button>
                     </Stack>
-                    <Avatar
-                        src={data?.images?.[0]?.url}
-                        className={classes.profilePicture}
-                        size={168}
-                    />
-                </Group>
-                <Group>
-                    <Button
-                        onClick={() => unlinkSpotify()}
-                        style={{ backgroundColor: "#E60F32" }}
-                    >
-                        <IconLockOpen className={classes.openLockIcon} />
-                        Unlink Spotify
-                    </Button>
-                    <Button style={{ backgroundColor: "#E60F32" }}>
-                        <IconLockOpen className={classes.openLockIcon} />
-                        Remove Data
-                    </Button>
-                </Group>
-            </div>
-        </div>
+                </ModalController>
+            </Stack>
+            <Avatar
+                src={data?.images?.[0]?.url}
+                className={classes.profilePicture}
+                size={192}
+            />
+        </Group>
     );
 };
 

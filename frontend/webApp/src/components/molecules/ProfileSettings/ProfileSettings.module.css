@@ -1,14 +1,14 @@
-.accountContainer {
+.container {
     width: 800px;
     height: 250px;
     border-radius: 16px;
     background-color: var(--background-color-3);
-    padding-left: var(--spacing-xl);
-    padding-top: var(--spacing-xl);
 }
 
-.userTextContainer {
+.dataContainer {
     gap: 0;
+    padding-left: var(--spacing-xl);
+    padding-top: var(--spacing-xl);
 }
 .usernameText {
     font-size: var(--font-size-xxl);
@@ -20,5 +20,24 @@
 }
 .profilePicture {
     margin-left: auto;
-    margin-right: 17px;
+    margin-right: var(--spacing-xxl);
+    align-self: center;
+}
+
+.modal {
+    align-items: center;
+    height: 100%;
+}
+.modalTitle {
+    font-size: var(--font-size-xxxl);
+    font-weight: 600;
+    padding-top: var(--spacing-xxl);
+}
+.modalText {
+    font-size: var(--font-size-lg);
+}
+.modalConfirmButton {
+    margin-top: var(--spacing-xxl);
+    margin-bottom: var(--spacing-xxl);
+    background-color: #e60f32;
 }
