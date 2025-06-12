@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { useQueue } from "../../../contexts/QueueContext";
 import useRequests from "../../../hooks/useRequests";
 import { ButtonProps } from "../../atoms/Button/Button";
@@ -6,10 +7,33 @@ import IconButton from "../../atoms/IconButton/IconButton";
 interface SaveOnSpotifyButtonProps extends ButtonProps {}
 
 const SaveOnSpotifyButton = ({ ...props }: SaveOnSpotifyButtonProps): React.JSX.Element => {
+    const [isSaved, setIsSaved] = useState(false);
     const { current } = useQueue();
     const { sendRequest } = useRequests();
 
-    const toggleSaved = () => {};
+    const updateIsSaved = async () => {
+        return await sendRequest("GET", `/spotify/are-tracks-liked?uris=${current.uri}`).then((data) => setIsSaved(data[current.uri]));
+    };
+
+    const save = async () => {
+        return await sendRequest("POST", `/spotify/liked-tracks/like`, { body: JSON.stringify({ track_uri: current.uri }) });
+    };
+
+    const unsave = async () => {
+        return await sendRequest("POST", `/spotify/liked-tracks/remove`, { body: JSON.stringify({ track_uri: current.uri }) });
+    };
+
+    useEffect(() => {
+        if (current?.uri) updateIsSaved();
+    }, [current?.uri]);
+
+    const toggleSaved = () => {
+        if (!current.uri) return;
+        setIsSaved((prev) => {
+            prev ? unsave() : save();
+            return !prev;
+        });
+    };
 
     return (
         <IconButton
@@ -18,7 +42,7 @@ const SaveOnSpotifyButton = ({ ...props }: SaveOnSpotifyButtonProps): React.JSX.
             variant="transparent"
             onClick={toggleSaved}
         >
-            <img src={`/icons/spotify/like-icon-like${false ? "d" : ""}.svg`} />
+            <img src={`/icons/spotify/like-icon-like${isSaved ? "d" : ""}.svg`} />
         </IconButton>
     );
 };

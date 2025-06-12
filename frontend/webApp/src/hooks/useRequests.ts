@@ -63,15 +63,18 @@ export const useRequests = (): useRequestsReturn => {
             const clonedResponse = response.clone();
             return errorCallback(clonedResponse);
         }
+
+        if (response.status == 204) return {};
+
         // handle no content reponses
         let json = {};
         try {
-            json = (await response?.json?.()) ?? {};
+            return (await response?.json?.()) ?? {};
         } catch (err) {
             console.error(`Couldn't parse request response. URL=${url}`, err);
         }
 
-        return json;
+        json;
     };
 
     return { getPath, sendRequest };

@@ -33,6 +33,8 @@ export const QueueProvider = ({ children }: { children: ReactNode }) => {
     const [discoveryState, setDiscoveryState] = useState<DiscoveryState>(null);
     const { sendRequest } = useRequests();
 
+    let block = false;
+
     const current = queue?.[currentIndex] ?? null;
 
     const generateDiscovery = async <T extends DiscoveryType>(type: T, options: DiscoveryOptionsMap[T]) => {
@@ -50,15 +52,19 @@ export const QueueProvider = ({ children }: { children: ReactNode }) => {
     };
 
     const createNewDiscoveryQueue = async <T extends DiscoveryType>(type: T, options: DiscoveryOptionsMap[T]) => {
+        if (loading || block) return;
+        block = true;
         setLoading(true);
         setQueue(await generateDiscovery(type, options));
         setDiscoveryState({ type, options } as DiscoveryState);
         setLoading(false);
         setCurrentIndex(0);
         updateCurrentColor();
+        block = false;
     };
 
     const updateCurrentColor = async () => {
+        if (!current) return;
         const colors = (await prominent(current?.track_details?.album_cover, { amount: 20, format: "hex", group: 50 })) as string[];
         const aliveColor =
             colors.find((color) => {
