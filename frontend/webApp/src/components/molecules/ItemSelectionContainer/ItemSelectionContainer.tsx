@@ -49,7 +49,7 @@ const ItemSelectionContainer = ({
     });
 
     return (
-        <Stack
+        filter !== "top" && <Stack
             className={cs(classes.container, className)}
             {...props}
         >

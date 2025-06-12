@@ -3,7 +3,6 @@ import Button from "../../components/atoms/Button/Button";
 import Group from "../../components/atoms/Group/Group";
 import Stack from "../../components/atoms/Stack/Stack";
 import ProfileSettings from "../../components/molecules/ProfileSettings/ProfileSettings";
-import StatsDisplay from "../../components/molecules/StatsDisplay/StatsDisplay";
 import classes from "./SettingsPage.module.css";
 import { IconSettings } from "@tabler/icons-react";
 const SettingsPage = (): React.JSX.Element => {
@@ -27,7 +26,7 @@ const SettingsPage = (): React.JSX.Element => {
             </Group>
             <Group className={classes.content}>
                 <ProfileSettings />
-                <StatsDisplay />
+                {/* <StatsDisplay /> */}
             </Group>
         </Stack>
     );

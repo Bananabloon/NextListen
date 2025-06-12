@@ -67,9 +67,7 @@ class BaseGenerateSerializer(serializers.Serializer):
 
 
 class GenerateQueueSerializer(BaseGenerateSerializer):
-    titles = serializers.ListField(
-        child=serializers.CharField(), min_length=1
-    )
+    titles = serializers.ListField(child=serializers.CharField(), min_length=1)
 
 
 class GenerateFromArtistsSerializer(BaseGenerateSerializer):
@@ -112,11 +110,13 @@ class SingleSongFeedbackResponseSerializer(serializers.Serializer):
     feedback_value = serializers.IntegerField()
     message = serializers.CharField(required=False)
 
+
 class DiscoveryGenerateRequestSerializer(serializers.Serializer):
-    genre = serializers.CharField(required=True, help_text="Genre to discover")
+    genres = serializers.ListField(child=serializers.CharField(), required=True)
     count = serializers.IntegerField(
         required=False, default=10, min_value=1, max_value=50
     )
+
 
 class DiscoveryGenerateResponseSerializer(serializers.Serializer):
     message = serializers.CharField()

@@ -1,16 +1,28 @@
-import { useEffect, useRef } from "react";
+import React, { PropsWithChildren, useEffect, useRef } from "react";
 import classes from "./ModalController.module.css";
 import Portal from "../../atoms/Portal/Portal";
 import Button from "../../atoms/Button/Button";
 import cs from "classnames";
 
+type dialogControls = {
+    controls: { open: () => void; close: () => void };
+};
 interface ModalControllerProps extends React.HTMLAttributes<HTMLDivElement> {
     width: number;
     height: number;
-    buttonText: string;
+    buttonStyle?: React.CSSProperties;
+    buttonContent?: React.ReactNode;
 }
 
-const ModalController = ({ width, height, buttonText, children, className, ...props }: ModalControllerProps): React.JSX.Element => {
+const ModalController = ({
+    width,
+    height,
+    buttonStyle,
+    buttonContent,
+    children,
+    className,
+    ...props
+}: ModalControllerProps): React.JSX.Element => {
     const ref = useRef(null);
 
     const inboundEventListener = (e: MouseEvent) => {
@@ -45,19 +57,22 @@ const ModalController = ({ width, height, buttonText, children, className, ...pr
                     {children}
                 </dialog>
             </Portal>
-            <Button
-                size="md"
-                variant="default"
-                className={classes.generateQueueButton}
-                onClick={(e) => {
-                    e.stopPropagation();
-                    const element = ref.current! as HTMLDialogElement;
-                    element.showModal();
-                    element.style.opacity = "1";
-                }}
-            >
-                {buttonText}
-            </Button>
+            {buttonContent && (
+                <Button
+                    size="md"
+                    variant="default"
+                    className={classes.generateQueueButton}
+                    style={buttonStyle}
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        const element = ref.current! as HTMLDialogElement;
+                        element.showModal();
+                        element.style.opacity = "1";
+                    }}
+                >
+                    {buttonContent}
+                </Button>
+            )}
         </>
     );
 };

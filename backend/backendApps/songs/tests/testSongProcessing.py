@@ -21,7 +21,6 @@ def dummy_user(db):
 @patch("songs.services.songProcessing.UserFeedback")
 @patch("songs.services.songProcessing.SpotifyAPI", autospec=True)
 def test_prepare_song_list_success(mock_spotify_class, mock_feedback, mock_media, mock_curveball, dummy_user):
-    print("TEST - SpotifyAPI instance:", mock_spotify_class, flush=True)
     mock_spotify = MagicMock()
     mock_spotify.search.return_value = {
         "tracks": {
@@ -55,20 +54,22 @@ def test_prepare_song_list_success(mock_spotify_class, mock_feedback, mock_media
     }
     mock_spotify_class.return_value = mock_spotify
 
-    # mock Media.objects.get
     mock_media = mock_media.objects
     mock_media.get.return_value = MagicMock()
 
-    # mock feedback
     mock_feedback.objects.filter.return_value.first.return_value = MagicMock(is_liked=True)
 
     raw_songs = [{"title": "Test Song", "artist": "Test Artist"}]
-    print("TEST - Wywołanie prepare_song_list", flush=True)
     result = prepare_song_list(dummy_user, raw_songs, count=1)
-    print("TEST - Wynik prepare_song_list:", result, flush=True)
 
     assert len(result) == 1
-    assert result[0]["name"] == "Test Song"
-    assert result[0]["id"] == "track123"
-    assert "artists" in result[0]
-    assert result[0]["artists"] == ["Test Artist"]
+    song = result[0]
+
+    # Nowe asercje - dopasowane do struktury z track_details
+    assert "track_details" in song
+    track = song["track_details"]
+
+    assert track["name"] == "Test Song"
+    assert track["id"] == "track123"
+    assert "artists" in track
+    assert track["artists"] == ["Test Artist"]
