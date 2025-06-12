@@ -2,6 +2,7 @@ import json
 from constants import GENERATION_BUFFER_MULTIPLIER
 from songs.services.songGeneration import build_preferences_prompt
 
+
 class PromptBuilder:
     def __init__(self, count, user_preferences, filters=""):
         self.count = count
@@ -53,17 +54,18 @@ class PromptBuilder:
         [{{"title": "tytuł", "artist": "artysta"}}]
         """
 
-    def for_discovery(self, artists, tracks, genre):
+    def for_discovery(self, artists, tracks, genres):
+        genres_str = ", ".join(genres)
         return f"""
         Użytkownik zwykle słucha:
         Artyści: {json.dumps(artists, indent=2, ensure_ascii=False)}
         Utwory: {json.dumps(tracks, indent=2, ensure_ascii=False)}
 
-        Teraz chce poznać nową muzykę z gatunku: {genre}
+        Teraz chce poznać nową muzykę z gatunków: {genres_str}
         {self.filters}
         {self.prefix}
 
-        Podaj {self.count * GENERATION_BUFFER_MULTIPLIER} rekomendacji 
+        Podaj {self.count * GENERATION_BUFFER_MULTIPLIER} rekomendacji. 
         Nie dodawaj komentarzy. Format JSON:
         [{{"title": "tytuł", "artist": "artysta"}}]
         """
