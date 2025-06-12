@@ -1,3 +1,11 @@
+.openButton {
+    font-weight: 400;
+}
+
+.openButton * {
+    width: fit-content;
+}
+
 .container {
     display: flex;
     flex-direction: column;

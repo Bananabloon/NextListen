@@ -5,18 +5,19 @@ import classes from "./ItemSelectionContainer.module.css";
 import cs from "classnames";
 import ScrollingText from "../../atoms/ScrollingText/ScrollingText";
 import { Dictionary, isEmpty, last } from "lodash";
+import { DiscoveryType } from "../../../types/api.types";
 
 type ImageEntry = { url: string } | undefined;
 
 interface ItemSelectionContainerProps extends React.HTMLAttributes<HTMLDivElement> {
-    filter: "top" | "artists" | "tracks" | "genres";
+    type: DiscoveryType;
     data: any[];
     onRemoveItem: (index: number) => void;
 }
 
 const ItemSelectionContainer = ({
     onRemoveItem,
-    filter,
+    type,
     data,
     children,
     className,
@@ -25,7 +26,7 @@ const ItemSelectionContainer = ({
     const getImageSource = {
         artists: (dataEntry: Dictionary<any>) => (last(dataEntry?.images) as ImageEntry)?.url,
         tracks: (dataEntry: Dictionary<any>) => (last(dataEntry?.album?.images) as ImageEntry)?.url,
-    }[filter];
+    }[type];
 
     let items = data.map((dataEntry, i) => {
         return (
@@ -49,13 +50,19 @@ const ItemSelectionContainer = ({
     });
 
     return (
-        filter !== "top" && <Stack
-            className={cs(classes.container, className)}
-            {...props}
-        >
-            <p className={classes.label}>Selected {filter}:</p>
-            {isEmpty(items) ? <p className={classes.placeholder}>None selected yet</p> : <Stack className={classes.items}>{items}</Stack>}
-        </Stack>
+        type !== "top" && (
+            <Stack
+                className={cs(classes.container, className)}
+                {...props}
+            >
+                <p className={classes.label}>Selected {type}:</p>
+                {isEmpty(items) ? (
+                    <p className={classes.placeholder}>None selected yet</p>
+                ) : (
+                    <Stack className={classes.items}>{items}</Stack>
+                )}
+            </Stack>
+        )
     );
 };
 

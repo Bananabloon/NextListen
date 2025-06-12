@@ -1,7 +1,6 @@
 export type Feedback = -1 | 0 | 1;
 
-export type DiscoveryType = "top" | "artist" | "genre" | "song";
-
+export type DiscoveryType = "top" | "artists" | "genres" | "tracks";
 export interface TrackDetails {
     album: string;
     album_cover: string;
@@ -34,10 +33,9 @@ export interface GenerateFromArtistOptions {
     artists: string[];
 }
 
-export interface GenerateFromSongOptions {
+export interface GenerateFromTrackOptions {
     count: number;
-    artists: string;
-    title: string;
+    titles: string[];
 }
 
 export interface GenerateFromGenreOptions {
@@ -47,14 +45,14 @@ export interface GenerateFromGenreOptions {
 
 export type DiscoveryOptionsMap = {
     top: GenerateFromTopOptions;
-    artist: GenerateFromArtistOptions;
-    genre: GenerateFromGenreOptions;
-    song: GenerateFromSongOptions;
+    artists: GenerateFromArtistOptions;
+    genres: GenerateFromGenreOptions;
+    tracks: GenerateFromTrackOptions;
 };
 
 export type DiscoveryState =
     | { type: "top"; options: GenerateFromTopOptions }
-    | { type: "artist"; options: GenerateFromArtistOptions }
-    | { type: "genre"; options: GenerateFromGenreOptions }
-    | { type: "song"; options: GenerateFromSongOptions }
+    | { type: "artists"; options: GenerateFromArtistOptions }
+    | { type: "genres"; options: GenerateFromGenreOptions }
+    | { type: "tracks"; options: GenerateFromTrackOptions }
     | null;

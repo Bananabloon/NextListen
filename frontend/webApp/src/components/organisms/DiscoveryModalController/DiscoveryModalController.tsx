@@ -1,55 +1,53 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Button from "../../atoms/Button/Button";
 import Group from "../../atoms/Group/Group";
 import Stack from "../../atoms/Stack/Stack";
-import ModalController from "../../molecules/ModalController/ModalController";
+import ModalController, { ModalControllerHandle } from "../../molecules/ModalController/ModalController";
 import classes from "./DiscoveryModalController.module.css";
 import ItemSelectionContainer from "../../molecules/ItemSelectionContainer/ItemSelectionContainer";
 import FilteredSelect from "../../molecules/FilteredSelect/FilteredSelect";
-import { useQueue } from "../../../contexts/QueueContext";
 import SegmentedControl from "../../atoms/SegmentedControl/SegmentedControl";
-import { DiscoveryType } from "../../../types/api.types";
+import { useQueue } from "../../../contexts/QueueContext";
+import { DiscoveryOptionsMap, DiscoveryType } from "../../../types/api.types";
+import { IconPlaylistAdd } from "@tabler/icons-react";
 
-type filterType = "top" | "artists" | "tracks" | "genres";
+const QUEUE_LENGTH = 20;
 
-const DiscoveryModalController = (): React.JSX.Element => {
-    const [activeFilter, setActiveFilter] = useState<"top" | "top" | "artists" | "tracks" | "genres">("artists");
+const DiscoveryModalController = ({ ...props }): React.JSX.Element => {
+    const modalRef = useRef<ModalControllerHandle>(null);
+    const [discoveryType, setDiscoveryType] = useState<DiscoveryType>("artists");
     const [items, setItems] = useState<any[]>([]);
-    const { queue, createNewDiscoveryQueue } = useQueue();
-
-    const spotifyToPathMap = {
-        artists: "artist",
-        tracks: "song",
-        genres: "genre",
-    };
+    const { createNewDiscoveryQueue } = useQueue();
 
     useEffect(() => {
         setItems([]);
-    }, [activeFilter]);
+    }, [discoveryType]);
 
-    const addNewObject = (option) => {
-        setItems((prev) => [...prev, option]);
+    const closeModal = () => modalRef.current?.close();
+
+    const addNewObject = (newItem: any) => {
+        setItems((prev) => [...prev, newItem]);
     };
 
-    const removeItem = (id) => {
-        setItems((prev) => prev.filter((item, i) => i !== id));
+    const removeItem = (idx: number) => {
+        setItems((prev) => prev.filter((item, i) => i !== idx));
     };
 
-    const generateQueue = () => {
-        let names = items.map((item) => item.name);
-        let count = 20;
-        let formattedItems;
-        formattedItems = {
-            count: count,
-            [activeFilter === "artists" ? "artists" : activeFilter === "tracks" ? "titles" : activeFilter === "genres" ? "genres" : ""]:
-                names,
+    const generateQueue = <T extends DiscoveryType>() => {
+        const names = items.map((item) => item.name);
+
+        const typeSpecificOptions = {
+            tracks: { titles: names },
+            genres: { genres: names },
+            artists: { artists: names },
         };
-        // }
-        if (activeFilter === "top") {
-            createNewDiscoveryQueue("top", { count: count });
-            return;
-        }
-        createNewDiscoveryQueue(spotifyToPathMap[activeFilter] as DiscoveryType, formattedItems);
+        const generationOptions = {
+            count: QUEUE_LENGTH,
+            ...(typeSpecificOptions[discoveryType] ?? {}),
+        } as DiscoveryOptionsMap[T];
+
+        createNewDiscoveryQueue(discoveryType, generationOptions);
+        closeModal();
     };
 
     return (
@@ -57,6 +55,13 @@ const DiscoveryModalController = (): React.JSX.Element => {
             buttonContent="Generate New Queue"
             width={820}
             height={500}
+            onClose={() => setItems([])}
+            ref={modalRef}
+            buttonProps={{
+                leftSection: <IconPlaylistAdd />,
+                className: classes.openButton,
+            }}
+            {...props}
         >
             <Stack className={classes.container}>
                 <h1 className={classes.title}>New Queue</h1>
@@ -71,20 +76,18 @@ const DiscoveryModalController = (): React.JSX.Element => {
                                 { label: "Selected Genres", value: "genres" },
                             ]}
                             buttonProps={{ className: classes.segmentedControlButton }}
-                            value={activeFilter}
-                            // ! to be removed
-                            // @ts-ignore
-                            onChange={setActiveFilter}
+                            value={discoveryType}
+                            onChange={setDiscoveryType}
                         />
                     </Stack>
                     <Group className={classes.controlGroup}>
                         <FilteredSelect
-                            filter={activeFilter}
+                            type={discoveryType}
                             changeSelectOption={addNewObject}
                         />
                         <ItemSelectionContainer
                             onRemoveItem={removeItem}
-                            filter={activeFilter}
+                            type={discoveryType}
                             data={items}
                             className={classes.selectedItemsStack}
                         />

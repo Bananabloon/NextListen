@@ -1,80 +1,88 @@
-import React, { PropsWithChildren, useEffect, useRef } from "react";
+import React, { forwardRef, PropsWithChildren, useEffect, useImperativeHandle, useRef } from "react";
 import classes from "./ModalController.module.css";
 import Portal from "../../atoms/Portal/Portal";
-import Button from "../../atoms/Button/Button";
+import Button, { ButtonProps } from "../../atoms/Button/Button";
 import cs from "classnames";
 
-type dialogControls = {
-    controls: { open: () => void; close: () => void };
-};
-interface ModalControllerProps extends React.HTMLAttributes<HTMLDivElement> {
-    width: number;
-    height: number;
-    buttonStyle?: React.CSSProperties;
-    buttonContent?: React.ReactNode;
+export interface ModalControllerHandle {
+    open: () => void;
+    close: () => void;
 }
 
-const ModalController = ({
-    width,
-    height,
-    buttonStyle,
-    buttonContent,
-    children,
-    className,
-    ...props
-}: ModalControllerProps): React.JSX.Element => {
-    const ref = useRef(null);
+export interface ModalControllerProps extends React.HTMLAttributes<HTMLDialogElement> {
+    width: number;
+    height: number;
+    buttonProps?: ButtonProps;
+    buttonContent?: React.ReactNode;
+    onClose?: () => void;
+}
 
-    const inboundEventListener = (e: MouseEvent) => {
-        const element = ref.current! as HTMLDialogElement;
-        if (element.open) {
-            let modalPos = element.getBoundingClientRect();
-            if (e.clientX < modalPos.left || e.clientY < modalPos.top || e.clientX > modalPos.right || e.clientY > modalPos.bottom) {
-                element.close();
-            }
-        }
-    };
+const ModalController = forwardRef<ModalControllerHandle, ModalControllerProps>(
+    ({ width, height, buttonProps, buttonContent, children, className, onClose, ...props }, ref): React.JSX.Element => {
+        const dialogRef = useRef<HTMLDialogElement>(null);
 
-    useEffect(() => {
-        window.addEventListener("click", inboundEventListener);
-        return () => {
-            window.removeEventListener("click", inboundEventListener);
+        const handleOpen = (e) => {
+            const element = dialogRef.current! as HTMLDialogElement;
+            e.stopPropagation();
+            element.showModal();
+            element.style.opacity = "1";
         };
-    }, []);
 
-    return (
-        <>
-            <Portal>
-                <dialog
-                    ref={ref}
-                    className={cs(classes.container, className)}
-                    style={{ width: `${width}px`, height: `${height}px` }}
-                    onClose={() => {
-                        const element = ref.current! as HTMLDialogElement;
-                        element.style.opacity = "0";
-                    }}
-                >
-                    {children}
-                </dialog>
-            </Portal>
-            {buttonContent && (
-                <Button
-                    size="md"
-                    variant="default"
-                    className={classes.generateQueueButton}
-                    style={buttonStyle}
-                    onClick={(e) => {
-                        e.stopPropagation();
-                        const element = ref.current! as HTMLDialogElement;
-                        element.showModal();
-                        element.style.opacity = "1";
-                    }}
-                >
-                    {buttonContent}
-                </Button>
-            )}
-        </>
-    );
-};
+        const handleClose = () => {
+            const element = dialogRef.current! as HTMLDialogElement;
+            element.style.opacity = "0";
+            onClose?.();
+        };
+
+        const inboundEventListener = (e: MouseEvent) => {
+            const element = dialogRef.current! as HTMLDialogElement;
+            const rect = element.getBoundingClientRect();
+            const clickedOutside = e.clientX < rect.left || e.clientY < rect.top || e.clientX > rect.right || e.clientY > rect.bottom;
+
+            if (!element.open || !clickedOutside) return;
+
+            element.close();
+        };
+
+        useImperativeHandle(ref, () => ({
+            open: () => (dialogRef.current! as HTMLDialogElement).showModal(),
+            close: () => (dialogRef.current! as HTMLDialogElement).close(),
+        }));
+
+        useEffect(() => {
+            window.addEventListener("click", inboundEventListener);
+            return () => {
+                window.removeEventListener("click", inboundEventListener);
+            };
+        }, []);
+
+        return (
+            <>
+                <Portal>
+                    <dialog
+                        ref={dialogRef}
+                        onClose={handleClose}
+                        className={cs(classes.container, className)}
+                        style={{ width, height }}
+                        {...props}
+                    >
+                        {children}
+                    </dialog>
+                </Portal>
+                {buttonContent && (
+                    <Button
+                        size="md"
+                        variant="default"
+                        onClick={handleOpen}
+                        {...buttonProps}
+                        className={cs(classes.generateQueueButton, buttonProps?.className)}
+                    >
+                        {buttonContent}
+                    </Button>
+                )}
+            </>
+        );
+    }
+);
 
 export default ModalController;

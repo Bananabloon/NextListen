@@ -19,9 +19,9 @@ const QueueContext = createContext<QueueContextType | undefined>(undefined);
 
 const API_PATHS: Record<DiscoveryType, string> = {
     top: "/songs/generate-from-top/",
-    song: "/songs/generate-from-song/",
-    artist: "/songs/generate-from-artist/",
-    genre: "/songs/generate-from-genre/",
+    tracks: "/songs/generate-from-song/",
+    artists: "/songs/generate-from-artist/",
+    genres: "/songs/generate-from-genre/",
 };
 
 export const QueueProvider = ({ children }: { children: ReactNode }) => {

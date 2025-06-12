@@ -3,6 +3,7 @@ import classes from "./Footer.module.css";
 import PlayerControls from "../../molecules/PlayerControls/PlayerControls";
 import { useQueue } from "../../../contexts/QueueContext";
 import PlayerSeekBar from "../../molecules/PlayerSeekBar/PlayerSeekBar";
+import DiscoveryModalController from "../DiscoveryModalController/DiscoveryModalController";
 
 const Footer = (): React.JSX.Element => {
     const { loading } = useQueue();
@@ -15,7 +16,9 @@ const Footer = (): React.JSX.Element => {
                 <PlayerSeekBar className={classes.playerSeekBar} />
             </div>
             <Group className={classes.footer}>
-                <Group className={classes.leftSection}></Group>
+                <Group className={classes.leftSection}>
+                    <DiscoveryModalController />
+                </Group>
                 <PlayerControls className={classes.centralSection} />
                 <Group className={classes.rightSection}></Group>
             </Group>

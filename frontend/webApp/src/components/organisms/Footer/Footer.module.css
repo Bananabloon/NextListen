@@ -17,6 +17,7 @@
 
 .leftSection {
     justify-content: start;
+    padding: 0 var(--spacing-xl);
 }
 
 .centralSection {
@@ -26,6 +27,7 @@
 
 .rightSection {
     justify-content: end;
+    padding: 0 var(--spacing-xl);
 }
 
 .seekBarPositioner {
