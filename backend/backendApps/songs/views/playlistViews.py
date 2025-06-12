@@ -1,6 +1,7 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
+from django.db.models import Subquery
 from spotifyData.services.spotifyClient import SpotifyAPI
 from users.models import Media, UserFeedback
 from songs.utils import find_best_match, create_playlist_with_uris
@@ -35,9 +36,11 @@ class CreateLikedPlaylistsView(APIView):
             user=user,
         )
 
-        liked = Media.objects.filter(user=user, feedback="like").exclude(
-            spotify_uri=None
-        )
+        liked = Media.objects.filter(
+            id__in=Subquery(
+                UserFeedback.objects.filter(user=user, is_liked=True).values("media_id")
+            )
+        ).exclude(spotify_uri=None)
         curveballs = liked.filter(is_curveball=True)
 
         if not liked.exists():

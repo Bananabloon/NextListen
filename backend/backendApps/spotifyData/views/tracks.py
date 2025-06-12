@@ -1,9 +1,13 @@
 from rest_framework.response import Response
 from drf_spectacular.utils import extend_schema, OpenApiParameter
 import requests
+import os
+import json
+from django.conf import settings
 from constants import SPOTIFY_SEARCH_URL
 from .views_helpers import SpotifyBaseView
 from difflib import SequenceMatcher
+GENRE_FILE_PATH = os.path.join(settings.BASE_DIR, "genres.json")
 
 class TopTracksView(SpotifyBaseView):
     @extend_schema(summary="Get user's top tracks", description="Most listened tracks.")
@@ -44,11 +48,11 @@ from difflib import SequenceMatcher
 
 class SpotifySearchView(SpotifyBaseView):
     @extend_schema(
-        summary="Search tracks or artists",
-        description="Search on Spotify.",
+        summary="Search tracks, artists, or genres",
+        description="Search on Spotify or local genres.",
         parameters=[
             OpenApiParameter(name="q", required=True, description="Search phrase", type=str),
-            OpenApiParameter(name="type", required=False, description="Search type: track or artist", type=str),
+            OpenApiParameter(name="type", required=False, description="Search type: track, artist, or genre", type=str),
             OpenApiParameter(name="artist", required=False, description="Artist name (optional, improves accuracy)", type=str),
         ],
     )
@@ -57,8 +61,11 @@ class SpotifySearchView(SpotifyBaseView):
         search_type = request.query_params.get("type", "track")
         artist_filter = request.query_params.get("artist")
 
-        if not query or search_type not in ["track", "artist"]:
-            return Response({"error": "Invalid query or type"}, status=400)
+        if not query or search_type not in ["track", "artist", "genre"]:
+            return Response({"error": "Invalid query or type. Allowed types: track, artist, genre"}, status=400)
+
+        if search_type == "genre":
+            return self._search_genres(query)
 
         token = request.user.spotify_access_token
         headers = {"Authorization": f"Bearer {token}"}
@@ -90,6 +97,52 @@ class SpotifySearchView(SpotifyBaseView):
             data["tracks"]["items"] = sorted_items
 
         return Response(data)
+
+    def _search_genres(self, query):
+        """Search for genres in the local genres.json file"""
+        try:
+            with open(GENRE_FILE_PATH, 'r', encoding='utf-8') as file:
+                genres_data = json.load(file)
+            
+            if isinstance(genres_data, dict) and 'genres' in genres_data:
+                genres = genres_data['genres']
+            elif isinstance(genres_data, list):
+                genres = genres_data
+            else:
+                return Response({"error": "Invalid genres file format"}, status=500)
+
+            query_lower = query.lower()
+            
+            matching_genres = []
+            for genre in genres:
+                genre_name = genre_name = genre if isinstance(genre, str) else genre.get('category', '')
+                if query_lower in genre_name.lower():
+                    similarity = SequenceMatcher(None, genre_name.lower(), query_lower).ratio()
+                    matching_genres.append({
+                        'name': genre_name,
+                        'similarity': similarity,
+                        'type': 'genre'
+                    })
+            
+            matching_genres.sort(key=lambda x: x['similarity'], reverse=True)
+            
+            matching_genres = matching_genres[:20]
+
+            response_data = {
+                "genres": {
+                    "items": [{"name": genre["name"], "type": "genre"} for genre in matching_genres],
+                    "total": len(matching_genres)
+                }
+            }
+            
+            return Response(response_data)
+            
+        except FileNotFoundError:
+            return Response({"error": "Genres file not found"}, status=500)
+        except json.JSONDecodeError:
+            return Response({"error": "Invalid JSON in genres file"}, status=500)
+        except Exception as e:
+            return Response({"error": f"Error searching genres: {str(e)}"}, status=500)
     
 class TransferPlaybackView(SpotifyBaseView):
     @extend_schema(

@@ -125,3 +125,4 @@ class SongViewsTestCase(APITestCase):
         response = self.client.post("/api/songs/similar/", {})
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response.data["error"], "title and artist are required")
+

@@ -17,7 +17,7 @@ class PromptBuilder:
         {self.filters}
         {self.prefix}
         Tylko utwory i artyści, którzy istnieją i są dostępni na Spotify.
-        Format JSON:
+        Nie dodawaj komentarzy. Format JSON:
         [{{"title": "tytuł", "artist": "artysta"}}]
         """
 
@@ -26,7 +26,7 @@ class PromptBuilder:
         Podaj {self.count * GENERATION_BUFFER_MULTIPLIER} utworów {self.filters}, inspirowanych twórczością:
         {json.dumps(artists, indent=2)}
         {self.prefix}
-        Format JSON:
+        Nie dodawaj komentarzy. Format JSON:
         [{{"title": "tytuł", "artist": "artysta"}}]
         """
 
@@ -35,7 +35,7 @@ class PromptBuilder:
         Podaj {self.count * GENERATION_BUFFER_MULTIPLIER} utworów pasujących do opisu:
         "{prompt}"
         {self.prefix}
-        Format JSON:
+        Nie dodawaj komentarzy. Format JSON:
         [{{"title": "tytuł", "artist": "artysta"}}]
         """
 
@@ -49,7 +49,7 @@ class PromptBuilder:
         {self.filters}
         {self.prefix}
         Podaj {self.count * GENERATION_BUFFER_MULTIPLIER} rekomendacji.
-        Format JSON:
+        Nie dodawaj komentarzy. Format JSON:
         [{{"title": "tytuł", "artist": "artysta"}}]
         """
 
@@ -64,6 +64,17 @@ class PromptBuilder:
         {self.prefix}
 
         Podaj {self.count * GENERATION_BUFFER_MULTIPLIER} rekomendacji 
-        Format JSON:
+        Nie dodawaj komentarzy. Format JSON:
+        [{{"title": "tytuł", "artist": "artysta"}}]
+        """
+
+    def for_titles_only(self, titles):
+        return f"""
+        Podaj {self.count * GENERATION_BUFFER_MULTIPLIER} utworów podobnych do poniższych tytułów:
+        {json.dumps(titles, indent=2, ensure_ascii=False)}
+        {self.filters}
+        {self.prefix}
+        Tylko utwory i artyści, którzy istnieją i są dostępni na Spotify.
+        Nie dodawaj komentarzy. Format JSON:
         [{{"title": "tytuł", "artist": "artysta"}}]
         """

@@ -67,8 +67,9 @@ class BaseGenerateSerializer(serializers.Serializer):
 
 
 class GenerateQueueSerializer(BaseGenerateSerializer):
-    title = serializers.CharField()
-    artist = serializers.CharField()
+    titles = serializers.ListField(
+        child=serializers.CharField(), min_length=1
+    )
 
 
 class GenerateFromArtistsSerializer(BaseGenerateSerializer):
