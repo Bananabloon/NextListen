@@ -16,6 +16,7 @@ import useRequests from "../../../hooks/useRequests";
 import { Feedback } from "../../../types/api.types";
 import VolumeSeekBar from "../VolumeSeekBar/VolumeSeekBar";
 import { isNull } from "lodash";
+import SaveOnSpotifyButton from "../SaveOnSpotifyButton/SaveOnSpotifyButton";
 
 const PlayerControls = ({ ...props }): React.JSX.Element => {
     const { currentState, playNext, playPrevious, togglePlay } = usePlayback();
@@ -32,17 +33,6 @@ const PlayerControls = ({ ...props }): React.JSX.Element => {
         setFeedback(value);
         sendRequest("POST", "songs/feedback/update", {
             body: JSON.stringify({ spotify_uri: currentState?.track_window.current_track.uri, feedback_value: value }),
-        });
-    };
-
-    const changeLikedPlaylistInclusion = () => {
-        console.log(JSON.stringify({ track_id: currentState?.track_window.current_track.uri }));
-        let trackUri = currentState?.track_window?.current_track?.uri;
-        let trackIdStart = trackUri!.lastIndexOf(":");
-        let trackId = trackUri!.slice(trackIdStart! + 1);
-        console.log(trackId);
-        sendRequest("POST", "spotify/liked-tracks/like", {
-            body: JSON.stringify({ track_id: trackId }),
         });
     };
 
@@ -102,13 +92,7 @@ const PlayerControls = ({ ...props }): React.JSX.Element => {
                 >
                     <IconPlayerTrackNextFilled />
                 </IconButton>
-                <IconButton
-                    size="md"
-                    variant="transparent"
-                    onClick={() => changeLikedPlaylistInclusion()}
-                >
-                    <img src={`/icons/spotify/like-icon-like${false ? "d" : ""}.svg`} />
-                </IconButton>
+                <SaveOnSpotifyButton />
                 <VolumeSeekBar />
             </Group>
         </>
