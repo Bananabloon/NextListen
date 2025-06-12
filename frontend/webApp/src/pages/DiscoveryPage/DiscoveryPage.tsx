@@ -1,7 +1,6 @@
 import Stack from "../../components/atoms/Stack/Stack";
 import SongCardConveyor from "../../components/organisms/SongCardConveyor/SongCardConveyor";
 import classes from "./DiscoveryPage.module.css";
-import DiscoveryModalController from "../../components/organisms/DiscoveryModalController/DiscoveryModalController";
 import { useQueue } from "../../contexts/QueueContext";
 import QueueLoadingOverlay from "../../components/organisms/QueueLoadingOverlay/QueueLoadingOverlay";
 import { useEffect } from "react";
@@ -15,10 +14,7 @@ const DiscoveryPage = (): React.JSX.Element => {
     }, []);
 
     return (
-        <Stack className={classes.container}>
-            {loading ? <QueueLoadingOverlay /> : <SongCardConveyor className={classes.conveyor} />}
-            <DiscoveryModalController />
-        </Stack>
+        <Stack className={classes.container}>{loading ? <QueueLoadingOverlay /> : <SongCardConveyor className={classes.conveyor} />}</Stack>
     );
 };
 

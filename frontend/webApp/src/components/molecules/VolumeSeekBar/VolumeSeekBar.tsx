@@ -6,12 +6,13 @@ import { useEffect, useState } from "react";
 import Group from "../../atoms/Group/Group";
 import { usePlayback } from "../../../contexts/PlaybackContext";
 import { isNull } from "lodash";
-import Stack from "../../atoms/Stack/Stack";
+import { useQueue } from "../../../contexts/QueueContext";
 
 interface VolumeSeekBarProps extends React.HTMLAttributes<HTMLDivElement> {}
 
 const VolumeSeekBar = ({ className, ...props }: VolumeSeekBarProps): React.JSX.Element => {
     const { currentState, setVolume } = usePlayback();
+    const { currentColor } = useQueue();
     const [volume, setVolumeState] = useState(0.1);
     const [muted, setMuted] = useState(false);
     const [showBar, setShowBar] = useState(false);
@@ -62,13 +63,16 @@ const VolumeSeekBar = ({ className, ...props }: VolumeSeekBarProps): React.JSX.E
                         step="0.01"
                         value={volume}
                         className={muted ? cs(classes.seekBar, classes.seekBarDisabled) : cs(classes.seekBar)}
-                        style={{
-                            opacity: showBar ? 1 : 0,
-                            transition: "opacity 0.3s ease-in-out",
-                            cursor: showBar ? "pointer" : "default",
-                        }}
+                        style={
+                            {
+                                opacity: showBar ? 1 : 0,
+                                transition: "opacity 0.3s ease-in-out",
+                                cursor: showBar ? "pointer" : "default",
+                                "--progress-color": currentColor,
+                            } as React.CSSProperties
+                        }
                         disabled={muted || !showBar}
-                    ></input>
+                    />
                 </div>
             </Group>
         </div>

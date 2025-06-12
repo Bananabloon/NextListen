@@ -16,6 +16,7 @@ import useRequests from "../../../hooks/useRequests";
 import { Feedback } from "../../../types/api.types";
 import VolumeSeekBar from "../VolumeSeekBar/VolumeSeekBar";
 import { isNull } from "lodash";
+import SaveOnSpotifyButton from "../SaveOnSpotifyButton/SaveOnSpotifyButton";
 
 const PlayerControls = ({ ...props }): React.JSX.Element => {
     const { currentState, playNext, playPrevious, togglePlay } = usePlayback();
@@ -50,7 +51,7 @@ const PlayerControls = ({ ...props }): React.JSX.Element => {
     return (
         <>
             <Group {...props}>
-                <div style={{ width: "80px" }}></div>
+                <div style={{ width: "140px" }}></div>
                 <IconButton
                     size="md"
                     variant="transparent"
@@ -103,13 +104,7 @@ const PlayerControls = ({ ...props }): React.JSX.Element => {
                 >
                     <IconPlayerTrackNextFilled />
                 </IconButton>
-                <IconButton
-                    size="md"
-                    variant="transparent"
-                    onClick={() => changeLikedPlaylistInclusion()}
-                >
-                    <img src={`/icons/spotify/like-icon-like${false ? "d" : ""}.svg`} />
-                </IconButton>
+                <SaveOnSpotifyButton />
                 <VolumeSeekBar />
             </Group>
         </>

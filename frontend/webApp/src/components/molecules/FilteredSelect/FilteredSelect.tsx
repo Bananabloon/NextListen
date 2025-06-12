@@ -9,7 +9,7 @@ import "./FilteredSelect.css";
 import { ClipLoader } from "react-spinners";
 
 interface ItemFilterContainerProps extends React.HTMLAttributes<HTMLDivElement> {
-    filter: "top" | "artists" | "tracks" | "genres";
+    type: "top" | "artists" | "tracks" | "genres";
     changeSelectOption: Function;
 }
 
@@ -18,7 +18,7 @@ type OptionType = {
     value: string;
 };
 
-const FilteredSelect = ({ changeSelectOption, filter, children, className, ...props }: ItemFilterContainerProps): React.JSX.Element => {
+const FilteredSelect = ({ changeSelectOption, type, children, className, ...props }: ItemFilterContainerProps): React.JSX.Element => {
     const [options, setOptions] = useState<OptionType[]>([]);
     const [items, setItems] = useState<any[]>([]);
     const [value, setValue] = useState(null);
@@ -26,18 +26,16 @@ const FilteredSelect = ({ changeSelectOption, filter, children, className, ...pr
     const { sendRequest } = useRequests();
 
     const debouncedSearch = useDebouncedCallback(async (inputValue: string) => {
-        if (!inputValue) {
-            return;
-        }
+        if (!inputValue) return;
 
         const preparedValue = inputValue.split(" ").join("+");
-        const type = filter.slice(0, -1); // remove pluralization
-        const query = `q=${preparedValue}&type=${type}`;
+        const typeSingular = type.slice(0, -1);
+        const query = `q=${preparedValue}&type=${typeSingular}`;
         const url = `spotify/search?${query}`;
 
         return await sendRequest("GET", url)
             .then((data) => {
-                const newItems = data[filter]?.items ?? [];
+                const newItems = data[type]?.items ?? [];
                 setItems(newItems);
                 setOptions(newItems.map((item) => ({ label: item.name, value: item.uri })));
             })
@@ -50,12 +48,12 @@ const FilteredSelect = ({ changeSelectOption, filter, children, className, ...pr
         setValue(null);
     };
 
-    return (
-        filter !== "top" ? <Stack
+    return type !== "top" ? (
+        <Stack
             className={cs(classes.inputContainer, className)}
             {...props}
         >
-            <p className={classes.label}>Choose {filter}:</p>
+            <p className={classes.label}>Choose {type}:</p>
             <Select
                 value={value}
                 className="filteredSelectContainer"
@@ -90,7 +88,9 @@ const FilteredSelect = ({ changeSelectOption, filter, children, className, ...pr
                     noOptionsMessage: (_) => "filteredSelect__noOptionsMessage",
                 }}
             />
-        </Stack> : <h2>Generation based on your top songs.</h2>
+        </Stack>
+    ) : (
+        <h2>Generation based on your top songs.</h2>
     );
 };
 

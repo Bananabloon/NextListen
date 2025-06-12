@@ -11,12 +11,12 @@
         "format": "prettier --write .",
         "preview": "vite preview",
         "test:e2e": "playwright test"
-
     },
     "dependencies": {
         "@mantine/hooks": "^8.0.2",
         "@tabler/icons-react": "3.17.0",
         "classnames": "^2.5.1",
+        "color.js": "^1.2.0",
         "css-unit-converter-js": "^1.0.2",
         "lodash": "^4.17.21",
         "react": "^19.1.0",

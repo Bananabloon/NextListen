@@ -1,17 +1,11 @@
 import { API_URL } from "../config/url.config.ts";
 import { normalizePath } from "../utils/api.ts";
-import { AppError } from "../utils/errors.ts";
 
 type Method = "GET" | "HEAD" | "POST" | "PUT" | "DELETE" | "CONNECT" | "OPTIONS" | "TRACE" | "PATCH";
 
 interface useRequestsReturn {
     getPath: (path: string) => string;
-    sendRequest: (
-        method: Method,
-        path: string,
-        options?: RequestInit,
-        errorCallback?: (response: Response) => void
-    ) => Promise<any>;
+    sendRequest: (method: Method, path: string, options?: RequestInit, errorCallback?: (response: Response) => void) => Promise<any>;
 }
 
 export const useRequests = (): useRequestsReturn => {
@@ -69,15 +63,18 @@ export const useRequests = (): useRequestsReturn => {
             const clonedResponse = response.clone();
             return errorCallback(clonedResponse);
         }
+
+        if (response.status == 204) return {};
+
         // handle no content reponses
         let json = {};
         try {
-            json = (await response?.json?.()) ?? {};
+            return (await response?.json?.()) ?? {};
         } catch (err) {
             console.error(`Couldn't parse request response. URL=${url}`, err);
         }
 
-        return json;
+        json;
     };
 
     return { getPath, sendRequest };
