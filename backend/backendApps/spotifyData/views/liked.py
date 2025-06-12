@@ -18,8 +18,8 @@ def parse_spotify_uris_to_ids(uris_string):
 
 class LikedTracksView(SpotifyBaseView):
     @extend_schema(
-        summary="Get user's liked tracks",
-        description="Returns a list of tracks liked by the current user on Spotify.",
+        summary="Get user's saved tracks",
+        description="Returns a list of tracks saved by the current user on Spotify.",
         parameters=[
             OpenApiParameter(
                 name="limit",
@@ -43,8 +43,8 @@ class LikedTracksView(SpotifyBaseView):
 
 class LikeTrackView(SpotifyBaseView):
     @extend_schema(
-        summary="Like a track",
-        description="Adds a track to the user's liked tracks on Spotify.",
+        summary="Save a track",
+        description="Adds a track to the user's saved tracks on Spotify.",
         request=LikeTrackSerializer,
         responses={204: None},
     )
@@ -59,8 +59,8 @@ class LikeTrackView(SpotifyBaseView):
 
 class RemoveLikedTrackView(SpotifyBaseView):
     @extend_schema(
-        summary="Remove a track from liked tracks",
-        description="Removes a track from the user's liked tracks on Spotify.",
+        summary="Remove a track from saved tracks",
+        description="Removes a track from the user's saved tracks on Spotify.",
         request=RemoveLikedTrackSerializer,
         responses={204: None},
     )
@@ -75,8 +75,8 @@ class RemoveLikedTrackView(SpotifyBaseView):
 
 class AreTracksLikedView(SpotifyBaseView):
     @extend_schema(
-        summary="Check if track(s) are liked",
-        description="Checks if given track URIs or IDs are liked by the current user on Spotify.",
+        summary="Check if track(s) are saved",
+        description="Checks if given track URIs or IDs are saved by the current user on Spotify.",
         parameters=[
             OpenApiParameter(
                 name="uris",
