@@ -98,7 +98,6 @@ class DeleteAccountView(APIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 class RefreshAccessToken(APIView):
-    permission_classes = [IsAuthenticated]
 
     @extend_schema(
         summary="Refresh access token",
