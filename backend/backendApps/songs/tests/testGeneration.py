@@ -198,7 +198,7 @@ def test_generate_queue_from_prompt(client):
 
 @pytest.mark.django_db
 def test_discovery_generate_view(client):
-    response = client.post("/api/songs/generate-from-genre/", {"genre": "rock", "count": 5})
+    response = client.post("/api/songs/generate-from-genre/", {"genres": ["rock", "pop"], "count": 5})
 
     assert response.status_code == 200
     assert "songs" in response.data
