@@ -2,16 +2,18 @@ from sentence_transformers import SentenceTransformer
 from qdrant_client import QdrantClient
 from qdrant_client.http import models
 import json
-import numpy as np
-import time
 
 MODEL_NAME = "paraphrase-multilingual-MiniLM-L12-v2"
 COLLECTION_NAME = "music_albums_test"
 INPUT_FILE = "output.json"
+BATCH_SIZE = 500
 
-model = SentenceTransformer(MODEL_NAME)
+model = SentenceTransformer(
+    MODEL_NAME, device="cuda"
+)  # Ustawiona genreracja na GPU, ale wtedy trzeba mieć zainstalowane pytorch z obsługą CUDA i CUDA
+print(f"Używana karta: {model.device}")
+
 qdrant = QdrantClient(url="http://localhost:6333", timeout=50)
-
 
 print(f"Tworzę kolekcję '{COLLECTION_NAME}'...")
 qdrant.recreate_collection(
@@ -41,44 +43,35 @@ def main():
     with open(INPUT_FILE, "r", encoding="utf-8") as f:
         albums = json.load(f)
 
-    total = len(albums)
-    for idx, album in enumerate(albums, start=1):
-        text = build_embedding_text(album)
+    print(f"Liczba albumów do przetworzenia: {len(albums)}")
+    texts = [build_embedding_text(album) for album in albums]
 
-        embedding = model.encode(text)
-        embedding_list = embedding.tolist()
+    embeddings = model.encode(
+        texts, batch_size=256, device="cuda", show_progress_bar=True
+    )
 
-        # Logowanie dla podglądu
-        print(
-            f"[{idx}/{total}] Generuję embedding dla albumu: '{album['album_title']}'"
-        )
-        print(f"Tekst do embeddingu (skrócony): {text[:100].replace(chr(10), ' ')}...")
-        print(f"Embedding (pierwsze 10 wymiarów): {np.array(embedding_list[:10])}")
+    all_points = []
 
+    for idx, (album, embedding) in enumerate(zip(albums, embeddings), start=1):
         metadata = {
-            "album_title": album["album_title"],
-            "country": album["country"],
-            "genres": album["genres"],
-            "styles": album["styles"],
-            "artist_name": album["main_artists"][0]["name"],
-            "artist_profile": album["main_artists"][0]["profile"],
-            "tracks": [track["title"] for track in album["tracklist"]],
+            "genres": list(album.get("genres", [])),
+            "styles": list(album.get("styles", [])),
+            "artist_name": album["main_artists"][0].get("name", ""),
+            "tracks": [track.get("title", "") for track in album.get("tracklist", [])],
         }
 
         vector_id = album["release_id"]
-
-        qdrant.upsert(
-            collection_name=COLLECTION_NAME,
-            points=[
-                models.PointStruct(
-                    id=vector_id, vector=embedding_list, payload=metadata
-                )
-            ],
+        point = models.PointStruct(
+            id=vector_id, vector=embedding.tolist(), payload=metadata
         )
+        all_points.append(point)
 
-        time.sleep(0.05)
+        if len(all_points) >= BATCH_SIZE or idx == len(albums):
+            qdrant.upsert(collection_name=COLLECTION_NAME, points=all_points)
+            print(f"Wysłano do Qdranta {idx}/{len(albums)} punktów...")
+            all_points = []
 
-    print("\nWszystkie embeddingi zostały wygenerowane i wrzucone do Qdranta.")
+    print("\nWszystkie embeddingi zostały wygenerowane i zapisane w Qdrant.")
 
 
 if __name__ == "__main__":
