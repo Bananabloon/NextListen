@@ -1,3 +1,4 @@
+import Button from "../../atoms/Button/Button";
 import Group from "../../atoms/Group/Group";
 import IconButton from "../../atoms/IconButton/IconButton";
 import Stack from "../../atoms/Stack/Stack";
@@ -12,10 +13,14 @@ const AppInformationView = ({ children, className, ...props }: AppInformationVie
             className={className}
             {...props}
         >
-            <h1 className={classes.sectionTitle}>App Information</h1>
+            <h1 className={classes.sectionTitle}>Application & Session</h1>
             <Stack className={classes.container}>
-                <h2 className={classes.innerTextBig}>Version: 1.0.0</h2>
-                <IconButton variant="transparent">
+                <p className={classes.innerTextBig}>Version: 1.0.0 (Dev) </p>
+                <p style={{ color: "var(--text-color-dimmed)" }}>Last updated: 13.06.2025</p>
+                <IconButton
+                    variant="transparent"
+                    style={{ paddingLeft: "0" }}
+                >
                     <a
                         href="https://github.com/Bananabloon/NextListen"
                         target="_blank"
@@ -23,6 +28,13 @@ const AppInformationView = ({ children, className, ...props }: AppInformationVie
                         <img src="/icons/github/github-mark-white.svg" />
                     </a>
                 </IconButton>
+
+                <Button
+                    className={classes.sessionClearButton}
+                    onClick={() => sessionStorage.clear()}
+                >
+                    Clear Session Storage
+                </Button>
             </Stack>
         </Stack>
     );

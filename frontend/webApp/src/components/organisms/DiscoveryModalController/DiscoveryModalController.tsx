@@ -10,8 +10,7 @@ import { useQueue } from "../../../contexts/QueueContext";
 import { DiscoveryOptionsMap, DiscoveryType } from "../../../types/api.types";
 import { IconPlaylistAdd } from "@tabler/icons-react";
 import SelectedDiscoveryItems from "../../molecules/SelectedDiscoveryItems/SelectedDiscoveryItems";
-
-const QUEUE_LENGTH = 20;
+import PROJECT_DEFAULTS from "../../../config/project.config";
 
 const DiscoveryModalController = ({ ...props }): React.JSX.Element => {
     const modalRef = useRef<ModalControllerHandle>(null);
@@ -42,7 +41,7 @@ const DiscoveryModalController = ({ ...props }): React.JSX.Element => {
             artists: { artists: names },
         };
         const generationOptions = {
-            count: QUEUE_LENGTH,
+            count: PROJECT_DEFAULTS.QUEUE_LENGTH,
             ...(typeSpecificOptions[discoveryType] ?? {}),
         } as DiscoveryOptionsMap[T];
 
@@ -70,9 +69,9 @@ const DiscoveryModalController = ({ ...props }): React.JSX.Element => {
                         <p className={classes.label}>Based on:</p>
                         <SegmentedControl
                             options={[
-                                { label: "My Top Songs", value: "top" },
+                                { label: "My Top Tracks", value: "top" },
                                 { label: "Selected Artists", value: "artists" },
-                                { label: "Selected Songs", value: "tracks" },
+                                { label: "Selected Tracks", value: "tracks" },
                                 { label: "Selected Genres", value: "genres" },
                             ]}
                             buttonProps={{ className: classes.segmentedControlButton }}

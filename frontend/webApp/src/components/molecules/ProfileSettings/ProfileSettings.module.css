@@ -60,7 +60,7 @@
     margin: auto var(--spacing-lg) var(--spacing-sm) auto;
 }
 .modalOpenButton {
-    margin-top: auto !important;
+    margin-top: auto;
     margin-bottom: var(--spacing-xl);
     background-color: #e60f32;
 }

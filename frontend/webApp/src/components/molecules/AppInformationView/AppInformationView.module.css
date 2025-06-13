@@ -24,3 +24,8 @@
 .innerTextMedium {
     font-size: var(--font-size-lg);
 }
+
+.sessionClearButton {
+    margin-top: auto;
+    margin-bottom: var(--spacing-xl);
+}
