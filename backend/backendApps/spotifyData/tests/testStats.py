@@ -7,25 +7,6 @@ from django.contrib.auth import get_user_model
 
 User = get_user_model()
 
-
-@pytest.fixture
-def user(db):
-    return User.objects.create_user(
-        display_name="TestUser",
-        spotify_user_id="test123",
-        spotify_access_token="fake-access-token",
-        spotify_refresh_token="fake-refresh-token",
-        curveball_enjoyment=0.75
-    )
-
-
-@pytest.fixture
-def client(user):
-    client = APIClient()
-    client.force_authenticate(user=user)
-    return client
-
-
 @pytest.fixture
 def media_items(db):
     media1 = Media.objects.create(
@@ -46,7 +27,7 @@ def test_user_stats_no_feedbacks(client):
     assert response.data["total_feedbacks"] == 0
     assert response.data["liked"] == 0
     assert response.data["disliked"] == 0
-    assert response.data["curveball_enjoyment"] == 0.75
+    assert response.data["curveball_enjoyment"] == 5
     assert response.data["curveballs_total"] == 0
     assert response.data["curveballs_liked"] == 0
     assert response.data["top_genres"] == []
