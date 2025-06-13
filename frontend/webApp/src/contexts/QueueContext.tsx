@@ -81,7 +81,7 @@ export const QueueProvider = ({ children }: { children: ReactNode }) => {
             }
             return;
         } catch (err) {
-            console.log("Parsing error");
+            console.error("Parsing error");
             return;
         }
     };

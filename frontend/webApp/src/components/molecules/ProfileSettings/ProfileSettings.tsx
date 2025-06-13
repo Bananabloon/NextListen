@@ -34,8 +34,8 @@ const ProfileSettings = ({ children, className, ...props }: ProfileSettingsProps
                     <h1 className={classes.usernameText}>{data?.display_name}</h1>
                     <p className={classes.emailText}>{data?.email} </p>
                     <ModalController
-                        width={820}
-                        height={380}
+                        width={600}
+                        height={300}
                         buttonContent={<>Remove Data</>}
                         buttonProps={{
                             leftSection: <IconLockOpen />,
@@ -44,10 +44,13 @@ const ProfileSettings = ({ children, className, ...props }: ProfileSettingsProps
                     >
                         <Stack className={classes.modal}>
                             <h1 className={classes.modalTitle}>Are you sure?</h1>
-                            <h2 className={classes.modalText}>
-                                This action <span style={{ color: "#E60F32" }}>cannot be undone</span>. Your data will be lost.
-                            </h2>
-                            <h2 className={classes.modalText}>You will be logged out.</h2>
+                            <span className={classes.modalText}>
+                                This action <span style={{ color: "#E60F32" }}>cannot be undone</span>.
+                            </span>
+                            <ul className={classes.warningList}>
+                                <li className={classes.modalText}>Your data will be lost.</li>
+                                <li className={classes.modalText}>Your account will be unlinked from NextListen.</li>
+                            </ul>
                             <Button
                                 onClick={deleteUserData}
                                 size="lg"

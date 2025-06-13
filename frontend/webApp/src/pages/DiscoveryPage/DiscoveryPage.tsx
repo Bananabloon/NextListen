@@ -10,8 +10,6 @@ const DiscoveryPage = (): React.JSX.Element => {
     const { queue, loading, createNewDiscoveryQueue, restoreDiscoveryQueue } = useQueue();
 
     useEffect(() => {
-        // if (isEmpty(queue)) createNewDiscoveryQueue("top", { count: 20 });
-        // if (isEmpty(sessionStorage.getItem("queue"))) createNewDiscoveryQueue("top", { count: 20 });
         restoreDiscoveryQueue("top", { count: 20 });
     }, []);
 
