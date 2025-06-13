@@ -8,15 +8,11 @@ import { QueueProvider } from "../../../contexts/QueueContext";
 
 const ApplicationTemplate = (): React.JSX.Element => {
     return (
-        <QueueProvider>
-            <PlaybackProvider>
-                <Fluid className={classes.layout}>
-                    <Header />
-                    <Outlet />
-                    <Footer />
-                </Fluid>
-            </PlaybackProvider>
-        </QueueProvider>
+        <Fluid className={classes.layout}>
+            <Header />
+            <Outlet />
+            <Footer />
+        </Fluid>
     );
 };
 
