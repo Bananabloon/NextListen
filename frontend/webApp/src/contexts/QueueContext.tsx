@@ -97,6 +97,7 @@ export const QueueProvider = ({ children }: { children: ReactNode }) => {
         } else setQueue(await generateDiscovery(type, options));
 
         setDiscoveryState({ type, options } as DiscoveryState);
+        setCurrentIndex(0);
         setLoading(false);
         block = false;
     };
