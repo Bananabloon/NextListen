@@ -13,3 +13,10 @@
     transition: 0.3s;
     border-radius: 16px;
 }
+
+.closeButton {
+    position: absolute;
+    right: 4px;
+    top: 4px;
+    color: var(--text-color-dimmed);
+}

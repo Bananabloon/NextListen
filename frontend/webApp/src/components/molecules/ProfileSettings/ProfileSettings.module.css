@@ -39,32 +39,35 @@
 
 .modal {
     height: 100%;
-    padding: var(--spacing-xl);
-    padding-top: var(--spacing-xxl);
+    padding: var(--spacing-xxl) var(--spacing-xl);
 }
 
 .modalTitle {
-    font-size: var(--font-size-xxl);
+    font-size: var(--font-size-xl);
     font-weight: 600;
 }
 
-.modalText {
-    font-size: var(--font-size-lg);
+.modalConfirmButton {
+    background-color: var(--danger-color);
+    margin: auto 0 0 auto;
 }
 
-.modalConfirmButton {
-    margin-bottom: var(--spacing-xxl);
-    background-color: #e60f32;
-    margin-left: auto;
-    margin-right: var(--spacing-lg);
-    margin: auto var(--spacing-lg) var(--spacing-sm) auto;
-}
 .modalOpenButton {
     margin-top: auto !important;
     margin-bottom: var(--spacing-xl);
     background-color: #e60f32;
 }
 
+.modalOpenButton > *:first-child {
+    gap: var(--spacing-sm);
+}
+
+.modalOpenButton * {
+    width: fit-content;
+}
+
 .warningList {
-    margin-left: var(--spacing-xl);
+    font-size: var(--font-size-md);
+    padding-left: var(--spacing-sm);
+    list-style-position: inside;
 }
