@@ -32,18 +32,15 @@ const SongCardConveyor = ({ children, className, ...props }: SongCardConveyorPro
     // sets currently focused
     const updateFocus = () => {
         const { cardWidth, selectedCardWidth, containerGap, scrollCenter } = getDimensions();
-        const currentSnap = Math.floor(
-            (scrollCenter - cardWidth - selectedCardWidth - 2.5 * containerGap) / (containerGap + cardWidth)
-        );
+        const currentSnap = Math.floor((scrollCenter - cardWidth - selectedCardWidth - 2.5 * containerGap) / (containerGap + cardWidth));
         setCurrentIndex(currentSnap);
     };
 
     // manual snap implementation due to using grabbable scroll
-    const snap = (toIndex: number) => {
+    const snap = (toIndex: number, scrollBehavior = "smooth") => {
         const { cardWidth, selectedCardWidth, containerGap, containerWidth } = getDimensions();
-        const snapPoint =
-            (toIndex + 2) * (cardWidth + containerGap) + containerGap + selectedCardWidth / 2 - containerWidth / 2;
-        ref.current.scrollTo({ left: snapPoint, behavior: "smooth" });
+        const snapPoint = (toIndex + 2) * (cardWidth + containerGap) + containerGap + selectedCardWidth / 2 - containerWidth / 2;
+        ref.current.scrollTo({ left: snapPoint, behavior: scrollBehavior });
     };
 
     const onScroll = () => {
@@ -55,16 +52,12 @@ const SongCardConveyor = ({ children, className, ...props }: SongCardConveyorPro
     };
 
     useEffect(() => {
-        if (ref.current) {
-            setSuppressFocusUpdate(true);
-            snap(currentIndex);
+        if (ref.current) snap(currentIndex);
+    }, [currentIndex]);
 
-            // Allow time for smooth scroll to complete before re-enabling focus updates
-            const timeout = setTimeout(() => setSuppressFocusUpdate(false), 300);
-
-            return () => clearTimeout(timeout);
-        }
-    }, [width, currentIndex]);
+    useEffect(() => {
+        if (ref.current) snap(currentIndex, "auto");
+    }, [width]);
 
     const songCards = queue.map((song, i) => (
         <SongCard

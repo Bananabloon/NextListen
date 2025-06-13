@@ -4,13 +4,14 @@ import PlayerControls from "../../molecules/PlayerControls/PlayerControls";
 import { useQueue } from "../../../contexts/QueueContext";
 import PlayerSeekBar from "../../molecules/PlayerSeekBar/PlayerSeekBar";
 import DiscoveryModalController from "../DiscoveryModalController/DiscoveryModalController";
+import { isEmpty } from "lodash";
 
 const Footer = (): React.JSX.Element => {
-    const { loading } = useQueue();
+    const { queue, loading } = useQueue();
     return (
         <div
             className={classes.container}
-            style={{ display: loading ? "none" : "flex" }}
+            style={{ display: isEmpty(queue) || loading ? "none" : "flex" }}
         >
             <div className={classes.seekBarPositioner}>
                 <PlayerSeekBar className={classes.playerSeekBar} />

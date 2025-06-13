@@ -1,7 +1,7 @@
 import { IconX } from "@tabler/icons-react";
 import Group from "../../atoms/Group/Group";
 import Stack from "../../atoms/Stack/Stack";
-import classes from "./ItemSelectionContainer.module.css";
+import classes from "./SelectedDiscoveryItems.module.css";
 import cs from "classnames";
 import ScrollingText from "../../atoms/ScrollingText/ScrollingText";
 import { Dictionary, isEmpty, last } from "lodash";
@@ -15,7 +15,7 @@ interface ItemSelectionContainerProps extends React.HTMLAttributes<HTMLDivElemen
     onRemoveItem: (index: number) => void;
 }
 
-const ItemSelectionContainer = ({
+const SelectedDiscoveryItems = ({
     onRemoveItem,
     type,
     data,
@@ -38,7 +38,13 @@ const ItemSelectionContainer = ({
                     className={classes.selectionElementPfp}
                     src={getImageSource?.(dataEntry)}
                 />
-                <ScrollingText style={{ flex: "1" }}>{dataEntry.name}</ScrollingText>
+                <ScrollingText
+                    style={{
+                        flex: "1",
+                    }}
+                >
+                    {dataEntry.name}
+                </ScrollingText>
                 <IconX
                     color="var(--text-color-disabled)"
                     size={20}
@@ -49,21 +55,18 @@ const ItemSelectionContainer = ({
         );
     });
 
-    return (
-        type !== "top" && (
-            <Stack
-                className={cs(classes.container, className)}
-                {...props}
-            >
-                <p className={classes.label}>Selected {type}:</p>
-                {isEmpty(items) ? (
-                    <p className={classes.placeholder}>None selected yet</p>
-                ) : (
-                    <Stack className={classes.items}>{items}</Stack>
-                )}
-            </Stack>
-        )
+    return type !== "top" ? (
+        <Stack
+            className={cs(classes.container, className)}
+            {...props}
+        >
+            <p className={classes.label}>Selected {type}:</p>
+            {isEmpty(items) ? <p className={classes.placeholder}>None selected yet</p> : <Stack className={classes.items}>{items}</Stack>}
+        </Stack>
+    ) : (
+        <></>
     );
 };
 
-export default ItemSelectionContainer;
+export default SelectedDiscoveryItems;
+

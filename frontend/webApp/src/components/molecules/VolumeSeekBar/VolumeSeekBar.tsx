@@ -7,23 +7,27 @@ import Group from "../../atoms/Group/Group";
 import { usePlayback } from "../../../contexts/PlaybackContext";
 import { isNull } from "lodash";
 import { useQueue } from "../../../contexts/QueueContext";
+import { useCookies } from "react-cookie";
 
 interface VolumeSeekBarProps extends React.HTMLAttributes<HTMLDivElement> {}
 
 const VolumeSeekBar = ({ className, ...props }: VolumeSeekBarProps): React.JSX.Element => {
-    const { currentState, setVolume } = usePlayback();
+    const { currentState, setVolume: setPlaybackVolume } = usePlayback();
     const { currentColor } = useQueue();
-    const [volume, setVolumeState] = useState(0.1);
+    const [cookies, setCookies] = useCookies(["volume"]);
     const [muted, setMuted] = useState(false);
     const [showBar, setShowBar] = useState(false);
 
+    const volume = cookies.volume;
+    const setVolume = (vol: number) => setCookies("volume", vol, { path: "/" });
+
     useEffect(() => {
-        if (!muted && !isNull(currentState)) setVolume(volume);
+        if (!muted && !isNull(currentState)) setPlaybackVolume(volume);
     }, [volume, muted]);
 
     const toggleMute = () =>
         setMuted((prev) => {
-            if (!prev) setVolume(0);
+            if (!prev) setPlaybackVolume(0);
             return !prev;
         });
 
@@ -54,9 +58,7 @@ const VolumeSeekBar = ({ className, ...props }: VolumeSeekBarProps): React.JSX.E
                         )}
                     </IconButton>
                     <input
-                        onChange={(e) => {
-                            setVolumeState(parseFloat(e.target.value));
-                        }}
+                        onChange={(e) => setVolume(parseFloat(e.target.value))}
                         type="range"
                         min="0"
                         max="1"

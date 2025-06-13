@@ -16,7 +16,9 @@ const DiscoveryPage = (): React.JSX.Element => {
     }, []);
 
     return (
-        <Stack className={classes.container}>{loading ? <QueueLoadingOverlay /> : <SongCardConveyor className={classes.conveyor} />}</Stack>
+        <Stack className={classes.container}>
+            {isEmpty(queue) || loading ? <QueueLoadingOverlay /> : <SongCardConveyor className={classes.conveyor} />}
+        </Stack>
     );
 };
 
