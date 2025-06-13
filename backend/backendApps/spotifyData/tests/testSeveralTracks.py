@@ -8,6 +8,18 @@ from spotifyData.services.spotifyClient import SpotifyAPI
 User = get_user_model()
 
 class SpotifySeveralTracksTest(TestCase):
+    
+    def setUp(self):
+        """Set up test fixtures before each test method."""
+        self.access_token = "test_access_token"
+        self.refresh_token = "test_refresh_token"
+        self.user = Mock()
+        self.spotify_api = SpotifyAPI(
+            access_token=self.access_token,
+            refresh_token=self.refresh_token,
+            user=self.user
+    )
+    
     @patch.object(SpotifyAPI, '_get')
     def test_get_several_tracks_success(self, mock_get):
         """Test successful get_several_tracks method."""
