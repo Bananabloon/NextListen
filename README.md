@@ -1,6 +1,6 @@
 # NextListen
 
-Aplikacja umożliwiająca jooużytkownikowi odkrywanie nowej muzyki poprzez rekomendacje oparte na jego historii słuchania w Spotify, poziomie eksperymentalności, gatunku muzyki oraz interakcji z systemem rekomendacji.
+Aplikacja umożliwiająca użytkownikowi odkrywanie nowej muzyki poprzez rekomendacje oparte na jego historii słuchania w Spotify, poziomie eksperymentalności, gatunku muzyki oraz interakcji z systemem rekomendacji.
 
 <a href="https://www.notion.so/NextListen-1ea5d256e98f80459af9c8f0930128ee" target="_blank">Notion</a>
 
