@@ -1,7 +1,7 @@
 import { createContext, useContext, ReactNode, useState, useEffect, useMemo, RefObject } from "react";
 import { DiscoveryOptionsMap, DiscoveryState, DiscoveryType, GeneratedSong } from "../types/api.types";
 import useRequests from "../hooks/useRequests";
-import { isEmpty, isNull, max } from "lodash";
+import { isArray, isEmpty, isNull, isNumber, max } from "lodash";
 import { average, prominent } from "color.js";
 import { getBrightestColor, hexToRgb } from "../utils/colors";
 
@@ -39,7 +39,7 @@ export const QueueProvider = ({ children }: { children: ReactNode }) => {
     const [discoveryState, setDiscoveryState] = useState<DiscoveryState>(null);
     const { sendRequest } = useRequests();
 
-    let block = false;
+    let block = false; // block double fetches in the dev mode
 
     const current = queue?.[currentIndex] ?? null;
 
@@ -69,20 +69,17 @@ export const QueueProvider = ({ children }: { children: ReactNode }) => {
     const parseStorage = (): sessionQueueData | undefined => {
         const storedQueue = sessionStorage.getItem("queue");
         const storedIndex = sessionStorage.getItem("currentIndex");
-        if (!storedQueue || !storedIndex) {
-            return;
-        }
+
+        if (!storedQueue || !storedIndex) return;
 
         try {
             const parsedQueue: GeneratedSong[] = JSON.parse(storedQueue);
             const parsedIndex: number = JSON.parse(storedIndex);
-            if (Array.isArray(parsedQueue) && parsedQueue.length > 0 && typeof parsedIndex === "number") {
-                return { queue: parsedQueue, index: parsedIndex };
-            }
-            return;
+
+            if (isArray(parsedQueue) && !isEmpty(parsedQueue)) return;
+            return { queue: parsedQueue, index: isNumber(parsedIndex) ? parsedIndex : 0 };
         } catch (err) {
-            console.log("Parsing error");
-            return;
+            console.error("Couldn't parse queue or index from the session storage.");
         }
     };
 
@@ -90,14 +87,17 @@ export const QueueProvider = ({ children }: { children: ReactNode }) => {
         if (loading || block) return;
         block = true;
         setLoading(true);
-        let cachedItems = parseStorage();
+        const cachedItems = parseStorage();
         const [cachedQueue, cachedIndex] = [cachedItems?.queue, cachedItems?.index];
+
         if (cachedQueue && cachedIndex) {
             setQueue(cachedQueue);
             setCurrentIndex(cachedIndex);
         } else setQueue(await generateDiscovery(type, options));
+
         setDiscoveryState({ type, options } as DiscoveryState);
         setLoading(false);
+        block = false;
     };
 
     const createNewDiscoveryQueue = async <T extends DiscoveryType>(type: T, options: DiscoveryOptionsMap[T]) => {
