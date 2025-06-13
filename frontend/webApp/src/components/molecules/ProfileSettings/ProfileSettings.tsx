@@ -4,7 +4,7 @@ import Button from "../../atoms/Button/Button";
 import Group from "../../atoms/Group/Group";
 import Stack from "../../atoms/Stack/Stack";
 import classes from "./ProfileSettings.module.css";
-import { IconLockOpen } from "@tabler/icons-react";
+import { IconLockOpen, IconTrash, IconTrashFilled } from "@tabler/icons-react";
 import useRequests from "../../../hooks/useRequests";
 import { useNavigate } from "react-router-dom";
 import ModalController from "../ModalController/ModalController";
@@ -19,7 +19,7 @@ const ProfileSettings = ({ children, className, ...props }: ProfileSettingsProps
         const requests = useRequests();
         requests.sendRequest("DELETE", "/auth/spotify/delete-user-data");
         requests.sendRequest("DELETE", "/auth/spotify/delete-tokens");
-        navigate("/login");
+        navigate("/");
     };
 
     return (
@@ -34,25 +34,25 @@ const ProfileSettings = ({ children, className, ...props }: ProfileSettingsProps
                     <p className={classes.emailText}>{data?.email} </p>
                     <ModalController
                         width={600}
-                        height={300}
+                        height={250}
                         buttonContent={<>Remove Data</>}
                         buttonProps={{
-                            leftSection: <IconLockOpen />,
+                            leftSection: <IconTrashFilled size={20} />,
                             className: classes.modalOpenButton,
                         }}
                     >
                         <Stack className={classes.modal}>
                             <h1 className={classes.modalTitle}>Are you sure?</h1>
-                            <span className={classes.modalText}>
-                                This action <span style={{ color: "#E60F32" }}>cannot be undone</span>.
+                            <span>
+                                This action <span style={{ color: "var(--danger-color )", fontWeight: 600 }}>cannot be undone.</span>
                             </span>
                             <ul className={classes.warningList}>
-                                <li className={classes.modalText}>Your data will be lost.</li>
-                                <li className={classes.modalText}>Your account will be unlinked from NextListen.</li>
+                                <li>Your data will be lost.</li>
+                                <li>Your account will be unlinked from NextListen.</li>
                             </ul>
                             <Button
                                 onClick={deleteUserData}
-                                size="lg"
+                                size="sm"
                                 className={classes.modalConfirmButton}
                             >
                                 Confirm

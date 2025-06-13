@@ -52,7 +52,14 @@ const SongCardConveyor = ({ children, className, ...props }: SongCardConveyorPro
     };
 
     useEffect(() => {
-        if (ref.current) snap(currentIndex);
+        if (ref.current) {
+            setSuppressFocusUpdate(true);
+            snap(currentIndex);
+
+            const timeout = setTimeout(() => setSuppressFocusUpdate(false), 300);
+
+            return () => clearTimeout(timeout);
+        }
     }, [currentIndex]);
 
     useEffect(() => {

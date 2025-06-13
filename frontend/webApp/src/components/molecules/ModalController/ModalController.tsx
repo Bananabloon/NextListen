@@ -3,6 +3,8 @@ import classes from "./ModalController.module.css";
 import Portal from "../../atoms/Portal/Portal";
 import Button, { ButtonProps } from "../../atoms/Button/Button";
 import cs from "classnames";
+import IconButton from "../../atoms/IconButton/IconButton";
+import { IconX } from "@tabler/icons-react";
 
 export interface ModalControllerHandle {
     open: () => void;
@@ -21,13 +23,15 @@ const ModalController = forwardRef<ModalControllerHandle, ModalControllerProps>(
     ({ width, height, buttonProps, buttonContent, children, className, onClose, ...props }, ref): React.JSX.Element => {
         const dialogRef = useRef<HTMLDialogElement>(null);
 
-        const handleOpen = (e) => {
+        // opens the modal
+        const open = (e) => {
             const element = dialogRef.current! as HTMLDialogElement;
             e.stopPropagation();
             element.showModal();
             element.style.opacity = "1";
         };
 
+        // does not close the modal, it fires ON closing
         const handleClose = () => {
             const element = dialogRef.current! as HTMLDialogElement;
             element.style.opacity = "0";
@@ -66,6 +70,13 @@ const ModalController = forwardRef<ModalControllerHandle, ModalControllerProps>(
                         style={{ width, height }}
                         {...props}
                     >
+                        <IconButton
+                            onClick={() => dialogRef.current?.close()}
+                            className={classes.closeButton}
+                            variant="transparent"
+                        >
+                            <IconX />
+                        </IconButton>
                         {children}
                     </dialog>
                 </Portal>
@@ -73,7 +84,7 @@ const ModalController = forwardRef<ModalControllerHandle, ModalControllerProps>(
                     <Button
                         size="md"
                         variant="default"
-                        onClick={handleOpen}
+                        onClick={open}
                         {...buttonProps}
                         className={cs(classes.generateQueueButton, buttonProps?.className)}
                     >
