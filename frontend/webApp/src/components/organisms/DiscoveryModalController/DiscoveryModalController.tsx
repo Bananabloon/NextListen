@@ -4,12 +4,12 @@ import Group from "../../atoms/Group/Group";
 import Stack from "../../atoms/Stack/Stack";
 import ModalController, { ModalControllerHandle } from "../../molecules/ModalController/ModalController";
 import classes from "./DiscoveryModalController.module.css";
-import ItemSelectionContainer from "../../molecules/ItemSelectionContainer/ItemSelectionContainer";
 import FilteredSelect from "../../molecules/FilteredSelect/FilteredSelect";
 import SegmentedControl from "../../atoms/SegmentedControl/SegmentedControl";
 import { useQueue } from "../../../contexts/QueueContext";
 import { DiscoveryOptionsMap, DiscoveryType } from "../../../types/api.types";
 import { IconPlaylistAdd } from "@tabler/icons-react";
+import SelectedDiscoveryItems from "../../molecules/SelectedDiscoveryItems/SelectedDiscoveryItems";
 
 const QUEUE_LENGTH = 20;
 
@@ -85,7 +85,7 @@ const DiscoveryModalController = ({ ...props }): React.JSX.Element => {
                             type={discoveryType}
                             changeSelectOption={addNewObject}
                         />
-                        <ItemSelectionContainer
+                        <SelectedDiscoveryItems
                             onRemoveItem={removeItem}
                             type={discoveryType}
                             data={items}
