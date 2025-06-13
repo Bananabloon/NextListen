@@ -6,6 +6,7 @@ import ProfileSettings from "../../components/molecules/ProfileSettings/ProfileS
 import classes from "./SettingsPage.module.css";
 import { IconSettings } from "@tabler/icons-react";
 import AppInformationView from "../../components/molecules/AppInformationView/AppInformationView";
+
 const SettingsPage = (): React.JSX.Element => {
     const navigate = useNavigate();
     return (
@@ -15,7 +16,7 @@ const SettingsPage = (): React.JSX.Element => {
                     size={38}
                     style={{ alignSelf: "self-start", marginTop: "6px" }}
                 />
-                <h1 className={classes.title}>Application Settings</h1>
+                <h1 className={classes.title}>Settings</h1>
 
                 <Button
                     className={classes.returnButton}

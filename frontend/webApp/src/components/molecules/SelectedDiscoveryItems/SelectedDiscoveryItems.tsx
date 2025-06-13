@@ -34,13 +34,16 @@ const SelectedDiscoveryItems = ({
                 className={classes.selectionElement}
                 key={i}
             >
-                <img
-                    className={classes.selectionElementPfp}
-                    src={getImageSource?.(dataEntry)}
-                />
+                {type !== "genres" && (
+                    <img
+                        className={classes.selectionElementPfp}
+                        src={getImageSource?.(dataEntry)}
+                    />
+                )}
                 <ScrollingText
                     style={{
                         flex: "1",
+                        ...(type === "genres" && { paddingLeft: "var(--spacing-md)" }),
                     }}
                 >
                     {dataEntry.name}
@@ -69,4 +72,3 @@ const SelectedDiscoveryItems = ({
 };
 
 export default SelectedDiscoveryItems;
-
