@@ -14,12 +14,10 @@
 
 .card[data-selected="true"] {
     width: 22%;
-
-    /* height: 100%; */
 }
 
 .card[data-curveball="true"] {
-    border: 1px solid var(--primary-color-7);
+    border: 1px solid var(--primary-color-7) inset;
     box-shadow: 0 0 3px var(--primary-color-7);
     animation: curveball 5s linear infinite;
 }
