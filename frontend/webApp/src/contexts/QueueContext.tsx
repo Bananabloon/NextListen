@@ -1,7 +1,7 @@
 import { createContext, useContext, ReactNode, useState, useEffect, useMemo, RefObject } from "react";
 import { DiscoveryOptionsMap, DiscoveryState, DiscoveryType, GeneratedSong } from "../types/api.types";
 import useRequests from "../hooks/useRequests";
-import { isArray, isEmpty, isNull, isNumber, max } from "lodash";
+import { isArray, isEmpty, isNull, isNumber, isUndefined, max } from "lodash";
 import { average, prominent } from "color.js";
 import { getBrightestColor, hexToRgb } from "../utils/colors";
 
@@ -76,7 +76,7 @@ export const QueueProvider = ({ children }: { children: ReactNode }) => {
             const parsedQueue: GeneratedSong[] = JSON.parse(storedQueue);
             const parsedIndex: number = JSON.parse(storedIndex);
 
-            if (isArray(parsedQueue) && !isEmpty(parsedQueue)) return;
+            if (!isArray(parsedQueue) || isEmpty(parsedQueue)) return;
             return { queue: parsedQueue, index: isNumber(parsedIndex) ? parsedIndex : 0 };
         } catch (err) {
             console.error("Couldn't parse queue or index from the session storage.");
@@ -87,10 +87,11 @@ export const QueueProvider = ({ children }: { children: ReactNode }) => {
         if (loading || block) return;
         block = true;
         setLoading(true);
+
         const cachedItems = parseStorage();
         const [cachedQueue, cachedIndex] = [cachedItems?.queue, cachedItems?.index];
 
-        if (cachedQueue && cachedIndex) {
+        if (cachedQueue && !isUndefined(cachedIndex)) {
             setQueue(cachedQueue);
             setCurrentIndex(cachedIndex);
         } else setQueue(await generateDiscovery(type, options));
