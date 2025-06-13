@@ -24,7 +24,7 @@ interface ContextType {
 const PlaybackContext = createContext<ContextType | undefined>(undefined);
 
 export const PlaybackProvider = ({ children }: { children: ReactNode }) => {
-    const { queue, current, currentIndex, setCurrentIndex } = useQueue();
+    const { queue, current, currentIndex, setCurrentIndex, loading: queueLoading } = useQueue();
     const { player, deviceId, currentState, updateState, loading, error, initiatePlayer } = useSpotifyPlayer();
     const { sendRequest } = useRequests();
 
@@ -65,6 +65,11 @@ export const PlaybackProvider = ({ children }: { children: ReactNode }) => {
             playNext();
         }
     }, [currentState?.timestamp]);
+
+    useEffect(() => {
+        player?.seek(0);
+        player?.pause();
+    }, [queueLoading]);
 
     // volume value was way too high so it's divided by 5
     const setVolume = useThrottledCallback(async (value: number) => await player?.setVolume?.(value / 5), 200);
