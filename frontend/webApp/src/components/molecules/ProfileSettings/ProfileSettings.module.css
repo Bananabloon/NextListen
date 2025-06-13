@@ -25,11 +25,13 @@
 .usernameText {
     font-size: var(--font-size-xxl);
 }
+
 .emailText {
     font-size: var(--font-size-lg);
     color: var(--text-color-dimmed);
     margin-left: 1px;
 }
+
 .profilePicture {
     margin-left: auto;
     margin-right: var(--spacing-xxl);
@@ -40,16 +42,24 @@
     align-items: center;
     height: 100%;
 }
+
 .modalTitle {
     font-size: var(--font-size-xxxl);
     font-weight: 600;
     padding-top: var(--spacing-xxl);
 }
+
 .modalText {
     font-size: var(--font-size-lg);
 }
+
 .modalConfirmButton {
     margin-top: var(--spacing-xxl);
     margin-bottom: var(--spacing-xxl);
+    background-color: #e60f32;
+}
+.modalOpenButton {
+    margin-top: auto !important;
+    margin-bottom: var(--spacing-xl);
     background-color: #e60f32;
 }

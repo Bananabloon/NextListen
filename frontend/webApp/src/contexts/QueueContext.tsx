@@ -13,6 +13,12 @@ interface QueueContextType {
     currentIndex: number;
     setCurrentIndex: (callback: number | ((prev: number) => number)) => void;
     createNewDiscoveryQueue: <T extends DiscoveryType>(type: T, options: DiscoveryOptionsMap[T]) => Promise<void>;
+    restoreDiscoveryQueue: <T extends DiscoveryType>(type: T, options: DiscoveryOptionsMap[T]) => Promise<void>;
+}
+
+interface sessionQueueData {
+    queue: GeneratedSong[];
+    index: number;
 }
 
 const QueueContext = createContext<QueueContextType | undefined>(undefined);
@@ -41,7 +47,10 @@ export const QueueProvider = ({ children }: { children: ReactNode }) => {
         if (queue.length > 0) {
             sessionStorage.setItem("queue", JSON.stringify(queue));
         }
-    }, [queue]);
+        if (currentIndex !== -1) {
+            sessionStorage.setItem("currentIndex", JSON.stringify(currentIndex));
+        }
+    }, [queue, currentIndex]);
 
     const generateDiscovery = async <T extends DiscoveryType>(type: T, options: DiscoveryOptionsMap[T]) => {
         const data = await sendRequest("POST", API_PATHS[type], { body: JSON.stringify(options) });
@@ -56,22 +65,45 @@ export const QueueProvider = ({ children }: { children: ReactNode }) => {
         setQueue((prev) => [...prev, ...songs]);
         setUpdating(false);
     };
-    const restoreDiscoveryQueue = async <T extends DiscoveryType>(type: T, options: DiscoveryOptionsMap[T]) => {
-        setLoading(true);
+
+    const parseStorage = (): sessionQueueData | undefined => {
         const storedQueue = sessionStorage.getItem("queue");
-        const parsedQueue = storedQueue ? JSON.parse(storedQueue) : null;
-        if (Array.isArray(parsedQueue) && parsedQueue.length > 0) {
-            setQueue(parsedQueue);
+        const storedIndex = sessionStorage.getItem("currentIndex");
+        if (!storedQueue || !storedIndex) {
+            return;
+        }
+
+        try {
+            const parsedQueue: GeneratedSong[] = JSON.parse(storedQueue);
+            const parsedIndex: number = JSON.parse(storedIndex);
+            if (Array.isArray(parsedQueue) && parsedQueue.length > 0 && typeof parsedIndex === "number") {
+                return { queue: parsedQueue, index: parsedIndex };
+            }
+            return;
+        } catch (err) {
+            console.log("Parsing error");
+            return;
+        }
+    };
+
+    const restoreDiscoveryQueue = async <T extends DiscoveryType>(type: T, options: DiscoveryOptionsMap[T]) => {
+        if (loading || block) return;
+        block = true;
+        setLoading(true);
+        let cachedItems = parseStorage();
+        const [cachedQueue, cachedIndex] = [cachedItems?.queue, cachedItems?.index];
+        if (cachedQueue && cachedIndex) {
+            setQueue(cachedQueue);
+            setCurrentIndex(cachedIndex);
         } else setQueue(await generateDiscovery(type, options));
         setDiscoveryState({ type, options } as DiscoveryState);
         setLoading(false);
     };
+
     const createNewDiscoveryQueue = async <T extends DiscoveryType>(type: T, options: DiscoveryOptionsMap[T]) => {
         if (loading || block) return;
         block = true;
         setLoading(true);
-        const storedQueue = sessionStorage.getItem("queue");
-        const parsedQueue = storedQueue ? JSON.parse(storedQueue) : null;
         setQueue(await generateDiscovery(type, options));
         setDiscoveryState({ type, options } as DiscoveryState);
         setLoading(false);
@@ -104,6 +136,7 @@ export const QueueProvider = ({ children }: { children: ReactNode }) => {
         currentIndex,
         setCurrentIndex,
         createNewDiscoveryQueue,
+        restoreDiscoveryQueue,
     };
 
     return <QueueContext.Provider value={value}>{children}</QueueContext.Provider>;

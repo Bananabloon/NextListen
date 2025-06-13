@@ -36,12 +36,11 @@ const ProfileSettings = ({ children, className, ...props }: ProfileSettingsProps
                     <ModalController
                         width={820}
                         height={380}
-                        buttonContent={
-                            <>
-                                <IconLockOpen className={classes.openLockIcon} />
-                                Remove Data
-                            </>
-                        }
+                        buttonContent={<>Remove Data</>}
+                        buttonProps={{
+                            leftSection: <IconLockOpen />,
+                            className: classes.modalOpenButton,
+                        }}
                     >
                         <Stack className={classes.modal}>
                             <h1 className={classes.modalTitle}>Are you sure?</h1>
