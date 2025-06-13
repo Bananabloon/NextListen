@@ -33,7 +33,7 @@ export const useSpotifyPlayer = () => {
 
         const newPlayer: Spotify.Player = new window.Spotify.Player({
             name: "NextListen",
-            volume: 0.1,
+            volume: 0.02,
             getOAuthToken: (cb) => getToken().then(cb),
         });
 

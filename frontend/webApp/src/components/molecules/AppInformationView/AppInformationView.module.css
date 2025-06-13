@@ -18,9 +18,15 @@
     text-align: center;
     border: 1px ridge var(--background-color-4);
 }
+
 .innerTextBig {
     font-size: var(--font-size-xxl);
 }
 .innerTextMedium {
     font-size: var(--font-size-lg);
+}
+
+.sessionClearButton {
+    margin-top: auto;
+    margin-bottom: var(--spacing-xl);
 }

@@ -68,10 +68,10 @@ export const QueueProvider = ({ children }: { children: ReactNode }) => {
 
     const parseStorage = (): sessionQueueData | undefined => {
         const storedQueue = sessionStorage.getItem("queue");
-        const storedIndex = sessionStorage.getItem("currentIndex");
+        let storedIndex = sessionStorage.getItem("currentIndex");
 
-        if (!storedQueue || !storedIndex) return;
-
+        if (!storedQueue) return;
+        if (!storedIndex) storedIndex = "0"; //to prevent generating a new queue when storedIndex isn't available
         try {
             const parsedQueue: GeneratedSong[] = JSON.parse(storedQueue);
             const parsedIndex: number = JSON.parse(storedIndex);

@@ -13,7 +13,6 @@
 
 .sectionTitle {
     font-size: var(--font-size-xxl);
-    /* padding-left: var(--spacing-lg); */
     background-color: var(--background-color-3);
     width: 800px;
     border-radius: var(--radius-md);
@@ -39,27 +38,36 @@
 }
 
 .modal {
-    align-items: center;
     height: 100%;
+    padding: var(--spacing-xxl) var(--spacing-xl);
 }
 
 .modalTitle {
-    font-size: var(--font-size-xxxl);
+    font-size: var(--font-size-xl);
     font-weight: 600;
-    padding-top: var(--spacing-xxl);
-}
-
-.modalText {
-    font-size: var(--font-size-lg);
 }
 
 .modalConfirmButton {
-    margin-top: var(--spacing-xxl);
-    margin-bottom: var(--spacing-xxl);
-    background-color: #e60f32;
+    background-color: var(--danger-color);
+    margin: auto 0 0 auto;
 }
+
 .modalOpenButton {
-    margin-top: auto !important;
+    margin-top: auto;
     margin-bottom: var(--spacing-xl);
     background-color: #e60f32;
+}
+
+.modalOpenButton > *:first-child {
+    gap: var(--spacing-sm);
+}
+
+.modalOpenButton * {
+    width: fit-content;
+}
+
+.warningList {
+    font-size: var(--font-size-md);
+    padding-left: var(--spacing-sm);
+    list-style-position: inside;
 }

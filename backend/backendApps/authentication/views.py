@@ -24,7 +24,7 @@ from .serializers import (
 
 
 class SpotifyOAuthRedirectView(APIView):
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
 
     @extend_schema(
         summary="Redirect to Spotify OAuth",
