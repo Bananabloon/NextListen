@@ -84,8 +84,8 @@ class SpotifyCallbackView(APIView):
         return response
 
 class ProtectedView(APIView):
-    permission_classes = [IsAuthenticated]
-
+    permission_classes = [AllowAny]
+    
     def get(self, request):
         return Response({"message": "You are authenticated!", "user": request.user.username})
 

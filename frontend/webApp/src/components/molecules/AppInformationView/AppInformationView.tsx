@@ -1,9 +1,7 @@
 import Button from "../../atoms/Button/Button";
-import Group from "../../atoms/Group/Group";
 import IconButton from "../../atoms/IconButton/IconButton";
 import Stack from "../../atoms/Stack/Stack";
 import classes from "./AppInformationView.module.css";
-import cs from "classnames";
 
 interface AppInformationViewProps extends React.HTMLAttributes<HTMLDivElement> {}
 
@@ -15,7 +13,9 @@ const AppInformationView = ({ children, className, ...props }: AppInformationVie
         >
             <h1 className={classes.sectionTitle}>Application & Session</h1>
             <Stack className={classes.container}>
-                <p className={classes.innerTextBig}>Version: 1.0.0 (Dev) </p>
+                <p className={classes.innerTextBig}>
+                    Version: 1.0.0 <span style={{ color: "var(--text-color-dimmed)" }}>(Dev)</span>{" "}
+                </p>
                 <p style={{ color: "var(--text-color-dimmed)" }}>Last updated: 13.06.2025</p>
                 <IconButton
                     variant="transparent"

@@ -18,6 +18,7 @@
     text-align: center;
     border: 1px ridge var(--background-color-4);
 }
+
 .innerTextBig {
     font-size: var(--font-size-xxl);
 }

@@ -4,7 +4,6 @@ import Button from "../../atoms/Button/Button";
 import Group from "../../atoms/Group/Group";
 import Stack from "../../atoms/Stack/Stack";
 import classes from "./ProfileSettings.module.css";
-import cs from "classnames";
 import { IconLockOpen } from "@tabler/icons-react";
 import useRequests from "../../../hooks/useRequests";
 import { useNavigate } from "react-router-dom";
@@ -13,7 +12,7 @@ import ModalController from "../ModalController/ModalController";
 interface ProfileSettingsProps extends React.HTMLAttributes<HTMLDivElement> {}
 
 const ProfileSettings = ({ children, className, ...props }: ProfileSettingsProps): React.JSX.Element => {
-    const { loading, data, error } = useFetch("/spotify/profile");
+    const { data } = useFetch("/spotify/profile");
     const navigate = useNavigate();
 
     const deleteUserData = () => {

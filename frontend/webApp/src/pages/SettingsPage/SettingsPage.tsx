@@ -28,7 +28,6 @@ const SettingsPage = (): React.JSX.Element => {
             <Stack className={classes.content}>
                 <ProfileSettings />
                 <AppInformationView />
-                {/* <StatsDisplay /> */}
             </Stack>
         </Stack>
     );
