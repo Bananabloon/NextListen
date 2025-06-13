@@ -85,7 +85,7 @@ class SpotifyCallbackView(APIView):
 
 
 class RefreshAccessToken(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
 
     @extend_schema(
         summary="Refresh access token",
