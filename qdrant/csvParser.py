@@ -6,7 +6,7 @@ def nan_to_none(value):
     return None if pd.isna(value) else value
 
 
-df = pd.read_csv("output.csv")
+df = pd.read_csv("wyniki.csv")
 
 albums = []
 for release_id, group in df.groupby("release_id"):
@@ -38,6 +38,14 @@ for release_id, group in df.groupby("release_id"):
             }
         )
 
+    seen_titles = set()
+    deduped_tracklist = []
+    for track in tracklist:
+        title = track.get("title")
+        if title and title not in seen_titles:
+            deduped_tracklist.append(track)
+            seen_titles.add(title)
+
     album = {
         "release_id": nan_to_none(release_id),
         "album_title": nan_to_none(first["album_title"]),
@@ -46,7 +54,7 @@ for release_id, group in df.groupby("release_id"):
         "genres": genres,
         "styles": styles,
         "main_artists": main_artists,
-        "tracklist": tracklist,
+        "tracklist": deduped_tracklist,
     }
     albums.append(album)
 
