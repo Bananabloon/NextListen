@@ -89,15 +89,13 @@ export const QueueProvider = ({ children }: { children: ReactNode }) => {
         setLoading(true);
 
         const cachedItems = parseStorage();
-        const [cachedQueue, cachedIndex] = [cachedItems?.queue, cachedItems?.index];
-
+        const [cachedQueue, cachedIndex] = [cachedItems?.queue, cachedItems?.index ? cachedItems?.index : 0];
         if (cachedQueue && !isUndefined(cachedIndex)) {
             setQueue(cachedQueue);
             setCurrentIndex(cachedIndex);
         } else setQueue(await generateDiscovery(type, options));
 
         setDiscoveryState({ type, options } as DiscoveryState);
-        setCurrentIndex(0);
         setLoading(false);
         block = false;
     };
