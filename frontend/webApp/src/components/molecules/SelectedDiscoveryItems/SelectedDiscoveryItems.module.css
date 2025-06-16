@@ -15,6 +15,7 @@
     width: 340px;
     height: 36px;
     align-items: center;
+    flex: none;
 }
 
 .selectionElementPfp {

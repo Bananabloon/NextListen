@@ -19,11 +19,20 @@
     text-align: center;
     border: 1px ridge var(--background-color-4);
 }
+
 .statText {
     font-size: var(--font-size-lg);
     color: var(--text-color-dimmed);
 }
 .statTextSide {
     font-size: var(--font-size-md);
+    color: var(--text-color-dimmed);
+}
+
+.placeholder {
+    font-size: var(--font-size-sm);
+    font-style: italic;
+    padding-left: 2px;
+
     color: var(--text-color-dimmed);
 }

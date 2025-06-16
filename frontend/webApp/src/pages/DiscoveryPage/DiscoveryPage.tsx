@@ -8,7 +8,7 @@ import { isEmpty } from "lodash";
 import PROJECT_DEFAULTS from "../../config/project.config";
 
 const DiscoveryPage = (): React.JSX.Element => {
-    const { queue, loading, createNewDiscoveryQueue, restoreDiscoveryQueue } = useQueue();
+    const { queue, loading, restoreDiscoveryQueue } = useQueue();
 
     useEffect(() => {
         restoreDiscoveryQueue("top", { count: PROJECT_DEFAULTS.QUEUE_LENGTH });
