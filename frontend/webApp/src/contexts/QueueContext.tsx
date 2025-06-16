@@ -68,8 +68,7 @@ export const QueueProvider = ({ children }: { children: ReactNode }) => {
 
     const parseStorage = (): sessionQueueData | undefined => {
         const storedQueue = sessionStorage.getItem("queue");
-        const storedIndex = sessionStorage.getItem("currentIndex") || "0"; //set to 0 to prevent generating a new queue when storedIndex isn't available
-
+        const storedIndex = sessionStorage.getItem("currentIndex") || "0"; //set to 0 to prevent generation of a new queue when storedIndex isn't available
         if (!storedQueue) return;
 
         try {
@@ -77,6 +76,7 @@ export const QueueProvider = ({ children }: { children: ReactNode }) => {
             const parsedIndex: number = JSON.parse(storedIndex);
 
             if (!isArray(parsedQueue) || isEmpty(parsedQueue)) return;
+            console.log({ queue: parsedQueue, index: isNumber(parsedIndex) ? parsedIndex : 0 });
             return { queue: parsedQueue, index: isNumber(parsedIndex) ? parsedIndex : 0 };
         } catch (err) {
             console.error("Couldn't parse queue or index from the session storage.");
@@ -89,11 +89,14 @@ export const QueueProvider = ({ children }: { children: ReactNode }) => {
         setLoading(true);
 
         const cachedItems = parseStorage();
-        const [cachedQueue, cachedIndex] = [cachedItems?.queue, cachedItems?.index ? cachedItems?.index : 0];
+        const [cachedQueue, cachedIndex] = [cachedItems?.queue, cachedItems?.index];
         if (cachedQueue && !isUndefined(cachedIndex)) {
             setQueue(cachedQueue);
             setCurrentIndex(cachedIndex);
-        } else setQueue(await generateDiscovery(type, options));
+        } else {
+            setQueue(await generateDiscovery(type, options));
+            setCurrentIndex(0);
+        }
 
         setDiscoveryState({ type, options } as DiscoveryState);
         setLoading(false);

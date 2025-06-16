@@ -16,7 +16,7 @@ const AppInformationView = ({ children, className, ...props }: AppInformationVie
                 <p className={classes.innerTextBig}>
                     Version: 1.0.0 <span style={{ color: "var(--text-color-dimmed)" }}>(Dev)</span>{" "}
                 </p>
-                <p style={{ color: "var(--text-color-dimmed)" }}>Last updated: 13.06.2025</p>
+                <p style={{ color: "var(--text-color-dimmed)" }}>Last updated: 16.06.2025</p>
                 <IconButton
                     variant="transparent"
                     style={{ paddingLeft: "0" }}

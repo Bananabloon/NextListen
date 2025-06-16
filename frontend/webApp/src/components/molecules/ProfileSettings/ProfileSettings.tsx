@@ -4,7 +4,7 @@ import Button from "../../atoms/Button/Button";
 import Group from "../../atoms/Group/Group";
 import Stack from "../../atoms/Stack/Stack";
 import classes from "./ProfileSettings.module.css";
-import { IconLockOpen, IconTrash, IconTrashFilled } from "@tabler/icons-react";
+import { IconTrashFilled } from "@tabler/icons-react";
 import useRequests from "../../../hooks/useRequests";
 import { useNavigate } from "react-router-dom";
 import ModalController from "../ModalController/ModalController";
