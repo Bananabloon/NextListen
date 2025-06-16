@@ -21,7 +21,7 @@ const StatsView = ({ children, className, ...props }: StatsViewProps): React.JSX
                 </p>
             </Stack>
             <Stack style={{ width: "225px" }}>
-                <p className={classes.statText}>Top artists:</p>
+                <p className={classes.statText}>Top artists</p>
                 {data?.top_artists ? (
                     (data?.top_artists).map((artist, i) => {
                         artist = `#${i + 1} ${artist[0]}`;
