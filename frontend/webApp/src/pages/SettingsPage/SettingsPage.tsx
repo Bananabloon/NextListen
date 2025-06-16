@@ -6,6 +6,7 @@ import ProfileSettings from "../../components/molecules/ProfileSettings/ProfileS
 import classes from "./SettingsPage.module.css";
 import { IconSettings } from "@tabler/icons-react";
 import AppInformationView from "../../components/molecules/AppInformationView/AppInformationView";
+import StatsView from "../../components/molecules/StatsView/StatsView";
 
 const SettingsPage = (): React.JSX.Element => {
     const navigate = useNavigate();
@@ -26,10 +27,13 @@ const SettingsPage = (): React.JSX.Element => {
                     Return
                 </Button>
             </Group>
-            <Stack className={classes.content}>
-                <ProfileSettings />
-                <AppInformationView />
-            </Stack>
+            <Group style={{ gap: "0", width: "900px" }}>
+                <Stack className={classes.content}>
+                    <ProfileSettings />
+                    <AppInformationView />
+                </Stack>
+                <StatsView />
+            </Group>
         </Stack>
     );
 };

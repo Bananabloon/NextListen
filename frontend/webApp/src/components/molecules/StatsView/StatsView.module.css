@@ -1,0 +1,29 @@
+.container {
+    width: 500px;
+    height: 250px;
+    border-radius: 16px;
+    padding-left: var(--spacing-xl);
+    padding-top: var(--spacing-xl);
+    gap: 0;
+    margin-top: 50px;
+    margin-left: var(--spacing-lg);
+    justify-content: center;
+}
+
+.sectionTitle {
+    font-size: var(--font-size-xxl);
+    background-color: var(--background-color-3);
+    width: 300px;
+    border-radius: var(--radius-md);
+    color: var(--text-color-dimmed);
+    text-align: center;
+    border: 1px ridge var(--background-color-4);
+}
+.statText {
+    font-size: var(--font-size-lg);
+    color: var(--text-color-dimmed);
+}
+.statTextSide {
+    font-size: var(--font-size-md);
+    color: var(--text-color-dimmed);
+}

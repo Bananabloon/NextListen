@@ -76,7 +76,6 @@ export const QueueProvider = ({ children }: { children: ReactNode }) => {
             const parsedIndex: number = JSON.parse(storedIndex);
 
             if (!isArray(parsedQueue) || isEmpty(parsedQueue)) return;
-            console.log({ queue: parsedQueue, index: isNumber(parsedIndex) ? parsedIndex : 0 });
             return { queue: parsedQueue, index: isNumber(parsedIndex) ? parsedIndex : 0 };
         } catch (err) {
             console.error("Couldn't parse queue or index from the session storage.");

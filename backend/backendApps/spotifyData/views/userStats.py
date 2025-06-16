@@ -55,8 +55,15 @@ class UserStatsView(SpotifyBaseView):
 
     def get_top_counts(self, queryset, field_name, limit):
         values = queryset.values_list(f"media__{field_name}", flat=True)
-        return Counter(values).most_common(limit)
 
+        flattened = []
+        for value in values:
+            if isinstance(value, list):
+                flattened.extend(value)
+            elif value is not None:
+                flattened.append(value)
+        return Counter(flattened).most_common(limit)
+    
     def get_most_common_value(self, queryset, field_name):
         values = queryset.values_list(f"media__{field_name}", flat=True)
         return Counter(values).most_common(1)[0][0] if values else None
