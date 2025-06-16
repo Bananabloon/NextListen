@@ -3,15 +3,14 @@ import Avatar from "../../atoms/Avatar/Avatar";
 import Button from "../../atoms/Button/Button";
 import Group from "../../atoms/Group/Group";
 import Stack from "../../atoms/Stack/Stack";
-import classes from "./ProfileSettings.module.css";
+import classes from "./ProfileView.module.css";
 import { IconTrashFilled } from "@tabler/icons-react";
 import useRequests from "../../../hooks/useRequests";
 import { useNavigate } from "react-router-dom";
 import ModalController from "../ModalController/ModalController";
-
 interface ProfileSettingsProps extends React.HTMLAttributes<HTMLDivElement> {}
 
-const ProfileSettings = ({ children, className, ...props }: ProfileSettingsProps): React.JSX.Element => {
+const ProfileView = ({ children, className, ...props }: ProfileSettingsProps): React.JSX.Element => {
     const { data } = useFetch("/spotify/profile");
     const navigate = useNavigate();
 
@@ -25,7 +24,7 @@ const ProfileSettings = ({ children, className, ...props }: ProfileSettingsProps
     return (
         <Stack
             {...props}
-            className={className}
+            className={classes.main}
         >
             <h1 className={classes.sectionTitle}>Account</h1>
             <Group className={classes.container}>
@@ -44,7 +43,15 @@ const ProfileSettings = ({ children, className, ...props }: ProfileSettingsProps
                         <Stack className={classes.modal}>
                             <h1 className={classes.modalTitle}>Are you sure?</h1>
                             <span>
-                                This action <span style={{ color: "var(--danger-color )", fontWeight: 600 }}>cannot be undone.</span>
+                                This action{" "}
+                                <span
+                                    style={{
+                                        color: "var(--danger-color )",
+                                        fontWeight: 600,
+                                    }}
+                                >
+                                    cannot be undone.
+                                </span>
                             </span>
                             <ul className={classes.warningList}>
                                 <li>Your data will be lost.</li>
@@ -70,4 +77,5 @@ const ProfileSettings = ({ children, className, ...props }: ProfileSettingsProps
     );
 };
 
-export default ProfileSettings;
+export default ProfileView;
+

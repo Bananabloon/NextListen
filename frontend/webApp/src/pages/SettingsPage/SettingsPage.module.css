@@ -1,7 +1,15 @@
-.container {
+.firstRow {
     width: 100%;
     height: 100%;
+    justify-content: center;
+    gap: var(--spacing-xxl);
 }
+
+.sectionStack {
+    align-items: center;
+    gap: 0;
+}
+
 .header {
     width: 100%;
     height: 125px;
@@ -14,8 +22,4 @@
     margin-left: auto;
     margin-right: var(--spacing-xxl);
     align-self: flex-start;
-}
-.content {
-    padding-left: 30px;
-    gap: 60px;
 }
