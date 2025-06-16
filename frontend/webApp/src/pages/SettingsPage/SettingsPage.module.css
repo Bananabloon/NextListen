@@ -23,3 +23,10 @@
     margin-right: var(--spacing-xxl);
     align-self: flex-start;
 }
+
+@media screen and (max-width: 1600px) {
+    .firstRow {
+        flex-direction: column;
+        align-items: center;
+    }
+}
