@@ -1,0 +1,14 @@
+.miniPlayer {
+    align-items: center;
+    margin-left: auto;
+    align-self: flex-start;
+    padding-top: var(--spacing-sm);
+    width: 500px;
+    justify-content: center;
+    text-align: center;
+}
+
+.songTitle {
+    width: 200px;
+    overflow: hidden;
+}
