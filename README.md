@@ -12,7 +12,6 @@ NextListen is a web application for exploring, searching, and recommending music
 
 **Backend:**  
 - Python  
-- Django  
 - Django REST Framework  
 - drf-spectacular (OpenAPI/Swagger)  
 
@@ -93,11 +92,14 @@ docker exec -it nextlisten-backend-1 bash
 python manage.py makemigrations
 python manage.py migrate
 ```
+### 8. You are all setup
+
+Enter your ngrok url and enjoy
 
 ## Access
 
 - Frontend: http://localhost:5173  
-- Backend API (Swagger Docs): http://localhost:8000/api/docs/
+- Backend: http://localhost:8000/api
 
 ## API Documentation
 
@@ -107,7 +109,7 @@ http://localhost:8000/api/docs/
 
 ## Notes
 
-- All previously committed API keys have been revoked and replaced.  
+- All previously committed API keys, and localhost certifications have been revoked and replaced.  
 - Qdrant was planned to be used as RAG with sentence transformers based on the Discogs DB, but there wasn't enough time to implement it — feel free to try adding it.  
 - The recommendation algorithm improves as you like more tracks.  
 - Due to the lack of RAG, only tracks from the latest AI model snapshot are available.
