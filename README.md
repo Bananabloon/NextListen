@@ -4,39 +4,34 @@ NextListen is a web application for exploring, searching, and recommending music
 
 ## Features
 
--   Generate queues based on your Spotify top artists and tracks
--   Create custom queues using specific artists, tracks, or genres
--   Add recommended songs to your Liked Tracks playlist on Spotify
--
+- Generate queues based on your Spotify top artists and tracks  
+- Create custom queues using specific artists, tracks, or genres  
+- Add recommended songs to your Liked Tracks playlist on Spotify  
 
 ## Tech Stack
 
-**Backend**
+**Backend:**  
+- Python  
+- Django  
+- Django REST Framework  
+- drf-spectacular (OpenAPI/Swagger)  
 
--   Python
--   Django
--   Django REST Framework
--   drf-spectacular (OpenAPI/Swagger)
+**Frontend:**  
+- React (Vite)  
+- TypeScript  
 
-**Frontend**
+**Database:**  
+- MySQL  
+- Qdrant
+  
+**Integrations:**  
+- Spotify Web API  
+- OpenAI API  
 
--   React (Vite)
--   TypeScript
-
-**Database**
-
--   MySQL
-
-**Integrations**
-
--   Spotify Web API
--   OpenAI API
-
-**Other Tools**
-
--   Docker
--   Nginx (reverse proxy)
--   pre-commit, black, flake8
+**Other Tools:**  
+- Docker  
+- Nginx (reverse proxy)  
+- pre-commit, black, flake8  
 
 ## Quick Start
 
@@ -47,29 +42,29 @@ git clone <repository-url>
 cd nextlisten
 ```
 
-### 2. Generate SSL keys and put them in ngnix
+### 2. Generate SSL Certificates and place them in the Nginx folder
 
--   Generate localhost.cert, and localhost.key
--   Put them in nginx/certs
+- Generate `localhost.cert` and `localhost.key`  
+- Place them inside the `nginx/certs` directory
 
-### 2. Setup frontend
+### 3. Install frontend dependencies
 
 ```bash
 cd frontend/webApp
 npm install
 ```
 
-### 3. Setup ngrok
+### 4. Run ngrok
 
-run
+Tunnel port 443 (HTTPS):
 
 ```bash
 ngrok http 443
 ```
 
-### 4. Setup the .env
+### 5. Configure environment files (.env)
 
-Backend Environment (`backend/.env`)
+#### Backend (`backend/.env`)
 
 ```env
 SPOTIFY_CLIENT_ID=YOUR_CLIENT_ID
@@ -79,42 +74,43 @@ OPENAI_API_KEY=YOUR_OPENAI_KEY
 NGROK_URL=YOUR_NGROK_URL
 ```
 
-Frontend Environment (`frontend/webApp/.env`)
+#### Frontend (`frontend/webApp/.env`)
 
 ```env
 VITE_NGROK_DEVELOPMENT_URL=SAME_AS_YOUR_BACKEND_NGROK_URL
 ```
 
-### 2. Run the Application with Docker
+### 6. Run the application with Docker
 
 ```bash
 docker-compose up --build
 ```
 
-### 3. Inside the Backend Container
+### 7. Inside the backend container, apply migrations
 
 ```bash
 docker exec -it nextlisten-backend-1 bash
 python manage.py makemigrations
 python manage.py migrate
 ```
+### 8. All done
+
+enter the ngrok url and enjoy
 
 ## Access
 
--   Frontend: http://localhost:5173
--   Backend API (Swagger Docs): http://localhost:8000/api/docs/
-
-## Configuration
+- Frontend: http://localhost:5173  
+- Backend : http://localhost:8000/api/
 
 ## API Documentation
 
-API documentation is auto-generated and available after starting the backend:
+API docs are auto-generated and available after backend startup at:
 
 http://localhost:8000/api/docs/
 
 ## Notes
 
--   All API keys previously committed have been revoked and replaced.
--   Qdrant was supposed to be used as RAG with sentence transformers using discogs DB, but there wasn't enought time. You can try implementing it
--   The algorythm gets better as you like more and more
--   Because of the lack of RAG, there are only tracks from the latest ai model snapshot
+- All previously committed API keys and SSL certificates have been revoked and replaced.  
+- Qdrant was planned to be used as RAG with sentence transformers based on the Discogs DB, but there wasn't enough time to implement it — feel free to try adding it.  
+- The recommendation algorithm improves as you like more tracks.  
+- Due to the lack of RAG, only tracks from the latest AI model snapshot are available.
