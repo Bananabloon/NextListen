@@ -16,8 +16,8 @@ const ProfileView = ({ children, className, ...props }: ProfileSettingsProps): R
 
     const deleteUserData = () => {
         const requests = useRequests();
-        requests.sendRequest("DELETE", "/auth/spotify/delete-user-data");
-        requests.sendRequest("DELETE", "/auth/spotify/delete-tokens");
+        requests.sendRequest("DELETE", "/auth/spotify/delete-account");
+        sessionStorage.clear();
         navigate("/");
     };
 
