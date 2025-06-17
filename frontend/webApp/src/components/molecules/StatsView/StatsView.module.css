@@ -24,3 +24,19 @@
 
     color: var(--text-color-dimmed);
 }
+
+@media screen and (min-width: 2500px) {
+    .main {
+        height: 300px;
+        gap: var(--spacing-xl);
+    }
+    .container {
+        height: 300px;
+    }
+    .statText {
+        font-size: var(--font-size-xl);
+    }
+    .statTextSide {
+        font-size: var(--font-size-lg);
+    }
+}

@@ -4,6 +4,7 @@ import Stack from "../../components/atoms/Stack/Stack";
 import classes from "./HomePage.module.css";
 import { useNavigate } from "react-router-dom";
 import { RingLoader } from "react-spinners";
+import Group from "../../components/atoms/Group/Group";
 const HomePage = (): React.JSX.Element => {
     const navigate = useNavigate();
 
@@ -14,7 +15,14 @@ const HomePage = (): React.JSX.Element => {
                 stroke={0.05}
                 className={classes.backgroundIcon}
             /> */}
-            <h1 className={classes.title}>NextListen</h1>
+            <Group style={{ gap: 0, justifyContent: "center" }}>
+                <img
+                    src="icons\nextlisten\nextlisten.svg"
+                    width={32}
+                    style={{ marginLeft: "var(--spacing-xxxl)" }}
+                />
+                <h1 className={classes.title}>NextListen</h1>
+            </Group>
             <Stack className={classes.container}>
                 <h1 className={classes.introText}>
                     Next Level music recommendations

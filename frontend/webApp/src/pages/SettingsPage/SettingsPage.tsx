@@ -18,7 +18,7 @@ const SettingsPage = (): React.JSX.Element => {
                     style={{ alignSelf: "self-start", marginTop: "6px" }}
                 />
                 <h1 className={classes.title}>Settings</h1>
-                <MiniPlayer />
+                <MiniPlayer className={classes.miniPlayer} />
                 <Button
                     className={classes.returnButton}
                     size="lg"

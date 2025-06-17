@@ -10,6 +10,11 @@
     animation: startup 0.3s;
 }
 
+.miniPlayer {
+    align-self: flex-start;
+    padding-top: var(--spacing-sm);
+}
+
 .firstRow {
     width: 100%;
     height: 100%;
@@ -42,5 +47,11 @@
     .firstRow {
         flex-direction: column;
         align-items: center;
+    }
+}
+
+@media screen and (min-width: 2500px) {
+    .miniPlayer > * {
+        font-size: var(--font-size-lg);
     }
 }

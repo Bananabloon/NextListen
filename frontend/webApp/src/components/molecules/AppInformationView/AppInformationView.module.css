@@ -23,7 +23,35 @@
     border: 1px ridge var(--background-color-4);
 }
 
+.versionText {
+    font-size: var(--font-size-xxl);
+}
+.updateDateText {
+    color: var(--text-color-dimmed);
+}
+.githubLogo {
+    padding-left: 0;
+}
+
 .sessionClearButton {
     margin-top: auto;
     margin-bottom: var(--spacing-xl);
+}
+
+@media screen and (min-width: 2500px) {
+    .main {
+        height: 400px;
+    }
+    .container {
+        height: 400px;
+    }
+    .versionText {
+        font-size: var(--font-size-xxxl);
+    }
+    .updateDateText {
+        font-size: var(--font-size-lg);
+    }
+    .githubLogo > a {
+        width: 128px !important;
+    }
 }
