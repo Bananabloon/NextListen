@@ -120,9 +120,9 @@ export const QueueProvider = ({ children }: { children: ReactNode }) => {
         const aliveColor =
             colors.find((color) => {
                 const rgb = hexToRgb(color);
-                return (max(rgb) ?? 0) >= 128;
+                return (max(rgb) ?? 0) >= 134;
             }) ?? "var(--primary-color-7)";
-        setCurrentColor(aliveColor);
+        setCurrentColor(current.curveball ? "var(--primary-color-7)" : aliveColor);
     };
 
     useEffect(() => {

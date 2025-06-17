@@ -1,78 +1,45 @@
 import classes from "./SongCardConveyor.module.css";
 import cs from "classnames";
 import SongCard from "../../molecules/SongCard/SongCard";
-import React, { useEffect, useState } from "react";
-import { remToPx } from "css-unit-converter-js";
-import ScrollContainer from "react-indiana-drag-scroll";
-import { useElementSize } from "@mantine/hooks";
+import React, { useEffect, useRef, useState } from "react";
 import { useQueue } from "../../../contexts/QueueContext";
-import SongCardPlaceholder from "../../molecules/SongCard/SongCardPlaceholder";
-import SongCardLoading from "../../molecules/SongCard/SongCardLoading";
+import { Virtuoso, VirtuosoHandle } from "react-virtuoso";
+import { isNull } from "lodash";
+import { GeneratedSong } from "../../../types/api.types";
+
+const PLACEHOLDERS_PER_SIDE = 2;
 
 interface SongCardConveyorProps extends React.HTMLAttributes<HTMLDivElement> {}
 
 const SongCardConveyor = ({ children, className, ...props }: SongCardConveyorProps): React.JSX.Element => {
     const { queue, currentIndex, setCurrentIndex } = useQueue();
-    const { width, ref } = useElementSize();
-    const [suppressFocusUpdate, setSuppressFocusUpdate] = useState(false);
+    const [firstRender, setFirstRender] = useState(true);
+    const virtuoso = useRef<VirtuosoHandle>(null);
 
-    const getDimensions = () => {
-        const container = ref.current!;
-        const styles = getComputedStyle(container);
-
-        return {
-            cardWidth: container.querySelector('*[data-selected="false"]')?.getBoundingClientRect().width ?? 0,
-            selectedCardWidth: container.querySelector('*[data-selected="true"]')?.getBoundingClientRect().width ?? 0,
-            containerGap: remToPx(parseFloat(styles.getPropertyValue("--conveyor-gap"))),
-            scrollCenter: container.scrollLeft + container.clientWidth / 2,
-            containerWidth: container.clientWidth,
-        };
+    const snap = (smooth = true) => {
+        virtuoso.current!.scrollToIndex({
+            index: currentIndex + 2,
+            align: "center",
+            behavior: smooth ? "smooth" : "auto",
+        });
     };
 
-    // sets currently focused
-    const updateFocus = () => {
-        const { cardWidth, selectedCardWidth, containerGap, scrollCenter } = getDimensions();
-        const currentSnap = Math.floor((scrollCenter - cardWidth - selectedCardWidth - 2.5 * containerGap) / (containerGap + cardWidth));
-        setCurrentIndex(currentSnap);
+    const handleLoad = () => {
+        if (!firstRender) return;
+        snap(false);
+        setFirstRender(false);
     };
 
-    // manual snap implementation due to using grabbable scroll
-    const snap = (toIndex: number, scrollBehavior = "smooth") => {
-        const { cardWidth, selectedCardWidth, containerGap, containerWidth } = getDimensions();
-        const snapPoint = (toIndex + 2) * (cardWidth + containerGap) + containerGap + selectedCardWidth / 2 - containerWidth / 2;
-        ref.current.scrollTo({ left: snapPoint, behavior: scrollBehavior });
-    };
-
-    const onScroll = () => {
-        if (ref.current && !suppressFocusUpdate) updateFocus();
-    };
-
-    const onEndScroll = () => {
-        if (ref.current) snap(currentIndex);
+    const handleClick = (e: React.MouseEvent<HTMLDivElement, MouseEvent>, index: number) => {
+        e.stopPropagation();
+        setCurrentIndex(index);
     };
 
     useEffect(() => {
-        if (ref.current) {
-            setSuppressFocusUpdate(true);
-            snap(currentIndex);
-
-            const timeout = setTimeout(() => setSuppressFocusUpdate(false), 300);
-
-            return () => clearTimeout(timeout);
-        }
+        if (!isNull(currentIndex)) snap();
     }, [currentIndex]);
 
-    useEffect(() => {
-        if (ref.current) snap(currentIndex, "auto");
-    }, [width]);
-
-    const songCards = queue.map((song, i) => (
-        <SongCard
-            key={i}
-            song={song}
-            isSelected={i === currentIndex}
-        />
-    ));
+    const data = [...Array(PLACEHOLDERS_PER_SIDE).fill(null), ...queue, ...Array(PLACEHOLDERS_PER_SIDE).fill(null)];
 
     return (
         <div
@@ -80,20 +47,22 @@ const SongCardConveyor = ({ children, className, ...props }: SongCardConveyorPro
             {...props}
             draggable="false"
         >
-            <ScrollContainer
-                horizontal
-                vertical={false}
-                onScroll={onScroll}
-                onEndScroll={onEndScroll}
-                className={cs(classes.cards, "scroll-container")}
-                innerRef={ref}
-            >
-                <SongCardPlaceholder transparent />
-                <SongCardPlaceholder transparent />
-                {songCards}
-                <SongCardLoading />
-                <SongCardPlaceholder transparent />
-            </ScrollContainer>
+            <Virtuoso
+                className={classes.virtuoso}
+                horizontalDirection
+                ref={virtuoso}
+                onLoad={handleLoad}
+                data={data}
+                itemContent={(i, song) => (
+                    <SongCard
+                        key={i}
+                        song={song ?? ({} as GeneratedSong)}
+                        onClick={(e) => handleClick(e, i - PLACEHOLDERS_PER_SIDE)}
+                        isSelected={i - PLACEHOLDERS_PER_SIDE === currentIndex}
+                        isPlaceholder={isNull(song)}
+                    />
+                )}
+            />
             <div className={classes.conveyorShadow} />
         </div>
     );

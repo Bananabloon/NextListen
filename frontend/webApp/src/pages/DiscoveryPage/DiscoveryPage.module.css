@@ -1,4 +1,6 @@
 .container {
-    padding-bottom: 5rem;
+    padding-bottom: 8rem;
     min-height: 0;
+    display: flex;
+    justify-content: center;
 }

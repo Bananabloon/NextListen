@@ -5,15 +5,15 @@
     padding: 12px;
     padding-bottom: 0;
     z-index: 2;
-    flex: 0 0 auto;
 
-    width: calc(19.5% - var(--conveyor-gap));
-    aspect-ratio: 7 / 9;
-    max-height: 100%;
+    aspect-ratio: 8 / 11;
+    width: 400px;
+    margin: 0 12px;
+    cursor: pointer;
 }
 
 .card[data-selected="true"] {
-    width: 22%;
+    width: 420px;
 }
 
 .card[data-curveball="true"] {

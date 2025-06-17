@@ -44,9 +44,9 @@ export const PlaybackProvider = ({ children }: { children: ReactNode }) => {
     const playCurrent = async () => await playTrack(current.uri);
 
     // playNext and playPrevious just update the index, useEffect bellow handles the rest
-    const playNext = () => setCurrentIndex((prev) => (prev === queue.length - 1 ? prev : prev + 1));
+    const playNext = useThrottledCallback(() => setCurrentIndex((prev) => (prev === queue.length - 1 ? prev : prev + 1)), 600);
 
-    const playPrevious = () => setCurrentIndex((prev) => (prev === 0 ? 0 : prev - 1));
+    const playPrevious = useThrottledCallback(() => setCurrentIndex((prev) => (prev === 0 ? 0 : prev - 1)), 600);
 
     // if currentIndex changed, update the track that is being played
     useEffect(() => {
