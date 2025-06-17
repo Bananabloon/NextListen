@@ -11,11 +11,20 @@ interface MiniPlayerProps extends React.HTMLAttributes<HTMLDivElement> {}
 
 const MiniPlayer = ({ children, className, ...props }: MiniPlayerProps): React.JSX.Element => {
     const { playNext, playPrevious, currentState, togglePlay } = usePlayback();
+
+    const artistText = currentState?.track_window.current_track.artists.map((artist) => artist.name).join(", ");
+
     return (
         <Group className={cs(classes.miniPlayer, className)}>
-            {currentState?.track_window.current_track.name ? (
+            {currentState?.track_window.current_track ? (
                 <>
-                    <ScrollingText className={classes.songTitle}>{currentState?.track_window.current_track.name}</ScrollingText>{" "}
+                    <ScrollingText className={classes.songTitle}>
+                        {currentState?.track_window.current_track.name}
+                        {"  "}
+                        &middot;
+                        {"  "}
+                        <span style={{ color: "var(--text-color-dimmed)" }}>{artistText}</span>
+                    </ScrollingText>{" "}
                     <IconButton
                         size="sm"
                         variant="transparent"
