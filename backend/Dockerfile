@@ -14,10 +14,10 @@ WORKDIR /backend/backendApps
 
 COPY /backendApps/ ./backendApps
 COPY requirements.txt .
-COPY wait-for-it.sh /usr/local/bin/wait-for-it.sh
-RUN chmod +x /usr/local/bin/wait-for-it.sh
+#COPY wait-for-it.sh /usr/local/bin/wait-for-it.sh
+#RUN chmod +x /usr/local/bin/wait-for-it.sh
 RUN pip install --no-cache-dir -r requirements.txt 
 
 
-#CMD ["gunicorn", "backendApps.wsgi:application", "--bind", "0.0.0.0:8000"] dla produkcji gunicorn, trzeba odhashować też w settings i docker-compose tam jest zaznaczone
+#CMD ["gunicorn", "backendApps.wsgi:application", "--bind", "0.0.0.0:8000"] for gunicorn
 CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]

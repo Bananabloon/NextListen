@@ -1,6 +1,3 @@
-# exportQdrant.py python exportQdrant.py music_albums_test
-
-
 import argparse
 import json
 from qdrant_client import QdrantClient
@@ -13,59 +10,64 @@ def export_collection_streaming(
     output_file: str = "qdrant_export.json",
     batch_size: int = 1000,
 ):
+    print(f"Connecting to Qdrant at {host}:{port}...")
     client = QdrantClient(host=host, port=port)
+
     offset = None
     total_fetched = 0
+    print(f"Exporting collection '{collection_name}' to file '{output_file}'...")
 
-    print(f"Eksportuję kolekcję '{collection_name}' z Qdranta ({host}:{port})...")
+    try:
+        with open(output_file, "w", encoding="utf-8") as f:
+            f.write("[")
+            first = True
 
-    with open(output_file, "w", encoding="utf-8") as f:
-        f.write("[\n")
-        first = True
+            while True:
+                response = client.scroll(
+                    collection_name=collection_name,
+                    scroll_filter=None,
+                    limit=batch_size,
+                    offset=offset,
+                    with_payload=True,
+                    with_vectors=True,
+                )
+                points, offset = response
 
-        while True:
-            response = client.scroll(
-                collection_name=collection_name,
-                scroll_filter=None,
-                limit=batch_size,
-                offset=offset,
-                with_payload=True,
-                with_vectors=True,
-            )
-            points, offset = response
-            if not points:
-                break
+                if not points:
+                    break
 
-            for point in points:
-                if not first:
-                    f.write(",\n")
-                json.dump(point.dict(), f, ensure_ascii=False)
-                first = False
+                for point in points:
+                    if not first:
+                        f.write(",")
+                    json.dump(
+                        point.dict(), f, ensure_ascii=False, separators=(",", ":")
+                    )
+                    first = False
 
-            total_fetched += len(points)
-            print(f"Pobrano: {total_fetched} punktów...")
+                total_fetched += len(points)
+                print(f"Fetched: {total_fetched} points...")
 
-        f.write("\n]\n")
+            f.write("]")
 
-    print(f"Zapisano do pliku: {output_file}")
-    print("Eksport zakończony.")
+        print(f"Export completed ({total_fetched} points)")
+        print(f"File saved: {output_file}")
+
+    except Exception as e:
+        print(f"Error during export: {e}")
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(
-        description="Eksportuj kolekcję z Qdranta do JSON."
-    )
-    parser.add_argument("collection", help="Nazwa kolekcji w Qdrant")
+    print(">>> Qdrant export script started")
+
+    parser = argparse.ArgumentParser(description="Export a Qdrant collection to JSON.")
+    parser.add_argument("collection", help="Name of the collection in Qdrant")
     parser.add_argument(
-        "-o",
-        "--output",
-        default="qdrant_export.json",
-        help="Ścieżka do pliku wynikowego",
+        "-o", "--output", default="qdrant_export.json", help="Path to the output file"
     )
-    parser.add_argument("--host", default="localhost", help="Adres hosta Qdrant")
-    parser.add_argument("--port", type=int, default=6333, help="Port Qdranta")
+    parser.add_argument("--host", default="localhost", help="Qdrant host address")
+    parser.add_argument("--port", type=int, default=6333, help="Qdrant port")
     parser.add_argument(
-        "--batch", type=int, default=1000, help="Rozmiar batcha przy pobieraniu"
+        "--batch", type=int, default=1000, help="Batch size for fetching data"
     )
 
     args = parser.parse_args()

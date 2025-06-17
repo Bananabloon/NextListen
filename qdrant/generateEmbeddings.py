@@ -10,17 +10,17 @@ BATCH_SIZE = 500
 
 model = SentenceTransformer(
     MODEL_NAME, device="cuda"
-)  # Ustawiona genreracja na GPU, ale wtedy trzeba mieć zainstalowane pytorch z obsługą CUDA i CUDA
-print(f"Używana karta: {model.device}")
+)  # Generation set to GPU, but you need to have PyTorch with CUDA support and CUDA installed
+print(f"Using device: {model.device}")
 
 qdrant = QdrantClient(url="http://localhost:6333", timeout=50)
 
-print(f"Tworzę kolekcję '{COLLECTION_NAME}'...")
+print(f"Creating collection '{COLLECTION_NAME}'...")
 qdrant.recreate_collection(
     collection_name=COLLECTION_NAME,
     vectors_config=models.VectorParams(size=384, distance=models.Distance.COSINE),
 )
-print("Kolekcja gotowa.\n")
+print("Collection ready.\n")
 
 
 def build_embedding_text(album):
@@ -43,7 +43,7 @@ def main():
     with open(INPUT_FILE, "r", encoding="utf-8") as f:
         albums = json.load(f)
 
-    print(f"Liczba albumów do przetworzenia: {len(albums)}")
+    print(f"Number of albums to process: {len(albums)}")
     texts = [build_embedding_text(album) for album in albums]
 
     embeddings = model.encode(
@@ -68,10 +68,10 @@ def main():
 
         if len(all_points) >= BATCH_SIZE or idx == len(albums):
             qdrant.upsert(collection_name=COLLECTION_NAME, points=all_points)
-            print(f"Wysłano do Qdranta {idx}/{len(albums)} punktów...")
+            print(f"Uploaded {idx}/{len(albums)} points to Qdrant...")
             all_points = []
 
-    print("\nWszystkie embeddingi zostały wygenerowane i zapisane w Qdrant.")
+    print("\nAll embeddings have been generated and saved to Qdrant.")
 
 
 if __name__ == "__main__":

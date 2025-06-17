@@ -211,7 +211,8 @@ dist-ssr
 *.sw?
 
 #SSL certs
-certs/
+certs/localhost.key
+certs/localhost.cert
 
 #wait-for-it script
 backend/wait-for-it.sh
@@ -220,3 +221,4 @@ backend/wait-for-it.sh
 .Dockerfile.swp
 
 backend-tests.yml
+
