@@ -48,6 +48,7 @@
     /* creating a custom design */
     height: 6px;
     width: 6px;
+    border: none;
     border-radius: 0 50% 50% 0;
     background-color: var(--progress-color);
     /*  slider progress trick  */
@@ -60,6 +61,7 @@
 .range::-moz-range-thumb {
     height: 6px;
     width: 6px;
+    border: none;
     border-radius: 50%;
     background-color: var(--progress-color);
     /*  slider progress trick  */

@@ -11,13 +11,13 @@ const StatsView = ({ children, className, ...props }: StatsViewProps): React.JSX
             <Stack style={{ width: "225px" }}>
                 <p style={{ fontSize: "var(--font-size-lg)" }}>Reactions</p>
                 <p className={classes.statText}>
-                    Songs liked: <span style={{ color: "var(--text-color)" }}>{data?.liked}</span>
+                    Songs liked: <span style={{ color: "var(--text-color)" }}>{data?.liked ? data.liked : "-"}</span>
                 </p>
                 <p
                     className={classes.statText}
                     style={{ marginBottom: "var(--spacing-sm)" }}
                 >
-                    Songs disliked: <span style={{ color: "var(--text-color)" }}>{data?.disliked}</span>
+                    Songs disliked: <span style={{ color: "var(--text-color)" }}>{data?.disliked ? data.disliked : "-"}</span>
                 </p>
             </Stack>
             <Stack style={{ width: "225px" }}>

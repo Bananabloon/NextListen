@@ -16,8 +16,8 @@ const ProfileView = ({ children, className, ...props }: ProfileSettingsProps): R
 
     const deleteUserData = () => {
         const requests = useRequests();
-        requests.sendRequest("DELETE", "/auth/spotify/delete-user-data");
-        requests.sendRequest("DELETE", "/auth/spotify/delete-tokens");
+        requests.sendRequest("DELETE", "/auth/spotify/delete-account");
+        sessionStorage.clear();
         navigate("/");
     };
 
@@ -29,8 +29,8 @@ const ProfileView = ({ children, className, ...props }: ProfileSettingsProps): R
             <h1 className={classes.sectionTitle}>Account</h1>
             <Group className={classes.container}>
                 <Stack className={classes.dataContainer}>
-                    <h1 className={classes.usernameText}>{data?.display_name}</h1>
-                    <p className={classes.emailText}>{data?.email} </p>
+                    <h1 className={classes.usernameText}>{data?.display_name ? data.display_name : "Username"}</h1>
+                    <p className={classes.emailText}>{data?.email ? data.email : "example@email.com"} </p>
                     <ModalController
                         width={600}
                         height={250}

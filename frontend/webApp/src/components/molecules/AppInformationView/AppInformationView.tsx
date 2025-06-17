@@ -13,13 +13,13 @@ const AppInformationView = ({ children, className, ...props }: AppInformationVie
         >
             <h1 className={classes.sectionTitle}>Application & Session</h1>
             <Stack className={classes.container}>
-                <p style={{ fontSize: "var(--font-size-xxl)" }}>
+                <p className={classes.versionText}>
                     Version: 1.0.0 <span style={{ color: "var(--text-color-dimmed)" }}>(Dev)</span>{" "}
                 </p>
-                <p style={{ color: "var(--text-color-dimmed)" }}>Last updated: 17.06.2025</p>
+                <p className={classes.updateDateText}>Last updated: 17.06.2025</p>
                 <IconButton
                     variant="transparent"
-                    style={{ paddingLeft: "0" }}
+                    className={classes.githubLogo}
                 >
                     <a
                         href="https://github.com/Bananabloon/NextListen"

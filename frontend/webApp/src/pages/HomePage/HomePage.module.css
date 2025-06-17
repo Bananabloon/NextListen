@@ -9,6 +9,7 @@
 }
 .title {
     padding: var(--spacing-xxxl);
+    padding-left: var(--spacing-sm);
     font-size: var(--font-size-xxl);
 }
 .introText {

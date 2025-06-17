@@ -75,3 +75,18 @@
     padding-left: var(--spacing-sm);
     list-style-position: inside;
 }
+
+@media screen and (min-width: 2500px) {
+    .main {
+        height: 400px;
+    }
+    .container {
+        height: 400px;
+    }
+    .usernameText {
+        font-size: var(--font-size-xxxl);
+    }
+    .emailText {
+        font-size: var(--font-size-xl);
+    }
+}

@@ -22,10 +22,10 @@
         "react": "^19.1.0",
         "react-cookie": "^8.0.1",
         "react-dom": "^19.1.0",
-        "react-indiana-drag-scroll": "^2.2.1",
         "react-router-dom": "^7.6.1",
         "react-select": "^5.10.1",
-        "react-spinners": "^0.17.0"
+        "react-spinners": "^0.17.0",
+        "react-virtuoso": "^4.13.0"
     },
     "devDependencies": {
         "@eslint/js": "^9.27.0",
