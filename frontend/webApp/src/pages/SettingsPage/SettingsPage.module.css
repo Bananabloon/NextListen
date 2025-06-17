@@ -1,21 +1,46 @@
-.container {
+@keyframes startup {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+.main {
+    animation: startup 0.3s;
+}
+
+.firstRow {
     width: 100%;
     height: 100%;
+    justify-content: center;
+    gap: var(--spacing-xxl);
 }
+
+.sectionStack {
+    align-items: center;
+    gap: 0;
+}
+
 .header {
     width: 100%;
     height: 125px;
     padding: var(--spacing-xxl) var(--spacing-xxxl);
 }
+
 .title {
     font-size: var(--font-size-xxl);
 }
+
 .returnButton {
     margin-left: auto;
     margin-right: var(--spacing-xxl);
     align-self: flex-start;
 }
-.content {
-    padding-left: 30px;
-    gap: 60px;
+
+@media screen and (max-width: 1600px) {
+    .firstRow {
+        flex-direction: column;
+        align-items: center;
+    }
 }

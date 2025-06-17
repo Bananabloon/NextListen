@@ -8,7 +8,7 @@
     margin-top: 20px;
 }
 .title {
-    padding: var(--spacing-xxxl) var(--spacing-xxxl);
+    padding: var(--spacing-xxxl);
     font-size: var(--font-size-xxl);
 }
 .introText {

@@ -1,7 +1,11 @@
-.container {
+.main {
     width: 800px;
+}
+
+.container {
+    width: 100%;
     height: 250px;
-    border-radius: 16px;
+    border-radius: var(--radius-lg);
     background-color: var(--background-color-3);
     padding-left: var(--spacing-xl);
     padding-top: var(--spacing-xl);
@@ -17,13 +21,6 @@
     color: var(--text-color-dimmed);
     text-align: center;
     border: 1px ridge var(--background-color-4);
-}
-
-.innerTextBig {
-    font-size: var(--font-size-xxl);
-}
-.innerTextMedium {
-    font-size: var(--font-size-lg);
 }
 
 .sessionClearButton {

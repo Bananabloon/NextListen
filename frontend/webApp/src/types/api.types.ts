@@ -50,6 +50,19 @@ export type DiscoveryOptionsMap = {
     tracks: GenerateFromTrackOptions;
 };
 
+export interface userStats {
+    total_feedbacks: number;
+    liked: number;
+    disliked: number;
+    curveball_enjoyment: number;
+    curveballs_total: number;
+    curveballs_liked: number;
+    top_genres: [];
+    top_artists: [];
+    most_common_media_type: string;
+    recent_top_genres: [];
+}
+
 export type DiscoveryState =
     | { type: "top"; options: GenerateFromTopOptions }
     | { type: "artists"; options: GenerateFromArtistOptions }

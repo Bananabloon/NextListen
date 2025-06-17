@@ -90,7 +90,7 @@ const FilteredSelect = ({ changeSelectOption, type, children, className, ...prop
             />
         </Stack>
     ) : (
-        <h2>Generation based on your top songs.</h2>
+        <h2>Generate a queue based on your top songs.</h2>
     );
 };
 
