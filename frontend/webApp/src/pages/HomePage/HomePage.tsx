@@ -1,18 +1,19 @@
+import { IconCube3dSphere } from "@tabler/icons-react";
 import Button from "../../components/atoms/Button/Button";
 import Stack from "../../components/atoms/Stack/Stack";
 import classes from "./HomePage.module.css";
 import { useNavigate } from "react-router-dom";
-import { IconCube3dSphere } from "@tabler/icons-react";
+import { RingLoader } from "react-spinners";
 const HomePage = (): React.JSX.Element => {
     const navigate = useNavigate();
 
     return (
         <>
-            <IconCube3dSphere
+            {/* <IconCube3dSphere
                 size={1024}
                 stroke={0.05}
                 className={classes.backgroundIcon}
-            />
+            /> */}
             <h1 className={classes.title}>NextListen</h1>
             <Stack className={classes.container}>
                 <h1 className={classes.introText}>
@@ -36,6 +37,19 @@ const HomePage = (): React.JSX.Element => {
                         style={{ height: 32 }}
                     />
                 </Button>
+                <RingLoader
+                    size="500"
+                    color="#FFFFFF"
+                    speedMultiplier={0.5}
+                    cssOverride={{
+                        opacity: 0.2,
+                        position: "absolute",
+                        top: "50%",
+                        left: "50%",
+                        transform: "translate(-50%,-50%)",
+                        zIndex: "-1",
+                    }}
+                />
             </Stack>
         </>
     );

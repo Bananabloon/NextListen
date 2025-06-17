@@ -12,3 +12,11 @@
     width: 200px;
     overflow: hidden;
 }
+
+.placeholder {
+    font-size: var(--font-size-sm);
+    font-style: italic;
+    padding-left: 2px;
+
+    color: var(--text-color-dimmed);
+}

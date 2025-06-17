@@ -13,29 +13,35 @@ const MiniPlayer = ({ children, className, ...props }: MiniPlayerProps): React.J
     const { playNext, playPrevious, currentState, togglePlay } = usePlayback();
     return (
         <Group className={cs(classes.miniPlayer, className)}>
-            <ScrollingText className={classes.songTitle}>{currentState?.track_window.current_track.name}</ScrollingText> <br />
-            <IconButton
-                size="sm"
-                variant="transparent"
-                onClick={() => playPrevious()}
-            >
-                <IconPlayerTrackPrevFilled />
-            </IconButton>
-            <IconButton
-                size="sm"
-                variant="filled"
-                style={{ borderRadius: "50%" }}
-                onClick={() => togglePlay()}
-            >
-                {isNull(currentState) || currentState.paused ? <IconPlayerPlayFilled /> : <IconPlayerPauseFilled />}
-            </IconButton>
-            <IconButton
-                size="sm"
-                variant="transparent"
-                onClick={() => playNext()}
-            >
-                <IconPlayerTrackNextFilled />
-            </IconButton>
+            {currentState?.track_window.current_track.name ? (
+                <>
+                    <ScrollingText className={classes.songTitle}>{currentState?.track_window.current_track.name}</ScrollingText>{" "}
+                    <IconButton
+                        size="sm"
+                        variant="transparent"
+                        onClick={() => playPrevious()}
+                    >
+                        <IconPlayerTrackPrevFilled />
+                    </IconButton>
+                    <IconButton
+                        size="sm"
+                        variant="filled"
+                        style={{ borderRadius: "50%" }}
+                        onClick={() => togglePlay()}
+                    >
+                        {isNull(currentState) || currentState.paused ? <IconPlayerPlayFilled /> : <IconPlayerPauseFilled />}
+                    </IconButton>
+                    <IconButton
+                        size="sm"
+                        variant="transparent"
+                        onClick={() => playNext()}
+                    >
+                        <IconPlayerTrackNextFilled />
+                    </IconButton>
+                </>
+            ) : (
+                <span className={classes.placeholder}>Current track missing</span>
+            )}
         </Group>
     );
 };

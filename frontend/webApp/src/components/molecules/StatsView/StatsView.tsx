@@ -9,7 +9,7 @@ const StatsView = ({ children, className, ...props }: StatsViewProps): React.JSX
     return (
         <Group className={classes.main}>
             <Stack style={{ width: "225px" }}>
-                <p className={classes.statText}>Reactions</p>
+                <p style={{ fontSize: "var(--font-size-lg)" }}>Reactions</p>
                 <p className={classes.statText}>
                     Songs liked: <span style={{ color: "var(--text-color)" }}>{data?.liked}</span>
                 </p>
@@ -21,7 +21,7 @@ const StatsView = ({ children, className, ...props }: StatsViewProps): React.JSX
                 </p>
             </Stack>
             <Stack style={{ width: "225px" }}>
-                <p className={classes.statText}>Top artists</p>
+                <p style={{ fontSize: "var(--font-size-lg)" }}>Top artists</p>
                 {data?.top_artists ? (
                     (data?.top_artists).map((artist, i) => {
                         artist = `#${i + 1} ${artist[0]}`;
