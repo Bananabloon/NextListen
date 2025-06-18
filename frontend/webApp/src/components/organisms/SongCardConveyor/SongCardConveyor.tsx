@@ -1,7 +1,7 @@
 import classes from "./SongCardConveyor.module.css";
 import cs from "classnames";
 import SongCard from "../../molecules/SongCard/SongCard";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useImperativeHandle, useRef } from "react";
 import { useQueue } from "../../../contexts/QueueContext";
 import { Virtuoso, VirtuosoHandle } from "react-virtuoso";
 import { isNull } from "lodash";
@@ -9,11 +9,13 @@ import { GeneratedSong } from "../../../types/api.types";
 
 const PLACEHOLDERS_PER_SIDE = 2;
 
-interface SongCardConveyorProps extends React.HTMLAttributes<HTMLDivElement> {}
+interface SongCardConveyorProps extends React.HTMLAttributes<HTMLDivElement> {
+    shouldSnap: boolean;
+    setShouldSnap: Function;
+}
 
-const SongCardConveyor = ({ children, className, ...props }: SongCardConveyorProps): React.JSX.Element => {
+const SongCardConveyor = ({ shouldSnap, setShouldSnap, children, className, ...props }: SongCardConveyorProps): React.JSX.Element => {
     const { queue, currentIndex, setCurrentIndex } = useQueue();
-    const [firstRender, setFirstRender] = useState(true);
     const virtuoso = useRef<VirtuosoHandle>(null);
 
     const snap = (smooth = true) => {
@@ -25,9 +27,13 @@ const SongCardConveyor = ({ children, className, ...props }: SongCardConveyorPro
     };
 
     const handleLoad = () => {
-        if (!firstRender) return;
-        snap(false);
-        setFirstRender(false);
+        console.log(shouldSnap);
+        if (!shouldSnap) return;
+
+        setTimeout(() => {
+            snap(true);
+            setShouldSnap(false);
+        }, 300);
     };
 
     const handleClick = (e: React.MouseEvent<HTMLDivElement, MouseEvent>, index: number) => {
@@ -50,8 +56,9 @@ const SongCardConveyor = ({ children, className, ...props }: SongCardConveyorPro
             <Virtuoso
                 className={classes.virtuoso}
                 horizontalDirection
+                initialTopMostItemIndex={currentIndex}
                 ref={virtuoso}
-                onLoad={handleLoad}
+                rangeChanged={handleLoad}
                 data={data}
                 itemContent={(i, song) => (
                     <SongCard
