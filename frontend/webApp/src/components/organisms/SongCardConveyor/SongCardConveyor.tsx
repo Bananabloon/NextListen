@@ -30,7 +30,7 @@ const SongCardConveyor = ({ shouldSnap, setShouldSnap, children, className, ...p
         if (!shouldSnap) return;
 
         setTimeout(() => {
-            snap(true);
+            snap();
             setShouldSnap(false);
         }, 300);
     };

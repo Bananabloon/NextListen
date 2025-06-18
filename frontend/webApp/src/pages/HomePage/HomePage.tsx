@@ -6,16 +6,14 @@ import { useNavigate } from "react-router-dom";
 import { RingLoader } from "react-spinners";
 import Group from "../../components/atoms/Group/Group";
 import IconButton from "../../components/atoms/IconButton/IconButton";
+import cs from "classnames";
+
 const HomePage = (): React.JSX.Element => {
     const navigate = useNavigate();
 
     return (
         <>
-            {/* <IconCube3dSphere
-                size={1024}
-                stroke={0.05}
-                className={classes.backgroundIcon}
-            /> */}
+            <title>NextListen</title>
             <Group style={{ gap: 0, justifyContent: "center" }}>
                 <img
                     src="icons\nextlisten\nextlisten.svg"
@@ -24,12 +22,14 @@ const HomePage = (): React.JSX.Element => {
                 />
                 <h1 className={classes.title}>NextListen</h1>
             </Group>
-            <Group style={{ alignItems: "center", justifyContent: "space-around" }}>
-                <div className={classes.sideTextBlock}>
+            <Group
+                className={classes.mainContent}
+                style={{ alignItems: "center", justifyContent: "space-around" }}
+            >
+                <div className={cs(classes.sideTextBlock, classes.sideTextBlockLeft)}>
                     <p className={classes.titleText}>How does it work?</p>
                     <p className={classes.smallerText}>
-                        Our system lets you generate song queues based on different factors and listen to the music directly through the
-                        app!
+                        Our system lets you generate song queues based on different factors and control playback right through the app!
                     </p>
                 </div>
                 <Stack className={classes.container}>
@@ -64,11 +64,11 @@ const HomePage = (): React.JSX.Element => {
                             top: "50%",
                             left: "50%",
                             transform: "translate(-50%,-50%)",
-                            zIndex: "-1",
+                            pointerEvents: "none",
                         }}
                     />
                 </Stack>
-                <div className={classes.sideTextBlock}>
+                <div className={cs(classes.sideTextBlock, classes.sideTextBlockRight)}>
                     <p className={classes.titleText}>Want more info?</p>
                     <p className={classes.smallerText}>Visit our Github Repository</p>
                     <IconButton

@@ -81,3 +81,32 @@
         border: 1px solid var(--background-color-3);
     }
 }
+
+@media screen and (max-width: 1700px) {
+    .card {
+        width: 320px;
+    }
+    .card[data-selected="true"] {
+        width: 336px;
+    }
+}
+
+@media screen and (max-width: 1500px) {
+    .card {
+        width: 228px;
+        font-size: var(--font-size-sm);
+    }
+    .card[data-selected="true"] {
+        width: 239px;
+    }
+
+    .titleText {
+        font-size: var(--font-size-md);
+    }
+    .artistsText {
+        font-size: var(--font-size-sm);
+    }
+    .curveballText {
+        font-size: var(--font-size-xs);
+    }
+}
