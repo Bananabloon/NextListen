@@ -7,6 +7,7 @@
     height: 800px;
     margin-top: 20px;
 }
+
 .title {
     padding: var(--spacing-xxxl);
     padding-left: var(--spacing-sm);
@@ -27,8 +28,33 @@
     margin-top: 220px;
     justify-content: flex-start;
     align-items: center;
+    width: 600px;
 }
 
 .container > * {
     transform: translateY(-50%);
+}
+
+.sideTextBlock {
+    background-color: var(--background-color-3);
+    width: 400px;
+    height: 300px;
+    padding: var(--spacing-xxl) var(--spacing-md) 0 var(--spacing-xxl);
+    border-radius: var(--radius-md);
+}
+.sideTextBlock > * {
+    font-size: var(--font-size-lg);
+}
+
+.titleText {
+    font-size: var(--font-size-lg);
+    font-weight: 500;
+    margin-bottom: var(--spacing-sm);
+}
+.smallerText {
+    font-size: var(--font-size-md);
+}
+
+.githubLogo {
+    padding-left: 0 !important;
 }

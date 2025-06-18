@@ -4,7 +4,6 @@ import Stack from "../../atoms/Stack/Stack";
 import classes from "./SongCard.module.css";
 import ScrollingText from "../../atoms/ScrollingText/ScrollingText";
 import { GeneratedSong } from "../../../types/api.types";
-import { isEmpty } from "lodash";
 
 interface SongCardProps extends React.HTMLAttributes<HTMLDivElement> {
     song: GeneratedSong;
@@ -31,8 +30,8 @@ const SongCard = ({ isPlaceholder, isSelected = false, song, children, className
                 {song?.curveball && <p className={classes.curveballText}>Curveball</p>}
                 <ScrollingText speed={60}>
                     <p className={classes.titleText}>{song?.track_details?.name}</p>
+                    <p className={classes.artistsText}>{song?.track_details?.artists?.join(", ")}</p>
                 </ScrollingText>
-                <p className={classes.artistsText}>{song?.track_details?.artists?.join(", ")}</p>
             </Stack>
             <Group className={classes.controlGroup}>
                 <a

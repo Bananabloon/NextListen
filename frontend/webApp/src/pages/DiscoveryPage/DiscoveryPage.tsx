@@ -13,7 +13,6 @@ const DiscoveryPage = (): React.JSX.Element => {
     const [shouldSnap, setShouldSnap] = useState(true);
 
     useEffect(() => {
-        console.log("rerender");
         restoreDiscoveryQueue("top", { count: PROJECT_DEFAULTS.QUEUE_LENGTH });
         setShouldSnap(true);
     }, []);

@@ -27,7 +27,6 @@ const SongCardConveyor = ({ shouldSnap, setShouldSnap, children, className, ...p
     };
 
     const handleLoad = () => {
-        console.log(shouldSnap);
         if (!shouldSnap) return;
 
         setTimeout(() => {
