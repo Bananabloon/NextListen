@@ -1,9 +1,9 @@
-import { createContext, useContext, ReactNode, useState, useEffect, useMemo, RefObject } from "react";
+import { createContext, useContext, ReactNode, useState, useEffect } from "react";
 import { DiscoveryOptionsMap, DiscoveryState, DiscoveryType, GeneratedSong } from "../types/api.types";
 import useRequests from "../hooks/useRequests";
 import { isArray, isEmpty, isNull, isNumber, isUndefined, max } from "lodash";
-import { average, prominent } from "color.js";
-import { getBrightestColor, hexToRgb } from "../utils/colors";
+import { prominent } from "color.js";
+import { hexToRgb } from "../utils/colors";
 
 interface QueueContextType {
     queue: GeneratedSong[];
@@ -83,10 +83,11 @@ export const QueueProvider = ({ children }: { children: ReactNode }) => {
     };
 
     const restoreDiscoveryQueue = async <T extends DiscoveryType>(type: T, options: DiscoveryOptionsMap[T]) => {
+        if (!isEmpty(queue) && isArray(queue)) return; //to avoid unnecessary computation when queue is populated
         if (loading || block) return;
+
         block = true;
         setLoading(true);
-
         const cachedItems = parseStorage();
         const [cachedQueue, cachedIndex] = [cachedItems?.queue, cachedItems?.index];
         if (cachedQueue && !isUndefined(cachedIndex)) {
@@ -96,7 +97,6 @@ export const QueueProvider = ({ children }: { children: ReactNode }) => {
             setQueue(await generateDiscovery(type, options));
             setCurrentIndex(0);
         }
-
         setDiscoveryState({ type, options } as DiscoveryState);
         setLoading(false);
         block = false;
