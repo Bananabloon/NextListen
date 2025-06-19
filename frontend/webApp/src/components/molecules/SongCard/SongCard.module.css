@@ -81,3 +81,50 @@
         border: 1px solid var(--background-color-3);
     }
 }
+
+@media screen and (min-width: 2560px) {
+    .card {
+        width: 460px;
+    }
+    .card[data-selected="true"] {
+        width: 483px;
+    }
+}
+
+@media screen and (max-width: 1920px) {
+    .card {
+        width: 380px;
+    }
+    .card[data-selected="true"] {
+        width: 399px;
+    }
+}
+
+@media screen and (max-width: 1600px) {
+    .card {
+        width: 320px;
+    }
+    .card[data-selected="true"] {
+        width: 336px;
+    }
+}
+
+@media screen and (max-width: 1440px) {
+    .card {
+        width: 228px;
+        font-size: var(--font-size-sm);
+    }
+    .card[data-selected="true"] {
+        width: 239px;
+    }
+
+    .titleText {
+        font-size: var(--font-size-md);
+    }
+    .artistsText {
+        font-size: var(--font-size-sm);
+    }
+    .curveballText {
+        font-size: var(--font-size-xs);
+    }
+}

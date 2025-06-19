@@ -22,21 +22,23 @@ const StatsView = ({ children, className, ...props }: StatsViewProps): React.JSX
             </Stack>
             <Stack style={{ width: "225px" }}>
                 <p style={{ fontSize: "var(--font-size-lg)" }}>Top artists</p>
-                {data?.top_artists ? (
-                    (data?.top_artists).map((artist, i) => {
-                        artist = `#${i + 1} ${artist[0]}`;
-                        return (
-                            <p
-                                key={i}
-                                className={classes.statTextSide}
-                            >
-                                {artist}
-                            </p>
-                        );
-                    })
-                ) : (
-                    <p className={classes.placeholder}>No artists to display.</p>
-                )}
+                <ul style={{ listStyle: "none" }}>
+                    {data?.top_artists ? (
+                        (data?.top_artists).map((artist, i) => {
+                            artist = `#${i + 1} ${artist[0]}`;
+                            return (
+                                <li
+                                    key={i}
+                                    className={classes.statTextSide}
+                                >
+                                    {artist}
+                                </li>
+                            );
+                        })
+                    ) : (
+                        <p className={classes.placeholder}>No artists to display.</p>
+                    )}
+                </ul>
             </Stack>
         </Group>
     );

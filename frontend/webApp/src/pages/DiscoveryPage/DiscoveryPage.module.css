@@ -1,6 +1,22 @@
+@keyframes startup {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
 .container {
     padding-bottom: 8rem;
     min-height: 0;
     display: flex;
     justify-content: center;
+    animation: startup 0.3s ease-in;
+}
+
+@media screen and (max-width: 1900px) {
+    .container {
+        padding-bottom: 4rem;
+    }
 }

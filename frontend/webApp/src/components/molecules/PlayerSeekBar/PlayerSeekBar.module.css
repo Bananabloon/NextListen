@@ -54,7 +54,7 @@
     /*  slider progress trick  */
     /* ! temporary */
     /* it doesnt work when its zoomed out */
-    box-shadow: -603px 0 0 600px var(--progress-color);
+    box-shadow: -1003px 0 0 1000px var(--progress-color);
 }
 
 /* Thumb: Firefox */
@@ -67,5 +67,5 @@
     /*  slider progress trick  */
     /* ! temporary */
     /* it doesnt work when its zoomed out */
-    box-shadow: -603px 0 0 600px var(--progress-color);
+    box-shadow: -1003px 0 0 1000px var(--progress-color);
 }

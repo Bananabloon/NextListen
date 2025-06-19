@@ -50,3 +50,13 @@
     padding-right: 5px;
     visibility: hidden;
 }
+
+@media screen and (min-width: 2560px) {
+    .filteredSelect__menu-list {
+        max-height: 293px !important;
+    }
+    .filteredSelect__control,
+    .filteredSelect__noOptionsMessage {
+        font-size: var(--font-size-md);
+    }
+}
