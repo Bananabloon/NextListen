@@ -17,7 +17,7 @@ const SettingsPage = (): React.JSX.Element => {
                 <Group className={classes.header}>
                     <IconSettings
                         size={38}
-                        style={{ alignSelf: "self-start", marginTop: "6px" }}
+                        style={{ alignSelf: "self-start", marginTop: "5px" }}
                     />
                     <h1 className={classes.title}>Settings</h1>
                     <MiniPlayer className={classes.miniPlayer} />
