@@ -32,9 +32,6 @@
     padding: var(--spacing-xxl) var(--spacing-md) 0 var(--spacing-xxl);
     border-radius: var(--radius-md);
 }
-.sideTextBlock > * {
-    font-size: var(--font-size-lg);
-}
 
 .titleText {
     font-size: var(--font-size-lg);
@@ -47,6 +44,19 @@
 
 .githubLogo {
     padding-left: 0 !important;
+}
+
+@media screen and (min-width: 2560px) {
+    .sideTextBlock {
+        width: 480px;
+        height: 360px;
+    }
+    .titleText {
+        font-size: var(--font-size-xl);
+    }
+    .smallerText {
+        font-size: var(--font-size-lg);
+    }
 }
 
 @media screen and (max-width: 1900px) {
