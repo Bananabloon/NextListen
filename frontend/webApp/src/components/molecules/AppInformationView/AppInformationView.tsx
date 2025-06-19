@@ -17,7 +17,7 @@ const AppInformationView = ({ children, className, ...props }: AppInformationVie
                 <p className={classes.versionText}>
                     Version: {appVersion} <span style={{ color: "var(--text-color-dimmed)" }}>(Dev)</span>{" "}
                 </p>
-                <p className={classes.updateDateText}>Last updated: 18.06.2025</p>
+                <p className={classes.updateDateText}>Last updated: 19.06.2025</p>
                 <IconButton
                     variant="transparent"
                     className={classes.githubLogo}

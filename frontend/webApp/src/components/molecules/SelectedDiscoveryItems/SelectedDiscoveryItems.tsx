@@ -32,6 +32,10 @@ const SelectedDiscoveryItems = ({
         return (
             <Group
                 className={classes.selectionElement}
+                style={{
+                    borderRadius:
+                        type === "genres" ? "var(--radius-sm)" : "var(--radius-xl) var(--radius-sm) var(--radius-sm) var(--radius-xl)",
+                }}
                 key={i}
             >
                 {type !== "genres" && (

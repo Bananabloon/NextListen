@@ -21,3 +21,10 @@
 .button[data-selected="true"] {
     background-color: var(--background-color-5);
 }
+
+@media screen and (min-width: 2560px) {
+    .button {
+        width: 25% !important;
+        font-size: var(--font-size-md) !important;
+    }
+}
