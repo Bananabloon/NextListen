@@ -7,7 +7,7 @@
     }
 }
 .main {
-    animation: startup 0.3s;
+    animation: startup 0.3s ease-in;
 }
 
 .miniPlayer {

@@ -26,15 +26,6 @@ const SongCardConveyor = ({ shouldSnap, setShouldSnap, children, className, ...p
         });
     };
 
-    const handleLoad = () => {
-        if (!shouldSnap) return;
-
-        setTimeout(() => {
-            snap();
-            setShouldSnap(false);
-        }, 300);
-    };
-
     const handleClick = (e: React.MouseEvent<HTMLDivElement, MouseEvent>, index: number) => {
         e.stopPropagation();
         setCurrentIndex(index);
@@ -55,9 +46,8 @@ const SongCardConveyor = ({ shouldSnap, setShouldSnap, children, className, ...p
             <Virtuoso
                 className={classes.virtuoso}
                 horizontalDirection
-                initialTopMostItemIndex={currentIndex}
+                initialTopMostItemIndex={{ index: currentIndex + 2, align: "center" }}
                 ref={virtuoso}
-                rangeChanged={handleLoad}
                 data={data}
                 itemContent={(i, song) => (
                     <SongCard
