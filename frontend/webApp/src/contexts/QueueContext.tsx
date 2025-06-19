@@ -83,8 +83,7 @@ export const QueueProvider = ({ children }: { children: ReactNode }) => {
     };
 
     const restoreDiscoveryQueue = async <T extends DiscoveryType>(type: T, options: DiscoveryOptionsMap[T]) => {
-        if (!isEmpty(queue) && isArray(queue)) return; //to avoid unnecessary computation when queue is populated
-        if (loading || block) return;
+        if ((!isEmpty(queue) && isArray(queue)) || loading || block) return;
 
         block = true;
         setLoading(true);

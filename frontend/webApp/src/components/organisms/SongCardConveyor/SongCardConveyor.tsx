@@ -9,12 +9,9 @@ import { GeneratedSong } from "../../../types/api.types";
 
 const PLACEHOLDERS_PER_SIDE = 2;
 
-interface SongCardConveyorProps extends React.HTMLAttributes<HTMLDivElement> {
-    shouldSnap: boolean;
-    setShouldSnap: Function;
-}
+interface SongCardConveyorProps extends React.HTMLAttributes<HTMLDivElement> {}
 
-const SongCardConveyor = ({ shouldSnap, setShouldSnap, children, className, ...props }: SongCardConveyorProps): React.JSX.Element => {
+const SongCardConveyor = ({ children, className, ...props }: SongCardConveyorProps): React.JSX.Element => {
     const { queue, currentIndex, setCurrentIndex } = useQueue();
     const virtuoso = useRef<VirtuosoHandle>(null);
 
