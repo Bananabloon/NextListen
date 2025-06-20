@@ -7,7 +7,7 @@
     }
 }
 .main {
-    animation: startup 0.3s;
+    animation: startup 0.3s ease-in;
 }
 
 .miniPlayer {
@@ -43,15 +43,15 @@
     align-self: flex-start;
 }
 
+@media screen and (min-width: 2560px) {
+    .miniPlayer > * {
+        font-size: var(--font-size-lg);
+    }
+}
+
 @media screen and (max-width: 1600px) {
     .firstRow {
         flex-direction: column;
         align-items: center;
-    }
-}
-
-@media screen and (min-width: 2500px) {
-    .miniPlayer > * {
-        font-size: var(--font-size-lg);
     }
 }

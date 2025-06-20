@@ -11,30 +11,33 @@ import MiniPlayer from "../../components/molecules/MiniPlayer/MiniPlayer";
 const SettingsPage = (): React.JSX.Element => {
     const navigate = useNavigate();
     return (
-        <Stack className={classes.main}>
-            <Group className={classes.header}>
-                <IconSettings
-                    size={38}
-                    style={{ alignSelf: "self-start", marginTop: "6px" }}
-                />
-                <h1 className={classes.title}>Settings</h1>
-                <MiniPlayer className={classes.miniPlayer} />
-                <Button
-                    className={classes.returnButton}
-                    size="lg"
-                    onClick={() => navigate(-1)}
-                >
-                    Return
-                </Button>
-            </Group>
-            <Stack className={classes.sectionStack}>
-                <Group className={classes.firstRow}>
-                    <ProfileView />
-                    <AppInformationView />
+        <>
+            <title>Settings | NextListen</title>
+            <Stack className={classes.main}>
+                <Group className={classes.header}>
+                    <IconSettings
+                        size={38}
+                        style={{ alignSelf: "self-start", marginTop: "5px" }}
+                    />
+                    <h1 className={classes.title}>Settings</h1>
+                    <MiniPlayer className={classes.miniPlayer} />
+                    <Button
+                        className={classes.returnButton}
+                        size="lg"
+                        onClick={() => navigate(-1)}
+                    >
+                        Return
+                    </Button>
                 </Group>
-                <StatsView />
+                <Stack className={classes.sectionStack}>
+                    <Group className={classes.firstRow}>
+                        <ProfileView />
+                        <AppInformationView />
+                    </Group>
+                    <StatsView />
+                </Stack>
             </Stack>
-        </Stack>
+        </>
     );
 };
 

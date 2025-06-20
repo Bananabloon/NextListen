@@ -51,6 +51,7 @@ const DiscoveryModalController = ({ ...props }): React.JSX.Element => {
 
     return (
         <ModalController
+            className={classes.modal}
             buttonContent="Generate New Queue"
             width={820}
             height={500}

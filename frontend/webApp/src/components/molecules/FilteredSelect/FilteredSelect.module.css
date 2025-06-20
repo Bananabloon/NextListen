@@ -8,3 +8,9 @@
     font-size: var(--font-size-sm);
     padding-left: 2px;
 }
+
+@media screen and (min-width: 2560px) {
+    .label {
+        font-size: var(--font-size-md);
+    }
+}

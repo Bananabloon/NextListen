@@ -30,3 +30,9 @@
     z-index: 0;
     pointer-events: none;
 }
+
+@media screen and (min-width: 2560px) {
+    .conveyor {
+        height: 690px;
+    }
+}

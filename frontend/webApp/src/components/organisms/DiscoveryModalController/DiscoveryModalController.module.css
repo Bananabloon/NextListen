@@ -64,3 +64,10 @@
 .selectedItemsStack {
     flex: 1;
 }
+
+@media screen and (min-width: 2560px) {
+    .modal {
+        width: 1025px !important;
+        height: 625px !important;
+    }
+}

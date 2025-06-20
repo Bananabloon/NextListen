@@ -11,7 +11,6 @@
 
 .selectionElement {
     background-color: var(--background-color-4);
-    border-radius: var(--radius-xl) var(--radius-sm) var(--radius-sm) var(--radius-xl);
     width: 340px;
     height: 36px;
     align-items: center;
@@ -41,4 +40,23 @@
     padding-left: 2px;
 
     color: var(--text-color-dimmed);
+}
+
+@media screen and (min-width: 2560px) {
+    .label,
+    .placeholder {
+        font-size: var(--font-size-md);
+    }
+    .selectionElement {
+        width: 425px;
+        height: 42px;
+    }
+    .selectionElementPfp {
+        width: 42px;
+        height: 42px;
+    }
+    .removeIcon {
+        width: 23px;
+        height: 23px;
+    }
 }
